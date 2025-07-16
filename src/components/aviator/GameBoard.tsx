@@ -1,0 +1,811 @@
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import BetAutoSwitch from "./BetAutoSwitch";
+import {
+  betAutoStateType,
+  betBoardAllItemType,
+  betBoardMyItemType,
+  betPlaceStatusType,
+  cashingStatusType,
+  dimensionType,
+} from "../../@types";
+import PIXIComponent from "../pixicomp";
+import { useAviator } from "../../store/aviator";
+import {
+  Game_Global_Vars,
+  doDelay,
+  getHistoryItemColor,
+  initBet6,
+  playSound,
+  setStateTemplate,
+} from "../../utils";
+import SnackBar from "../SnackBar";
+import SwitchButton from "../SwitchButton";
+import AutoBetModal from "../AutoBetModal";
+import BetBoard from "./BetBoard";
+import CustomSnackBar from "../CustomSnackBar";
+
+const AVATAR_URLS = [
+  // DiceBear Avatars (open source)
+  "https://api.dicebear.com/7.x/identicon/svg?seed=",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=",
+  "https://api.dicebear.com/7.x/thumbs/svg?seed=",
+];
+function randomUsername() {
+  const chars = "abcdefghijklmnopqrstuvwxyz";
+  const first = chars[Math.floor(Math.random() * chars.length)];
+  const last = Math.floor(Math.random() * 10);
+  const mid = Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, "0");
+  return `${first}***${last}`;
+}
+function randomAvatar(seed: string) {
+  const base = AVATAR_URLS[Math.floor(Math.random() * AVATAR_URLS.length)];
+  return base + encodeURIComponent(seed);
+}
+
+const GameBoard = ({ bet6 }: { bet6: string[] }) => {
+  const { aviatorState, setAviatorState } = useAviator();
+  console.log("aviatorState ::", aviatorState);
+  const [autoPlayingIndex, setAutoPlayingIndex] = useState(0);
+  const [snackState, setSnackState] = useState({
+    open: false,
+    msg: "",
+  });
+  const [modalAutoPlayOpen, modalAutoPlaySetOpen] = useState(false);
+  const [rotate, setRotate] = useState(0);
+
+  const [trigParachute, setTrigParachute] = useState({ uniqId: 0, isMe: true });
+
+  const [crashHistory, setCrashHistory] = useState<string[]>([
+    "1.25x",
+    "2.15x",
+    "1.85x",
+    "3.45x",
+    "1.12x",
+  ]);
+  const [crashAnim, setCrashAnim] = useState<boolean>(false);
+  const [crashColor, setCrashColor] = useState<string[]>([]);
+  const [pixiDimension, setPixiDimension] = useState<dimensionType>({
+    width: 0,
+    height: 400,
+  });
+  const pixi_ref = useRef<HTMLDivElement>(null);
+  const footer_ref = useRef<HTMLDivElement>(null);
+
+  const [betButtonCount, setBetButtonCount] = useState(2);
+  const [curPayout, setCurPayout] = useState(0);
+
+  const [pendingBet, setPendingBet] = useState<boolean[]>([false, false]);
+  const [allowedBet, setAllowedBet] = useState(false);
+  const [betAutoState, setBetAutoState] = useState<betAutoStateType[]>([
+    "bet",
+    "bet",
+  ]);
+  const [betValue, setBetValue] = useState<string[]>([
+    initBet6[0],
+    initBet6[0],
+  ]);
+  const [cashedWin, setCashedWin] = useState<number[]>([0, 0]);
+  const [enabledAutoCashOut, setEnabledAutoCashOut] = useState<boolean[]>([
+    false,
+    false,
+  ]);
+  const [autoCashVal, setAutoCashVal] = useState<string[]>(["1.45", "1.45"]);
+  const [betPlaceStatus, setBetPlaceStatus] = useState<betPlaceStatusType[]>([
+    "none",
+    "none",
+  ]);
+  const [cashingStatus, setCashingStatus] = useState<cashingStatusType[]>([
+    "none",
+    "none",
+  ]);
+  const [betBoardAllItem, setBetBoardAllItem] = useState<betBoardAllItemType[]>(
+    []
+  );
+
+  const [cashes, setCashes] = useState<{ payout: number; win: number }[]>([]);
+
+  // Add new state for previous rounds and all users
+  const [previousRounds, setPreviousRounds] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+
+  const _setBetValue = (
+    val: string | ((prev: string) => string),
+    i: number
+  ) => {
+    if (typeof val === "string") {
+      Game_Global_Vars.betValue[i] = val;
+      setBetValue((prev) => {
+        const new_val = [...prev];
+        new_val[i] = val;
+        return new_val;
+      });
+    } else {
+      setBetValue((prev) => {
+        const new_val = [...prev];
+        new_val[i] = val(prev[i]);
+        Game_Global_Vars.betValue = new_val;
+        return new_val;
+      });
+    }
+  };
+
+  const _setBetPlaceStatus = (
+    val: betPlaceStatusType | betPlaceStatusType[],
+    i: number
+  ) => {
+    if (typeof val === "object") {
+      Game_Global_Vars.betPlaceStatus = val;
+      setBetPlaceStatus(val);
+    } else {
+      Game_Global_Vars.betPlaceStatus[i] = val;
+      setBetPlaceStatus(setStateTemplate(val, i));
+    }
+  };
+
+  const _setCashingStatus = (val: cashingStatusType, i: number) => {
+    Game_Global_Vars.cashingStatus[i] = val;
+    setCashingStatus(setStateTemplate(val, i));
+  };
+
+  const _setPendingBet = (val: boolean | boolean[], i: number) => {
+    if (typeof val === "boolean") {
+      setPendingBet(setStateTemplate(val, i));
+    } else {
+      setPendingBet(val);
+    }
+  };
+
+  const _setEnabledAutoCashOut = (val: boolean, i: number) => {
+    setEnabledAutoCashOut(setStateTemplate(val, i));
+  };
+
+  const _setAutoCashVal = (val: string, i: number) => {
+    setAutoCashVal(setStateTemplate(val, i));
+  };
+
+  const _setCashedWin = (val: number, i: number) => {
+    setCashedWin(setStateTemplate(val, i));
+  };
+
+  const cancelAutoPlay = (i: number) => {
+    setAviatorState((prev) => {
+      const v = prev.RemainedAutoPlayCount;
+      v[i] = 0;
+      return { ...prev, RemainedAutoPlayCount: v };
+    });
+  };
+
+  const handleBetValueChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    i: number
+  ) => {
+    if (e.target.value.endsWith(".")) {
+      _setBetValue(e.target.value, i);
+    } else {
+      _setBetValue(
+        Math.max(
+          10,
+          Math.round(parseFloat(e.target.value) * 100) / 100
+        ).toString(),
+        i
+      );
+    }
+  };
+
+  const modifyBetValue = (amount: number, i: number) => {
+    _setBetValue((prev) => {
+      const new_val = parseInt(prev);
+      return `${Math.max(new_val + amount, 10)}`;
+    }, i);
+  };
+
+  const doBet = async (i: number) => {
+    console.log(
+      "doBet called for index:",
+      i,
+      "allowedBet:",
+      Game_Global_Vars.allowedBet
+    );
+    if (!Game_Global_Vars.allowedBet) return;
+    _setBetPlaceStatus("placing", i);
+    Game_Global_Vars.cashStarted[i] = false;
+    _setCashingStatus("none", i);
+
+    // Simulate bet placement
+    await doDelay(1000);
+
+    // Simulate successful bet
+    _setBetPlaceStatus("success", i);
+    setAviatorState((prev) => ({
+      ...prev,
+      balance: prev.balance - parseFloat(betValue[i]),
+    }));
+
+    // Add dummy bet to board
+    const dummyBet: betBoardAllItemType = {
+      gameCrashId: Date.now(),
+      username: "Player",
+      betAmount: parseFloat(betValue[i]),
+    };
+    setBetBoardAllItem((prev) => [dummyBet, ...prev]);
+    console.log("Bet placed successfully for index:", i);
+  };
+
+  const handleBet = async (i: number) => {
+    console.log(
+      "handleBet called for index:",
+      i,
+      "allowedBet:",
+      Game_Global_Vars.allowedBet
+    );
+    if (Game_Global_Vars.allowedBet) {
+      await doBet(i);
+    } else {
+      _setPendingBet(true, i);
+      Game_Global_Vars.pendingBet[i] = true;
+      console.log("Bet queued for next round");
+    }
+  };
+
+  const cancelBet = async (i: number) => {
+    if (Game_Global_Vars.pendingBet[i]) {
+      _setPendingBet(false, i);
+      Game_Global_Vars.pendingBet[i] = false;
+    } else {
+      // Simulate bet cancellation
+      _setBetPlaceStatus("none", i);
+      setAviatorState((prev) => ({
+        ...prev,
+        balance: prev.balance + parseFloat(betValue[i]),
+      }));
+    }
+    if (aviatorState.RemainedAutoPlayCount[i] > 0) {
+      cancelAutoPlay(i);
+    }
+  };
+
+  useEffect(() => {
+    setCrashColor(crashHistory.map((item) => getHistoryItemColor(item)));
+  }, [crashHistory]);
+
+  const handleCashOut = async (i: number, auto?: boolean) => {
+    console.log(
+      "handleCashOut called for index:",
+      i,
+      "curPayout:",
+      curPayout,
+      "betValue:",
+      betValue[i]
+    );
+    if (Game_Global_Vars.cashStarted[i]) return;
+    Game_Global_Vars.cashStarted[i] = true;
+    _setCashingStatus("caching", i);
+
+    // Simulate cashout
+    await doDelay(1000);
+
+    const winAmount = curPayout * parseFloat(betValue[i]);
+    console.log(
+      "Win amount calculated:",
+      winAmount,
+      "curPayout:",
+      curPayout,
+      "betValue:",
+      betValue[i]
+    );
+
+    setAviatorState((prev) => ({
+      ...prev,
+      balance: prev.balance + winAmount,
+    }));
+    _setCashedWin(winAmount, i);
+    _setCashingStatus("success", i);
+    _setBetPlaceStatus("none", i);
+
+    // Update bet board to show cashout
+    setBetBoardAllItem((prev) =>
+      prev.map((bet) => {
+        if (bet.gameCrashId === Date.now() - i) {
+          // Simple way to identify the bet
+          return { ...bet, cashout: winAmount, crashedAt: curPayout };
+        }
+        return bet;
+      })
+    );
+
+    playSound("win");
+    console.log(
+      "Cashout completed successfully. New balance:",
+      aviatorState.balance + winAmount
+    );
+  };
+
+  const handleResize = () => {
+    const width = Math.min(
+      aviatorState.dimension.width,
+      pixi_ref.current?.clientWidth || 0
+    );
+    const height = Math.max(
+      150,
+      window.innerHeight -
+        (footer_ref.current?.clientHeight || 0) -
+        150 -
+        (width > 1392 ? 0 : 10)
+    );
+    setPixiDimension({ width, height });
+    setAviatorState((prev) => {
+      const new_width = prev.dimension.width;
+      const new_height = (new_width * height) / width;
+      return {
+        ...prev,
+        dimension: {
+          width: new_width,
+          height: new_height,
+        },
+      };
+    });
+  };
+
+  // Dummy game simulation
+  useEffect(() => {
+    const simulateGame = () => {
+      // Generate dummy users for this round
+      const userCount = 30 + Math.floor(Math.random() * 10);
+      const users: any[] = [];
+      for (let i = 0; i < userCount; i++) {
+        const username = randomUsername();
+        users.push({
+          username,
+          avatar: randomAvatar(username),
+        });
+      }
+      // Always include "You"
+      users[0] = {
+        username: "You",
+        avatar: randomAvatar("You"),
+        isYou: true,
+      };
+      setAllUsers(users);
+
+      // Waiting phase
+      setAviatorState((prev) => ({ ...prev, game_anim_status: "WAITING" }));
+      setAllowedBet(false);
+      Game_Global_Vars.allowedBet = false;
+      _setBetPlaceStatus(["none", "none"], 0);
+      setCashingStatus(["none", "none"]);
+      setCashedWin([0, 0]);
+      setBetBoardAllItem([]);
+
+      setTimeout(() => {
+        // Betting phase
+        setAllowedBet(true);
+        Game_Global_Vars.allowedBet = true;
+        setAviatorState((prev) => ({ ...prev, game_anim_status: "WAITING" }));
+        setTimeout(async () => {
+          if (Game_Global_Vars.pendingBet[0]) {
+            await doBet(0);
+          }
+          if (Game_Global_Vars.pendingBet[1]) {
+            await doBet(1);
+          }
+          _setPendingBet([false, false], 0);
+          Game_Global_Vars.pendingBet = [false, false];
+        }, 100);
+
+        setTimeout(() => {
+          // Flying phase
+          setAllowedBet(false);
+          Game_Global_Vars.allowedBet = false;
+          setAviatorState((prev) => ({
+            ...prev,
+            game_anim_status: "ANIM_STARTED",
+          }));
+          playSound("take");
+
+          // Simulate payout increase
+          let payout = 1.0;
+          const payoutInterval = setInterval(() => {
+            payout += 0.1;
+            setCurPayout(payout);
+            Game_Global_Vars.curPayout = payout;
+            // Live update dummy bets: randomly cash out some users
+            if (Math.random() < 0.1 && payout > 1.1) {
+              // Pick a random user who hasn't cashed out
+              const notCashed = users.filter((u) => !u.cashedOut && !u.isYou);
+              if (notCashed.length > 0) {
+                const winner =
+                  notCashed[Math.floor(Math.random() * notCashed.length)];
+                winner.cashedOut = true;
+                winner.cashoutX = payout.toFixed(2);
+                winner.win = 100 * parseFloat(winner.cashoutX);
+                setBetBoardAllItem((prev) => [
+                  ...prev,
+                  {
+                    gameCrashId: Date.now() + Math.random(),
+                    username: winner.username,
+                    betAmount: 100,
+                    crashedAt: parseFloat(winner.cashoutX),
+                    cashout: winner.win,
+                    avatar: winner.avatar,
+                    isWinner: true,
+                  },
+                ]);
+              }
+            }
+            // Random crash
+            if (Math.random() < 0.02) {
+              clearInterval(payoutInterval);
+              setTimeout(() => {
+                // Crash phase
+                setCrashHistory((prev) => [`${payout.toFixed(2)}x`, ...prev]);
+                setCrashAnim(true);
+                setTimeout(() => setCrashAnim(false), 1000);
+                setAviatorState((prev) => ({
+                  ...prev,
+                  game_anim_status: "ANIM_CRASHED",
+                }));
+                playSound("flew");
+                // Store previous round
+                setPreviousRounds((prev) => [
+                  {
+                    result: payout.toFixed(2),
+                    bets: betBoardAllItem,
+                  },
+                  ...prev.slice(0, 9),
+                ]);
+                setTimeout(() => {
+                  // Reset for next round
+                  setCurPayout(0);
+                  Game_Global_Vars.curPayout = 0;
+                  _setBetPlaceStatus(["none", "none"], 0);
+                  setCashingStatus(["none", "none"]);
+                  setCashedWin([0, 0]);
+                  simulateGame();
+                }, 3000);
+              }, 100);
+            }
+          }, 100);
+        }, 5000);
+      }, 2000);
+    };
+
+    simulateGame();
+  }, []);
+
+  useEffect(() => {
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    const rotateInterval = setInterval(
+      () => setRotate((prev) => prev + 10),
+      100
+    );
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearInterval(rotateInterval);
+    };
+  }, []);
+
+  return (
+    <div
+      className="flex overflow-auto"
+      style={{ height: "calc(100vh - 50px)" }}
+    >
+      <CustomSnackBar cashes={cashes} setCashes={setCashes} />
+      <div className="w-[460px] hidden lg:block h-full">
+        <BetBoard />
+      </div>
+      <div className="flex flex-col gap-2 w-full bg-black p-2 text-white overflow-auto pb-0">
+        <div className="flex justify-between items-center">
+          <div className="score-bomb flex gap-x-2 w-full flex-wrap pr-4 h-[26px] overflow-y-hidden">
+            {crashHistory.map((item, i) => (
+              <span
+                key={i}
+                style={{ color: crashColor[i] }}
+                className={`${
+                  i === 0 && crashAnim ? "animate-pinRight" : ""
+                } block px-3 py-1 rounded-full bg-gray-900 font-bold text-[11px] 3xl:text-[15px]`}
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div
+          className={`flex justify-center w-full relative`}
+          style={{ height: pixiDimension.height }}
+          ref={pixi_ref}
+        >
+          <div
+            className="flex flex-col gap-10 absolute top-0 justify-center items-center"
+            style={{
+              height: pixiDimension.height,
+              display:
+                aviatorState.game_anim_status !== "ANIM_STARTED"
+                  ? "flex"
+                  : "none",
+              gap: pixiDimension.height < 200 ? 2 : 40,
+            }}
+          >
+            <div
+              style={{
+                display:
+                  aviatorState.game_anim_status === "WAITING"
+                    ? "block"
+                    : "none",
+                width: Math.min(pixiDimension.width, pixiDimension.height) / 4,
+              }}
+            >
+              <div
+                style={{
+                  rotate: `${rotate}deg`,
+                  width: "50px",
+                  height: "50px",
+                  backgroundColor: "#E59407",
+                  borderRadius: "50%",
+                }}
+              />
+            </div>
+            <div className="flex flex-col justify-center items-center px-4 py-2 lg:px-8 lg:py-2 bg-black/70 border-dashed border border-[#E59407] rounded-lg">
+              <p className="text-[#E59407] uppercase font-bold text-[21px] lg:text-[30px]">
+                {aviatorState.game_anim_status === "ANIM_CRASHED"
+                  ? "Flew away"
+                  : "PLACE YOUR BET"}
+              </p>
+              {aviatorState.game_anim_status === "ANIM_CRASHED" && (
+                <p className="text-white font-bold text-[42px] leading-[42px] lg:text-[100px] lg:leading-[100px]">
+                  {curPayout.toFixed(2)}x
+                </p>
+              )}
+            </div>
+          </div>
+          <PIXIComponent
+            pixiDimension={pixiDimension}
+            curPayout={curPayout}
+            trigParachute={trigParachute}
+          />
+        </div>
+        <div className="flex flex-col w-full" ref={footer_ref}>
+          {/* Betting status indicator */}
+          <div className="text-center mb-2">
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-bold ${
+                allowedBet ? "bg-green-600 text-white" : "bg-red-600 text-white"
+              }`}
+            >
+              {allowedBet ? "BETTING ENABLED" : "BETTING DISABLED"}
+            </span>
+          </div>
+          <div
+            className={`grid grid-cols-1 gap-2 relative ${
+              betButtonCount === 1 ? "" : "lg:grid-cols-2"
+            }`}
+          >
+            <button
+              onClick={() => {
+                setBetButtonCount((prev) => (prev === 1 ? 2 : 1));
+                setTimeout(handleResize, 500);
+              }}
+              disabled={betPlaceStatus[1] === "success" || pendingBet[1]}
+              className={`absolute right-1 top-1 rounded-full bg-black w-6 h-6 pb-[2px] flex justify-center items-center text-lg cursor-pointer disabled:opacity-30`}
+            >
+              {betButtonCount === 1 ? (
+                <span>+</span>
+              ) : (
+                <span className="text-xs">&#8212;</span>
+              )}
+            </button>
+            {[0, 1].map((item, i) => (
+              <div
+                key={i}
+                className={`flex flex-col justify-start items-center gap-1 lg:gap-4 w-full rounded-lg bg-gradient-to-b from-[#1C1C1C] to-black p-4 pb-0 ${
+                  betPlaceStatus[i] === "success" || pendingBet[i]
+                    ? allowedBet || pendingBet[i]
+                      ? "border border-red-700"
+                      : "border border-orange-500"
+                    : ""
+                } ${i === 1 && betButtonCount === 1 ? "hidden" : ""}`}
+              >
+                <BetAutoSwitch
+                  disabled={aviatorState.RemainedAutoPlayCount[i] > 0}
+                  betAuto={{
+                    betAutoState: betAutoState[i],
+                    setBetAutoState: (val: betAutoStateType) =>
+                      setBetAutoState((prev) => {
+                        const new_state = [...prev];
+                        new_state[i] = val;
+                        return new_state;
+                      }),
+                  }}
+                />
+                <div className="flex gap-2">
+                  <div className="flex flex-col w-[100px] lg:w-[130px] 3xl:w-[260px] h-full">
+                    <div
+                      className="flex justify-between items-center text-[10px] 3xl:text-xl w-full h-[27px] 3xl:h-[54px] bg-black rounded-full px-2"
+                      style={{ fontFamily: "Roboto" }}
+                    >
+                      <button
+                        disabled={
+                          betPlaceStatus[i] === "success" || pendingBet[i]
+                        }
+                        onClick={() => modifyBetValue(-10, i)}
+                        className="flex justify-center items-center w-[16px] h-[16px] 3xl:w-[36px] 3xl:h-[36px]  text-white rounded-full border-2 border-white"
+                      >
+                        <div className="w-2/3 h-1/6 bg-white" />
+                      </button>
+                      <input
+                        disabled={
+                          betPlaceStatus[i] === "success" || pendingBet[i]
+                        }
+                        onChange={(e) => handleBetValueChange(e, i)}
+                        value={betValue[i]}
+                        type="string"
+                        className="w-[30px] lg:w-[70px] 3xl:w-[150px] bg-black text-center text-[13px] 3xl:text-[26px]"
+                      />
+                      <button
+                        disabled={
+                          betPlaceStatus[i] === "success" || pendingBet[i]
+                        }
+                        onClick={() => modifyBetValue(10, i)}
+                        className="flex relative justify-center items-center w-[16px] h-[16px] 3xl:w-[36px] 3xl:h-[36px] text-white rounded-full border-2 border-white"
+                      >
+                        <div className="w-2/3 h-1/6 bg-white" />
+                        <div className="absolute top-[2px] h-2/3 w-1/6 bg-white" />
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap justify-between gap-1 w-full h-[40px] 3xl:h-[78px]">
+                      {bet6.map((item, j) => (
+                        <button
+                          disabled={
+                            betPlaceStatus[i] === "success" || pendingBet[i]
+                          }
+                          key={j}
+                          onClick={() => _setBetValue(`${item}`, i)}
+                          className="flex justify-center items-center bg-[#171717] rounded-lg gap-[2px] w-[28px] lg:w-[40px] h-[17px] 3xl:w-20 3xl:h-9 text-[13px] 3xl:text-[26px]"
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {betPlaceStatus[i] === "success" || pendingBet[i] ? (
+                    pendingBet[i] ? (
+                      <div className="flex flex-col justify-center items-center text-xs w-[100px] lg:w-[160px] 3xl:w-[395px]">
+                        <p className="uppercase w-full text-center">
+                          Waiting for next round
+                        </p>
+                        <button
+                          onClick={() => cancelBet(i)}
+                          className="flex flex-col w-full h-[42px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-red-700 border border-red-400  justify-center items-center font-bold hover:opacity-80"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleCashOut(i, false)}
+                        className="flex flex-col w-[100px] lg:w-[160px] h-[72px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-gradient-to-b from-[#E59407] to-[#412900]  justify-center items-center font-bold border border-[#FFB432]/50 hover:opacity-80"
+                      >
+                        <h4 className="text-[16px] 3xl:text-[42px] leading-[20px] 3xl:leading-[42px] uppercase">
+                          {cashingStatus[i] === "none"
+                            ? "Cash Out"
+                            : cashingStatus[i] === "caching"
+                            ? "Cashing Out..."
+                            : cashingStatus[i] === "success"
+                            ? `Cashed ${cashedWin[i]}`
+                            : "Failed"}
+                        </h4>
+                        {cashingStatus[i] === "none" && (
+                          <h4 className="text-[20px]">
+                            {(curPayout * parseFloat(betValue[i])).toFixed(2)}
+                          </h4>
+                        )}
+                        {cashingStatus[i] === "none" && (
+                          <p className="text-xs text-green-400">
+                            {curPayout.toFixed(2)}x
+                          </p>
+                        )}
+                      </button>
+                    )
+                  ) : (
+                    <button
+                      onClick={() => handleBet(i)}
+                      disabled={!allowedBet || betPlaceStatus[i] !== "none"}
+                      className={`disabled:opacity-30 flex flex-col min-w-[120px] lg:min-w-[160px] h-[72px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-gradient-to-b from-[#E59407] to-[#412900]  justify-center items-center font-bold border border-[#FFB432]/50 hover:opacity-80`}
+                    >
+                      <h4 className="text-[16px] 3xl:text-[42px] leading-[20px] 3xl:leading-[42px] uppercase">
+                        Bet
+                      </h4>
+                      <h4 className="text-[20px]">{betValue[i]}</h4>
+                    </button>
+                  )}
+                </div>
+                {betAutoState[i] === "auto" ? (
+                  <div className="flex justify-between gap-2 items-center min-w-[300px]">
+                    <button
+                      onClick={() => {
+                        if (aviatorState.RemainedAutoPlayCount[i] < 1) {
+                          modalAutoPlaySetOpen(true);
+                          setAutoPlayingIndex(i);
+                        } else {
+                          cancelAutoPlay(i);
+                          _setEnabledAutoCashOut(false, i);
+                          Game_Global_Vars.enabledAutoCashOut[i] = false;
+                        }
+                      }}
+                      className={`flex w-[72px] lg:w-[96px] h-[24px] 3xl:w-[212px] 3xl:h-[48px] rounded-full ${
+                        aviatorState.RemainedAutoPlayCount[i] > 0
+                          ? "bg-red-700"
+                          : "bg-gradient-to-b from-[#07BDE5] to-[#07BDE588]"
+                      }   justify-center items-center font-bold border border-[#9FEEFF] text-[10px] lg:text-[12px] uppercase`}
+                    >
+                      {aviatorState.RemainedAutoPlayCount[i] > 0
+                        ? `Stop (${aviatorState.RemainedAutoPlayCount[i]})`
+                        : "AutoPlay"}
+                    </button>
+                    <div className="flex gap-1 items-center">
+                      <span className="text-[#939393] min-w-[20px] text-[12px] lg:text-sm text-center">
+                        Auto Cash Out
+                      </span>
+                      <SwitchButton
+                        disabled={
+                          betPlaceStatus[i] === "success" || pendingBet[i]
+                        }
+                        checked={enabledAutoCashOut[i]}
+                        onChange={(_, checked) => {
+                          _setEnabledAutoCashOut(checked, i);
+                          Game_Global_Vars.enabledAutoCashOut[i] = checked;
+                        }}
+                      />
+                      <div className="flex gap-1 px-3 py-[2px] rounded-full bg-[#1F1F1F]">
+                        <input
+                          disabled={!enabledAutoCashOut}
+                          readOnly={
+                            betPlaceStatus[i] === "success" || pendingBet[i]
+                          }
+                          type="text"
+                          value={autoCashVal[i]}
+                          onChange={(e) => {
+                            const val =
+                              e.target.value.replace(/[^\d.]/g, "").trim() ||
+                              "1";
+                            _setAutoCashVal(val, i);
+                            Game_Global_Vars.autoCashVal[i] = val;
+                          }}
+                          size={1}
+                          className="bg-transparent w-12 outline-none disabled:text-[#888] text-center"
+                        />
+                        <span
+                          className={`inline-block ${
+                            enabledAutoCashOut ? "text-white" : "text-[#888]"
+                          }`}
+                        >
+                          x
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="" style={{ width: 10, height: 0 }} />
+                )}
+              </div>
+            ))}
+          </div>
+          <SnackBar snackState={snackState} setSnackState={setSnackState} />
+          <AutoBetModal
+            modalOpen={modalAutoPlayOpen}
+            modalSetOpen={modalAutoPlaySetOpen}
+            autoPlayingIndex={autoPlayingIndex}
+          />
+        </div>
+        <div className="w-full lg:hidden h-full">
+          <BetBoard />
+        </div>
+      </div>
+    </div>
+  );
+};
+export default GameBoard;

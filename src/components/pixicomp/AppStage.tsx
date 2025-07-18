@@ -125,10 +125,10 @@ const AppStage = ({
   const posPlane = useMemo(() => {
     const _ontoCorner = game_anim_status === "ANIM_CRASHED" ? ontoCorner : 0;
     return {
-      x: (pulseBase + pulseGraph) * planeX + _ontoCorner * 150 + 40,
+      x: (pulseBase + pulseGraph) * planeX + _ontoCorner * 150 + 50,
       y:
         dimension.height -
-        40 -
+        80 -
         (1 - pulseGraph) *
           curveFunction(planeX, {
             width: dimension.width - 40,
@@ -161,8 +161,26 @@ const AppStage = ({
     return Texture.from(canvas);
   };
 
-  const planeTexture = useMemo(() => createPlaneTexture(), []);
-  const planeGifTexture = Texture.from("/Plane.gif");
+  // const planeTexture = useMemo(() => createPlaneTexture(), []);
+
+  // const planeTexture = Texture.from("/aviator/plane/plane-1.png");
+  // const planeGifTexture = Texture.from("/aviator/Plane.gif");
+
+  // Use Array.from to generate the 8 frame textures
+  const planeFrames = Array.from({ length: 8 }, (_, i) =>
+    Texture.from(`/aviator/plane/plane-${i + 1}.png`)
+  );
+
+  const [currentFrame, setCurrentFrame] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFrame((prev) => (prev + 1) % planeFrames.length);
+    }, 100); // Change frame every 100ms
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Container>
       <Sprite
@@ -195,15 +213,15 @@ const AppStage = ({
       <Container
         mask={gameBoardMask.current}
         visible={game_anim_status === "ANIM_STARTED"}
-        position={{ x: 40, y: 0 }}
+        position={{ x: 60, y: 0 }}
         scale={{ x: 1, y: 1 }}
       >
         <Graphics
           mask={maskRef.current}
           draw={renderCurve}
-          position={{ x: 0, y: dimension.height - 40 }}
+          position={{ x: 60, y: dimension.height - 40  }}
           scale={{ x: pulseBase + pulseGraph, y: 1 - pulseGraph }}
-          pivot={{ x: 0, y: dimension.height - 40 }}
+          pivot={{ x: 60, y: dimension.height - 40 }}
         />
         <Graphics
           scale={{
@@ -216,17 +234,29 @@ const AppStage = ({
         />
       </Container>
       {/* </div> */}
-      <Container visible={game_anim_status !== "WAITING"}>
-        <Container>
-          <Sprite
-            texture={planeTexture}
-            rotation={-Math.PI / 10}
-            pivot={{ x: 0.08, y: 0.54 }}
-            anchor={{ x: 0.07, y: 0.55 }}
-            scale={planeScale}
-            position={posPlane}
-          />
-        </Container>
+      {/* <Container visible={game_anim_status !== "WAITING"}> */}
+      <Container>
+        <Sprite
+          texture={planeFrames[currentFrame]}
+          pivot={{ x: 0.08, y: 0.54 }}
+          anchor={{ x: 0.07, y: 0.55 }}
+          scale={planeScale}
+          position={posPlane}
+        />
+        {/* <AnimatedSprite
+          // textures={planeFrames}
+          isPlaying={true}
+          texture={planeFrames[0]}
+          loop={true}
+          animationSpeed={2}
+          // filters={[colorMatrix]}
+          // rotation={-Math.PI / 10}
+          pivot={{ x: 0.08, y: 0.54 }}
+          anchor={{ x: 0.07, y: 0.55 }}
+          scale={planeScale}
+          position={posPlane}
+        /> */}
+        {/* </Container> */}
 
         <Text
           visible={game_anim_status === "ANIM_STARTED"}

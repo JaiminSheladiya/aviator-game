@@ -99,6 +99,8 @@ const AppStage = ({
   );
 
   const [pulseGraph, setPulseGraph] = useState(1);
+  const [currentFrame, setCurrentFrame] = useState(0);
+
   useTick((delta) => {
     if (game_anim_status !== "ANIM_STARTED") return;
     const amp = 0.06;
@@ -121,6 +123,14 @@ const AppStage = ({
     if (game_anim_status === "WAITING") tickRef.current = 0;
     if (game_anim_status === "ANIM_CRASHED") setOntoCorner(0);
   }, [game_anim_status]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFrame((prev) => (prev + 1) % planeFrames.length);
+    }, 100); // Change frame every 100ms
+
+    return () => clearInterval(interval);
+  }, []);
 
   const posPlane = useMemo(() => {
     const _ontoCorner = game_anim_status === "ANIM_CRASHED" ? ontoCorner : 0;
@@ -171,18 +181,28 @@ const AppStage = ({
     Texture.from(`/aviator/plane/plane-${i + 1}.png`)
   );
 
-  const [currentFrame, setCurrentFrame] = useState(0);
+  const drawRadialSlices = (g: GraphicsRaw) => {
+    g.clear();
+    const centerX = 0; // bottom-left origin
+    const centerY = dimension.height;
+    const totalSlices = 60; // increase/decrease for density
+    const radius = Math.max(dimension.width, dimension.height) * 2;
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentFrame((prev) => (prev + 1) % planeFrames.length);
-    }, 100); // Change frame every 100ms
+    for (let i = 0; i < totalSlices; i++) {
+      const startAngle = (i / totalSlices) * Math.PI * 2;
+      const endAngle = ((i + 1) / totalSlices) * Math.PI * 2;
+      g.beginFill(i % 2 === 0 ? 0x0a0a0a : 0x121212); // alternating dark shades
 
-    return () => clearInterval(interval);
-  }, []);
+      g.moveTo(centerX, centerY);
+      g.arc(centerX, centerY, radius, startAngle, endAngle);
+      g.lineTo(centerX, centerY); // back to center
+      g.endFill();
+    }
+  };
 
   return (
     <Container>
+      <Graphics draw={drawRadialSlices} />
       <Sprite
         filters={[colorMatrix]}
         texture={gradTexture}
@@ -219,7 +239,7 @@ const AppStage = ({
         <Graphics
           mask={maskRef.current}
           draw={renderCurve}
-          position={{ x: 60, y: dimension.height - 40  }}
+          position={{ x: 60, y: dimension.height - 40 }}
           scale={{ x: pulseBase + pulseGraph, y: 1 - pulseGraph }}
           pivot={{ x: 60, y: dimension.height - 40 }}
         />
@@ -243,20 +263,6 @@ const AppStage = ({
           scale={planeScale}
           position={posPlane}
         />
-        {/* <AnimatedSprite
-          // textures={planeFrames}
-          isPlaying={true}
-          texture={planeFrames[0]}
-          loop={true}
-          animationSpeed={2}
-          // filters={[colorMatrix]}
-          // rotation={-Math.PI / 10}
-          pivot={{ x: 0.08, y: 0.54 }}
-          anchor={{ x: 0.07, y: 0.55 }}
-          scale={planeScale}
-          position={posPlane}
-        /> */}
-        {/* </Container> */}
 
         <Text
           visible={game_anim_status === "ANIM_STARTED"}

@@ -15,7 +15,9 @@ const PIXIComponent = ({ pixiDimension, curPayout, trigParachute }: {
     return (
         <Stage width={pixiDimension.width} height={pixiDimension.height} options={{ antialias: true }}>
             <Container scale={scale}>
-                <AppStage payout={curPayout} game_anim_status={aviatorState.game_anim_status} dimension={aviatorState.dimension} pixiDimension={pixiDimension} trigParachute={trigParachute} />
+                <AppStage payout={curPayout} game_anim_status={aviatorState.game_anim_status} dimension={aviatorState.dimension} pixiDimension={pixiDimension}
+                    // trigParachute={trigParachute}
+                />
             </Container>
         </Stage>
     );

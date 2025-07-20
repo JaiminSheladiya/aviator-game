@@ -12,10 +12,9 @@ export type aviatorStateType = {
         stopIfarr: number[],
     }[],
     RemainedAutoPlayCount: number[],
-    bet6: string[],
-    music: boolean,
-    fx: boolean,
-    slider: number,
+    musicChecked: boolean
+    fxChecked: boolean
+    vol: number
 }
 export type betAutoStateType = "bet" | "auto"
 export type dimensionType = {

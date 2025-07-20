@@ -151,18 +151,18 @@ export const _drawBar =
   };
 
 export const playSound = (type: "bg" | "flew" | "win" | "take") => {
-  let status = "";
-  switch (type) {
-    case "bg":
-      status = localStorage.getItem("music") || "true";
-      break;
-    case "flew":
-    case "win":
-    case "take":
-      status = localStorage.getItem("fx") || "true";
-      break;
-  }
-  if (status === "true") sound.play(`${type}-sound`, { loop: type === "bg" });
+  // let status = "";
+  // switch (type) {
+  //   case "bg":
+  //     status = localStorage.getItem("music") || "true";
+  //     break;
+  //   case "flew":
+  //   case "win":
+  //   case "take":
+  //     status = localStorage.getItem("fx") || "true";
+  //     break;
+  // }
+  // if (status === "true") sound.play(`${type}-sound`, { loop: type === "bg" });
 };
 export const stopSound = (type: "bg" | "flew" | "win" | "take") => {
   sound.stop(`${type}-sound`);

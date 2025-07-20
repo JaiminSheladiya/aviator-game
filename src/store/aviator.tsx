@@ -21,6 +21,9 @@ const initValue: aviatorStateType = {
         }
     ],
     RemainedAutoPlayCount: [0, 0],
+    musicChecked: true,
+    fxChecked: true,
+    vol: 50
 }
 const AviatorContext = createContext<{
     aviatorState: aviatorStateType,

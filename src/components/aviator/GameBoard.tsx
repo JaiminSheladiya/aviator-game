@@ -452,7 +452,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                   ...prev,
                   game_anim_status: "ANIM_CRASHED",
                 }));
-                playSound("flew");
+                // playSound("flew");
                 // Store previous round
                 setPreviousRounds((prev) => [
                   {
@@ -495,12 +495,22 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
   }, []);
 
   useEffect(() => {
-    // Play background music when GameBoard mounts
-    if (!bgMusicRef.current) {
-      bgMusicRef.current = new Audio("/aviator/sounds/bg_music.mp3");
-      bgMusicRef.current.loop = true;
-      bgMusicRef.current.volume = 0.5;
-      bgMusicRef.current.play();
+    // Play or stop background music based on aviatorState.musicChecked and set volume from aviatorState.vol
+    if (aviatorState.musicChecked) {
+      if (!bgMusicRef.current) {
+        bgMusicRef.current = new Audio("/aviator/sounds/bg_music.mp3");
+        bgMusicRef.current.loop = true;
+        bgMusicRef.current.volume = (aviatorState.vol ?? 50) / 100;
+        bgMusicRef.current.play();
+      } else {
+        bgMusicRef.current.volume = (aviatorState.vol ?? 50) / 100;
+        bgMusicRef.current.play();
+      }
+    } else {
+      if (bgMusicRef.current) {
+        bgMusicRef.current.pause();
+        bgMusicRef.current.currentTime = 0;
+      }
     }
     return () => {
       // Stop music when GameBoard unmounts
@@ -510,14 +520,36 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
         bgMusicRef.current = null;
       }
     };
-  }, []);
+  }, [aviatorState.musicChecked]);
 
+  useEffect(() => {
+    // Play or stop background music based on aviatorState.musicChecked and set volume from aviatorState.vol
+    if (aviatorState.musicChecked) {
+      if (bgMusicRef.current) {
+        bgMusicRef.current.volume = (aviatorState.vol ?? 50) / 100;
+      }
+    }
+  }, [aviatorState.musicChecked, aviatorState.vol]);
+
+  // useEffect(() => {
+  //   console.log("aviatorState.fxChecked", aviatorState.fxChecked);
+    
+  //   if (aviatorState.game_anim_status === "ANIM_CRASHED" && aviatorState.fxChecked) {
+  //     if (!crashAudioRef.current) {
+  //       crashAudioRef.current = new Audio("/aviator/assets/sounds/sprite_audio.mp3");
+  //       crashAudioRef.current.volume = 1.0;
+  //       crashAudioRef.current.play();
+  //       crashAudioRef.current.onended = () => {
+  //         crashAudioRef.current = null;
+  //       };
+  //     }
+  //   }
+  // }, [aviatorState.game_anim_status, aviatorState.fxChecked]);
+  
   const playCrashSound = () => {
     // Play sprite_audio.mp3 when game_anim_status is ANIM_CRASHED
-    if (!crashAudioRef.current) {
-      crashAudioRef.current = new Audio(
-        "/aviator/sounds/sprite_audio.mp3"
-      );
+    if (!crashAudioRef.current && aviatorState.fxChecked) {
+      crashAudioRef.current = new Audio("/aviator/sounds/sprite_audio.mp3");
       crashAudioRef.current.volume = 1.0;
       crashAudioRef.current.currentTime = 2.5; // Start from 3 seconds
       crashAudioRef.current.play();

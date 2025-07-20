@@ -30,38 +30,11 @@ const HeaderMenu = ({
   openHistoryModal: () => void;
   openRuleDialog: () => void;
 }) => {
-  const [vol, setValVol] = React.useState<number>(
-    parseInt(localStorage.getItem("slider") || "50")
-  );
+  const { aviatorState, setAviatorState } = useAviator();
 
   const handleVolumeChange = (_: Event, newValue: number | number[]) => {
-    setValVol(newValue as number);
+    setAviatorState((prev) => ({ ...prev, vol: newValue as number }));
   };
-  React.useEffect(() => {
-    localStorage.setItem("slider", Math.round(vol).toString());
-    setVolume(vol);
-  }, [vol]);
-  const [musicChecked, setMusicChecked] = React.useState<boolean>(
-    (localStorage.getItem(`music`) || "true") === "true"
-  );
-  const [fxChecked, setFxChecked] = React.useState<boolean>(
-    (localStorage.getItem(`fx`) || "true") === "true"
-  );
-  React.useEffect(() => {
-    if (!loaded) return;
-    localStorage.setItem(`music`, musicChecked.toString());
-    localStorage.setItem(`fx`, fxChecked.toString());
-    if (musicChecked) {
-      playSound("bg");
-    } else {
-      stopSound("bg");
-    }
-    if (!fxChecked) {
-      stopSound("flew");
-      stopSound("win");
-      stopSound("take");
-    }
-  }, [musicChecked, fxChecked]);
 
   return (
     <div
@@ -81,8 +54,10 @@ const HeaderMenu = ({
             <span>Music</span>
           </div>
           <SwitchButton
-            checked={musicChecked}
-            onChange={(_, checked) => setMusicChecked(checked)}
+            checked={aviatorState.musicChecked}
+            onChange={(_, checked) =>
+              setAviatorState((prev) => ({ ...prev, musicChecked: checked }))
+            }
             disabled={false}
           />
         </div>
@@ -94,8 +69,10 @@ const HeaderMenu = ({
             <span>Sound FX</span>
           </div>
           <SwitchButton
-            checked={fxChecked}
-            onChange={(_, checked) => setFxChecked(checked)}
+            checked={aviatorState.fxChecked}
+            onChange={(_, checked) =>
+              setAviatorState((prev) => ({ ...prev, fxChecked: checked }))
+            }
             disabled={false}
           />
         </div>
@@ -108,7 +85,7 @@ const HeaderMenu = ({
           </div>
           <Slider
             onChange={handleVolumeChange}
-            value={vol}
+            value={aviatorState.vol}
             sx={{
               width: "160px",
               color: "#EFAC01",

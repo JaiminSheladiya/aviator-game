@@ -48,7 +48,7 @@ const Splash = ({
         <button
           onClick={() => {
             setOpenGame(true);
-            if (!testMobile().iPhone) openFullscreen();
+            // if (!testMobile().iPhone) openFullscreen();
           }}
           className="px-8 py-2 text-lg rounded-full border border-[#fff] bg-gradient-to-b from-[#E59407] to-[#412900] uppercase font-bold"
         >

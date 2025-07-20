@@ -10,7 +10,7 @@ import {
   testMobile,
 } from "../utils";
 import { useAviator } from "../store/aviator";
-
+// import HeaderMenu from "./HeaderMenu";
 const HeaderMenu = ({
   loaded,
   scaleFactor,
@@ -202,11 +202,11 @@ const TopLogoBar = ({
   const header_ref = React.useRef<HTMLDivElement>(null);
   const [maxH, setMaxH] = React.useState(100);
 
-  const [fullScreen, setFullScreen] = React.useState(false);
+  // const [fullScreen, setFullScreen] = React.useState(false);
 
-  const handleFullScreen = () => {
-    setFullScreen(document.fullscreenElement !== null);
-  };
+  // const handleFullScreen = () => {
+  //   setFullScreen(document.fullscreenElement !== null);
+  // };
   const handleResize = () => {
     set_w_factor(window.innerWidth > 1024 ? 32 : 24);
     setTimeout(() => {
@@ -224,11 +224,11 @@ const TopLogoBar = ({
     handleResize();
     window.addEventListener("resize", handleResize);
 
-    handleFullScreen();
-    window.addEventListener("fullscreenchange", handleFullScreen);
+    // handleFullScreen();
+    // window.addEventListener("fullscreenchange", handleFullScreen);
     return () => {
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("fullscreenchange", handleFullScreen);
+      // window.removeEventListener("fullscreenchange", handleFullScreen);
     };
   }, []);
 
@@ -241,26 +241,35 @@ const TopLogoBar = ({
             ref={header_ref}
             style={{ padding: (w_factor / scale) * 0.2 }}
           >
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-[#E59407] rounded-lg flex items-center justify-center text-white font-bold text-sm">
                 BG
               </div>
               <span className="text-white font-bold">Gaming</span>
-            </div>
+            </div> */}
+            <img
+              src="/aviator/aviator-logo.svg"
+              alt="Aviator Logo"
+              className="w-8 h-8 object-contain"
+              style={{ transform: `scale(3)`, marginLeft: "2rem" }}
+            />
             <div className="flex " style={{ gap: (w_factor / scale) * 0.3 }}>
               <div
-                className="flex gap-1 sm:gap-2 justify-center items-center"
-                style={{ fontSize: (w_factor / scale) * 0.5 }}
+                className="flex gap-1 sm:gap-2 justify-center font-bold items-center"
+                style={{ fontSize: "14px", color: "#9B9C9E" }}
               >
                 <div className="w-4 h-4 bg-[#E59407] rounded-full flex items-center justify-center">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div>
-                {aviatorState.balance
-                  .toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "INR",
-                  })
-                  .substring(1)}
+                <span style={{ color: "#28A909" }}>
+                  {aviatorState.balance
+                    .toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "INR",
+                    })
+                    .substring(1)}
+                </span>{" "}
+                USD
               </div>
               <div
                 className=" rounded-full bg-[#3E3E43]"
@@ -281,16 +290,25 @@ const TopLogoBar = ({
                 }}
               >
                 <div
-                  className="w-full rounded-full bg-white"
-                  style={{ height: (w_factor / scale) * 0.1 }}
+                  className="w-full rounded-full"
+                  style={{
+                    height: (w_factor / scale) * 0.1,
+                    background: "rgb(155, 156, 158)",
+                  }}
                 />
                 <div
-                  className="w-full rounded-full bg-white"
-                  style={{ height: (w_factor / scale) * 0.1 }}
+                  className="w-full rounded-full"
+                  style={{
+                    height: (w_factor / scale) * 0.1,
+                    background: "rgb(155, 156, 158)",
+                  }}
                 />
                 <div
-                  className="w-full rounded-full bg-white"
-                  style={{ height: (w_factor / scale) * 0.1 }}
+                  className="w-full rounded-full"
+                  style={{
+                    height: (w_factor / scale) * 0.1,
+                    background: "rgb(155, 156, 158)",
+                  }}
                 />
               </div>
               <div
@@ -300,26 +318,6 @@ const TopLogoBar = ({
                   display: testMobile().iPhone ? "none" : "block",
                 }}
               />
-              <div
-                className="cursor-pointer self-center"
-                style={{ display: testMobile().iPhone ? "none" : "block" }}
-              >
-                {fullScreen ? (
-                  <div
-                    onClick={closeFullscreen}
-                    className="w-8 h-8 bg-[#E59407] rounded-lg flex items-center justify-center text-white font-bold"
-                  >
-                    X
-                  </div>
-                ) : (
-                  <div
-                    onClick={openFullscreen}
-                    className="w-8 h-8 bg-[#E59407] rounded-lg flex items-center justify-center text-white font-bold"
-                  >
-                    ⛶
-                  </div>
-                )}
-              </div>
             </div>
           </div>
           <div

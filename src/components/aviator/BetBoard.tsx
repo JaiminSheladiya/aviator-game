@@ -7,7 +7,7 @@ const PURPLE_X = "#a259f7";
 const BLUE_X = "#07BDE5";
 const DARK_BG = "#18191b";
 const ROW_BG = "#141516";
-const AVATAR_SIZE = 32;
+const AVATAR_SIZE = 24;
 const PLACEHOLDER_AVATAR =
   "https://api.dicebear.com/7.x/identicon/svg?seed=placeholder";
 
@@ -139,8 +139,8 @@ const Tab = ({
   onClick: () => void;
 }) => (
   <button
-    className={`px-6 py-1 rounded-full font-semibold text-sm focus:outline-none transition-all ${
-      active ? "bg-[#232325] text-white" : "text-gray-400"
+    className={`px-6 py-1 rounded-full text-sm focus:outline-none transition-all ${
+      active ? "bg-[#232325] text-gray-400" : "text-gray-400"
     }`}
     style={{ marginRight: 8, marginLeft: 0 }}
     onClick={onClick}
@@ -160,13 +160,10 @@ const BetBoardItem = ({
 }: any) => {
   return (
     <div
-      className={`flex items-center px-2 py-1 mb-[2px] ${
-        isWinner ? "rounded-[12px]" : "rounded-[8px]"
-      } ${isWinner ? "" : isYou ? "bg-[#232a3a]" : "bg-[#141516]"}`}
+      className={`flex items-center px-2 py-1 mb-[2px] rounded-[32px] ${isWinner ? "" : isYou ? "bg-[#232a3a]" : "bg-[#141516]"}`}
       style={{
         background: isWinner ? GREEN_WIN_BG : undefined,
-        color: isWinner ? "#fff" : isYou ? "#fff" : "#fff",
-        fontWeight: isWinner ? 600 : 500,
+        color: isWinner ? "#bbbfc5" : isYou ? "#bbbfc5" : "#bbbfc5",
       }}
     >
       <img
@@ -178,10 +175,10 @@ const BetBoardItem = ({
         className="rounded-full mr-2 border border-[#232325]"
         style={{ objectFit: "cover" }}
       />
-      <span className="w-24 truncate font-medium text-[15px]">{username}</span>
+      <span className="w-20 truncate text-[12]">{username}</span>
       <span className="w-20 text-right font-inter">{betAmount.toFixed(2)}</span>
       <span
-        className="w-16 text-center font-bold text-[16px]"
+        className="w-16 text-center text-[12px]"
         style={{
           color: crashedAt ? (crashedAt < 2 ? BLUE_X : PURPLE_X) : "#888",
         }}
@@ -189,13 +186,13 @@ const BetBoardItem = ({
         {crashedAt ? (
           <span>
             {crashedAt.toFixed(2)}
-            <span style={{ fontWeight: 700 }}>x</span>
+            <span>x</span>
           </span>
         ) : (
           "-"
         )}
       </span>
-      <span className="w-20 text-right font-inter font-bold">
+      <span className="w-20 text-right font-inter">
         {cashout ? cashout.toFixed(2) : "-"}
       </span>
     </div>
@@ -400,7 +397,7 @@ const BetBoard = () => {
               ))}
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-[18px] font-bold text-white leading-none">
+              <span className="text-[18px] text-white leading-none">
                 {topTotalWin.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -412,7 +409,7 @@ const BetBoard = () => {
         )}
         {tab === "All Bets" && (
           <div className="flex items-center w-full mb-1">
-            <span className="text-[15px] font-bold text-white mr-2">
+            <span className="text-[15px] text-white mr-2">
               {topWinners}/{totalBets} Bets
             </span>
             <div className="flex-1 h-2 rounded-full bg-[#232325] overflow-hidden">
@@ -428,14 +425,14 @@ const BetBoard = () => {
         )}
       </div>
       {/* Table Headings */}
-      <div className="flex px-4 py-1 text-xs text-gray-400 font-bold border-b border-gray-700">
-        <span className="w-24">Player</span>
-        <span className="w-20 text-right">Bet USD</span>
-        <span className="w-16 text-center">X</span>
+      <div className="flex px-4 py-1 text-gray-400 text-[10px]">
+        <span className="w-20">Player</span>
+        <span className="w-24 text-right">Bet USD</span>
+        <span className="w-20 text-center">X</span>
         <span className="w-20 text-right">Win USD</span>
       </div>
       {/* Table Body */}
-      <div className="flex-1 flex flex-col gap-[2px] w-full text-[15px] overflow-auto px-4 pb-2">
+      <div className="flex-1 flex flex-col gap-[2px] w-full text-[12px] overflow-auto px-4 pb-2">
         {tab === "All Bets" &&
           users.map((item, i) => {
             const isWinner =
@@ -464,7 +461,7 @@ const BetBoard = () => {
               </span>
               <div className="text-xs text-gray-400">Round Result</div>
             </div>
-            <div className="flex px-2 py-1 text-xs text-gray-400 font-bold border-b border-gray-700">
+            <div className="flex px-2 py-1 text-xs text-gray-400">
               <span className="w-24">Player</span>
               <span className="w-20 text-right">Bet USD</span>
               <span className="w-16 text-center">X</span>
@@ -478,22 +475,22 @@ const BetBoard = () => {
         {tab === "Top" && (
           <>
             <div className="flex gap-2 mb-2">
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-white font-bold">
+              <button className="px-3 py-1 rounded-full bg-[#232325] text-white">
                 X
               </button>
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400 font-bold">
+              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400">
                 Win
               </button>
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400 font-bold">
+              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400">
                 Rounds
               </button>
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-white font-bold">
+              <button className="px-3 py-1 rounded-full bg-[#232325] text-white">
                 Day
               </button>
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400 font-bold">
+              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400">
                 Month
               </button>
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400 font-bold">
+              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400">
                 Year
               </button>
             </div>
@@ -512,7 +509,7 @@ const BetBoard = () => {
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-white text-[15px]">
+                    <span className="font-bold text-white text-[12px]">
                       {item.username}
                     </span>
                     <span className="text-xs text-gray-400">{item.date}</span>
@@ -521,14 +518,14 @@ const BetBoard = () => {
                     <div className="text-xs text-gray-400">
                       Bet USD
                       <br />
-                      <span className="text-white font-bold text-[15px]">
+                      <span className="text-white text-[12px]">
                         {item.bet}
                       </span>
                     </div>
                     <div className="text-xs text-gray-400">
                       Win USD
                       <br />
-                      <span className="text-white font-bold text-[15px]">
+                      <span className="text-white text-[12px]">
                         {item.win.toLocaleString(undefined, {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
@@ -539,7 +536,7 @@ const BetBoard = () => {
                       Result
                       <br />
                       <span
-                        className="font-bold text-[15px]"
+                        className="font-bold text-[12px]"
                         style={{ color: PURPLE_X }}
                       >
                         {item.result}x
@@ -549,7 +546,7 @@ const BetBoard = () => {
                       Round max.
                       <br />
                       <span
-                        className="font-bold text-[15px]"
+                        className="font-bold text-[12px]"
                         style={{ color: PURPLE_X }}
                       >
                         {item.roundMax}x

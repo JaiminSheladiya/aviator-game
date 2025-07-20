@@ -358,7 +358,7 @@ const BetBoard = () => {
   return (
     <div
       className="flex flex-col w-full h-full max-w-[480px] mx-auto bg-[#18191b] rounded-2xl shadow-lg p-0"
-      style={{ minHeight: "100vh" }}
+      style={{ maxHeight: "100vh" }}
     >
       {/* Tabs & Summary */}
       <div className="flex flex-col w-full px-4 pt-4 pb-2">

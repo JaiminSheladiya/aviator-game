@@ -114,6 +114,8 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const crashAudioRef = useRef<HTMLAudioElement | null>(null);
 
+  const [progress, setProgress] = useState(100);
+
   const _setBetValue = (
     val: string | ((prev: string) => string),
     i: number
@@ -274,6 +276,25 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
     setCrashColor(crashHistory.map((item) => getHistoryItemColor(item)));
   }, [crashHistory]);
 
+  useEffect(() => {
+    if (aviatorState.game_anim_status === "WAITING") {
+      setProgress(100);
+      const totalDuration = 5000; // 5 seconds
+      const intervalMs = 20;
+      const decrement = 100 / (totalDuration / intervalMs);
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev <= 0) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - decrement;
+        });
+      }, intervalMs);
+      return () => clearInterval(interval);
+    }
+  }, [aviatorState.game_anim_status]);
+
   const handleCashOut = async (i: number, auto?: boolean) => {
     console.log(
       "handleCashOut called for index:",
@@ -319,7 +340,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
       })
     );
 
-    playSound("win");
+    // playSound("win");
     console.log(
       "Cashout completed successfully. New balance:",
       aviatorState.balance + winAmount
@@ -406,7 +427,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
             ...prev,
             game_anim_status: "ANIM_STARTED",
           }));
-          playSound("take");
+          // playSound("take");
 
           // Simulate payout increase
           let payout = 1.0;
@@ -445,7 +466,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                 // Crash phase
                 setCrashHistory((prev) => [`${payout.toFixed(2)}x`, ...prev]);
                 setCrashAnim(true);
-                playCrashSound();
+                if (aviatorState.fxChecked) playCrashSound();
                 setTimeout(() => setCrashAnim(false), 1000);
 
                 setAviatorState((prev) => ({
@@ -533,7 +554,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
 
   // useEffect(() => {
   //   console.log("aviatorState.fxChecked", aviatorState.fxChecked);
-    
+
   //   if (aviatorState.game_anim_status === "ANIM_CRASHED" && aviatorState.fxChecked) {
   //     if (!crashAudioRef.current) {
   //       crashAudioRef.current = new Audio("/aviator/assets/sounds/sprite_audio.mp3");
@@ -545,7 +566,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
   //     }
   //   }
   // }, [aviatorState.game_anim_status, aviatorState.fxChecked]);
-  
+
   const playCrashSound = () => {
     // Play sprite_audio.mp3 when game_anim_status is ANIM_CRASHED
     if (!crashAudioRef.current && aviatorState.fxChecked) {
@@ -585,6 +606,19 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
           </div>
         </div>
         <div
+          style={{
+            background: "rgba(229, 148, 7, .8)",
+            textAlign: "center",
+            fontSize: "14px",
+            fontWeight: 700,
+            width: "100%",
+            borderRadius: "20px 20px 0 0",
+            border: "1px solid #e59407",
+          }}
+        >
+          FUN MODE
+        </div>
+        <div
           className={`flex justify-center w-full relative`}
           style={{ height: pixiDimension.height }}
           ref={pixi_ref}
@@ -601,29 +635,36 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
             }}
           >
             <div
-              style={{
-                display:
-                  aviatorState.game_anim_status === "WAITING"
-                    ? "block"
-                    : "none",
-                width: Math.min(pixiDimension.width, pixiDimension.height) / 4,
-              }}
+              style={
+                {
+                  // display:
+                  //   aviatorState.game_anim_status === "WAITING"
+                  //     ? "block"
+                  //     : "none",
+                  // width: Math.min(pixiDimension.width, pixiDimension.height) / 4,
+                }
+              }
             >
-              <div
-                style={{
-                  rotate: `${rotate}deg`,
-                  width: "50px",
-                  height: "50px",
-                  backgroundColor: "#E59407",
-                  borderRadius: "50%",
-                }}
-              />
+              <div className="flex flex-col items-center justify-center w-[300px] rounded-lg">
+                <div className="flex flex-col items-center">
+                  {/* UFC/Aviator Logo */}
+                  <img src="/aviator/aviator-brand.svg" alt="UFC" />
+                  {/* Progress Bar */}
+                  <div className="mt-4 h-2 bg-gray-700 rounded w-[250px]">
+                    <div
+                      className="h-2 bg-red-600 rounded transition-all duration-100"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col justify-center items-center px-4 py-2 lg:px-8 lg:py-2 bg-black/70 border-dashed border border-[#E59407] rounded-lg">
-              <p className="text-[#E59407] uppercase font-bold text-[21px] lg:text-[30px]">
-                {aviatorState.game_anim_status === "ANIM_CRASHED"
-                  ? "Flew away"
-                  : "PLACE YOUR BET"}
+            <div className="flex flex-col justify-center items-center px-4 py-2 lg:px-8 lg:py-2 rounded-lg">
+              <p className="text-[#E59407] uppercase text-[21px] lg:text-[30px]">
+                {aviatorState.game_anim_status === "ANIM_CRASHED" &&
+                  "Flew away"}
+                {/* ? 
+                  : "PLACE YOUR BET"} */}
               </p>
               {aviatorState.game_anim_status === "ANIM_CRASHED" && (
                 <p className="text-white font-bold text-[42px] leading-[42px] lg:text-[100px] lg:leading-[100px]">

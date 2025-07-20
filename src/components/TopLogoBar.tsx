@@ -235,9 +235,9 @@ const TopLogoBar = ({
                 className="flex gap-1 sm:gap-2 justify-center font-bold items-center"
                 style={{ fontSize: "14px", color: "#9B9C9E" }}
               >
-                <div className="w-4 h-4 bg-[#E59407] rounded-full flex items-center justify-center">
+                {/* <div className="w-4 h-4 bg-[#E59407] rounded-full flex items-center justify-center">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
+                </div> */}
                 <span style={{ color: "#28A909" }}>
                   {aviatorState.balance
                     .toLocaleString("en-US", {

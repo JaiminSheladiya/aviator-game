@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { betBoardAllItemType } from "../../@types";
+import {getHistoryItemColor} from "../../utils"
 
 const GREEN_WIN_BG = "#23391a";
 const GREEN_PROGRESS = "#7be22a";
@@ -160,7 +161,9 @@ const BetBoardItem = ({
 }: any) => {
   return (
     <div
-      className={`flex items-center px-2 py-1 mb-[2px] rounded-[32px] ${isWinner ? "" : isYou ? "bg-[#232a3a]" : "bg-[#141516]"}`}
+      className={`flex items-center px-2 py-1 mb-[2px] rounded-[32px] ${
+        isWinner ? "" : isYou ? "bg-[#232a3a]" : "bg-[#141516]"
+      }`}
       style={{
         background: isWinner ? GREEN_WIN_BG : undefined,
         color: isWinner ? "#bbbfc5" : isYou ? "#bbbfc5" : "#bbbfc5",
@@ -388,9 +391,9 @@ const BetBoard = () => {
                   key={i}
                   src={u.avatar}
                   alt="avatar"
-                  width={32}
-                  height={32}
-                  className="rounded-full border-2 border-[#18191b] bg-[#232325]"
+                  width={24}
+                  height={24}
+                  className="rounded-full border border-[#28a90a] bg-[#232325]"
                   onError={(e) => (e.currentTarget.src = PLACEHOLDER_AVATAR)}
                   style={{ zIndex: 10 - i }}
                 />
@@ -425,12 +428,14 @@ const BetBoard = () => {
         )}
       </div>
       {/* Table Headings */}
-      <div className="flex px-4 py-1 text-gray-400 text-[10px]">
-        <span className="w-20">Player</span>
-        <span className="w-24 text-right">Bet USD</span>
-        <span className="w-20 text-center">X</span>
-        <span className="w-20 text-right">Win USD</span>
-      </div>
+      {tab === "All Bets" && (
+        <div className="flex px-4 py-1 text-gray-400 text-[10px]">
+          <span className="w-20">Player</span>
+          <span className="w-24 text-right">Bet USD</span>
+          <span className="w-20 text-center">X</span>
+          <span className="w-20 text-right">Win USD</span>
+        </div>
+      )}
       {/* Table Body */}
       <div className="flex-1 flex flex-col gap-[2px] w-full text-[12px] overflow-auto px-4 pb-2">
         {tab === "All Bets" &&
@@ -453,13 +458,13 @@ const BetBoard = () => {
         {tab === "Previous" && (
           <>
             <div className="w-full text-center py-2">
+              <div className="text-xs text-gray-400">Round Result</div>
               <span
                 className="text-[28px] font-extrabold"
-                style={{ color: PURPLE_X }}
+                style={{ color: getHistoryItemColor(previous.roundResult.toFixed(2)) }}
               >
                 {previous.roundResult.toFixed(2)}x
               </span>
-              <div className="text-xs text-gray-400">Round Result</div>
             </div>
             <div className="flex px-2 py-1 text-xs text-gray-400">
               <span className="w-24">Player</span>
@@ -518,9 +523,7 @@ const BetBoard = () => {
                     <div className="text-xs text-gray-400">
                       Bet USD
                       <br />
-                      <span className="text-white text-[12px]">
-                        {item.bet}
-                      </span>
+                      <span className="text-white text-[12px]">{item.bet}</span>
                     </div>
                     <div className="text-xs text-gray-400">
                       Win USD

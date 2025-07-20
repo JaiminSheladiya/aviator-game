@@ -25,6 +25,37 @@ export const curveFunction = (x: number, dimension: dimensionType) => {
   return (0.0007 * Math.pow(x, 1.9) * dimension.height) / 1500;
 };
 
+// export const renderCurve = (g: Graphics, _dimension: dimensionType) => {
+//   const dimension = { width: _dimension.width, height: _dimension.height - 40 };
+//   const xAxis = Array.from(
+//     { length: dimension.width / 10 },
+//     (_, index) => index * 10
+//   );
+//   const points = xAxis.map((item) => ({
+//     x: item,
+//     y: dimension.height - curveFunction(item, dimension),
+//   }));
+//   g.clear();
+//   g.beginFill(0xe59407, 0.3);
+//   // g.lineStyle(4, 0xffd900, 1);
+//   g.moveTo(points[0].x, points[0].y);
+
+//   for (let i = 1; i < points.length; i++) {
+//     g.lineTo(points[i].x, points[i].y);
+//   }
+//   g.lineTo(points[points.length - 1].x, dimension.height);
+//   g.lineTo(0, dimension.height);
+//   g.endFill();
+//   const lineWidth = interpolate(window.innerWidth, 400, 1920, 16, 4);
+//   g.lineStyle(lineWidth, 0xffd900, 1);
+//   g.moveTo(points[0].x, points[0].y);
+
+//   for (let i = 1; i < points.length; i++) {
+//     g.lineTo(points[i].x, points[i].y);
+//   }
+// };
+
+
 export const renderCurve = (g: Graphics, _dimension: dimensionType) => {
   const dimension = { width: _dimension.width, height: _dimension.height - 40 };
   const xAxis = Array.from(
@@ -35,25 +66,31 @@ export const renderCurve = (g: Graphics, _dimension: dimensionType) => {
     x: item,
     y: dimension.height - curveFunction(item, dimension),
   }));
-  g.clear();
-  g.beginFill(0xe59407, 0.3);
-  // g.lineStyle(4, 0xffd900, 1);
-  g.moveTo(points[0].x, points[0].y);
 
+  g.clear();
+
+  // 🔴 Fill area under curve in red
+  g.beginFill(0xff0000, 0.3);
+
+  g.moveTo(points[0].x, points[0].y);
   for (let i = 1; i < points.length; i++) {
     g.lineTo(points[i].x, points[i].y);
   }
   g.lineTo(points[points.length - 1].x, dimension.height);
   g.lineTo(0, dimension.height);
   g.endFill();
-  const lineWidth = interpolate(window.innerWidth, 400, 1920, 16, 4);
-  g.lineStyle(lineWidth, 0xffd900, 1);
-  g.moveTo(points[0].x, points[0].y);
 
+  // 🔴 Red stroke line over the curve
+  const lineWidth = interpolate(window.innerWidth, 400, 1920, 16, 4);
+  g.lineStyle(lineWidth, 0xff0000, 1);
+  g.moveTo(points[0].x, points[0].y);
   for (let i = 1; i < points.length; i++) {
     g.lineTo(points[i].x, points[i].y);
   }
 };
+
+
+
 export const _drawOuterBoundery = (g: Graphics, dimension: dimensionType) => {
   g.clear();
 

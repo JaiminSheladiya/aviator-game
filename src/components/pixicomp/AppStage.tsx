@@ -24,6 +24,7 @@ import {
   interpolate,
 } from "../../utils";
 import { dimensionType, gameAnimStatusType } from "../../@types";
+import type { Container as ContainerType } from "pixi.js";
 
 const AppStage = ({
   payout,
@@ -46,6 +47,14 @@ const AppStage = ({
   const [planeScale, setPlaneScale] = useState(0.2);
   const [pulseBase, setPulseBase] = useState(0.8);
   const [currentFrame, setCurrentFrame] = useState(0);
+
+  const containerRef = useRef<ContainerType>(null);
+
+  useTick((delta) => {
+    if (game_anim_status === "ANIM_STARTED" && containerRef.current) {
+      containerRef.current.rotation += 0.005 * delta;
+    }
+  });
 
   const renderCurve = useCallback(
     (g: GraphicsRaw) => _renderCurve(g, dimension),
@@ -82,7 +91,6 @@ const AppStage = ({
       crashOffset.current = 0;
     }
   }, [game_anim_status]);
-  console.log("game_anim_status :::", game_anim_status);
 
   useTick((delta) => {
     hueRotateRef.current += delta / 500;
@@ -163,12 +171,30 @@ const AppStage = ({
     []
   );
 
+  // const drawRadialSlices = (g: GraphicsRaw) => {
+  //   g.clear();
+  //   const centerX = 0;
+  //   const centerY = dimension.height;
+  //   const totalSlices = 60;
+  //   const radius = Math.max(dimension.width, dimension.height) * 2;
+  //   for (let i = 0; i < totalSlices; i++) {
+  //     const startAngle = (i / totalSlices) * Math.PI * 2;
+  //     const endAngle = ((i + 1) / totalSlices) * Math.PI * 2;
+  //     g.beginFill(i % 2 === 0 ? 0x0a0a0a : 0x121212);
+  //     g.moveTo(centerX, centerY);
+  //     g.arc(centerX, centerY, radius, startAngle, endAngle);
+  //     g.lineTo(centerX, centerY);
+  //     g.endFill();
+  //   }
+  // };
+
   const drawRadialSlices = (g: GraphicsRaw) => {
     g.clear();
     const centerX = 0;
-    const centerY = dimension.height;
+    const centerY = 0; // Note: it's 0 because the container is already placed at bottom-left
     const totalSlices = 60;
     const radius = Math.max(dimension.width, dimension.height) * 2;
+
     for (let i = 0; i < totalSlices; i++) {
       const startAngle = (i / totalSlices) * Math.PI * 2;
       const endAngle = ((i + 1) / totalSlices) * Math.PI * 2;
@@ -182,7 +208,22 @@ const AppStage = ({
 
   return (
     <Container>
-      <Graphics draw={drawRadialSlices} />
+      {/* <Graphics draw={drawRadialSlices} /> */}
+      {/* <Graphics
+        ref={graphicsRef}
+        draw={drawRadialSlices}
+        x={dimension.width / 2}
+        y={dimension.height / 2}
+      /> */}
+
+      <Container
+        ref={containerRef}
+        x={0}
+        y={dimension.height}
+        pivot={{ x: 0, y: 0 }}
+      >
+        <Graphics draw={drawRadialSlices} />
+      </Container>
       <Sprite
         filters={[colorMatrix]}
         texture={gradTexture}

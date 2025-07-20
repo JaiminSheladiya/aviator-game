@@ -111,6 +111,9 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
   const [previousRounds, setPreviousRounds] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
 
+  const bgMusicRef = useRef<HTMLAudioElement | null>(null);
+  const crashAudioRef = useRef<HTMLAudioElement | null>(null);
+
   const _setBetValue = (
     val: string | ((prev: string) => string),
     i: number
@@ -442,7 +445,9 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                 // Crash phase
                 setCrashHistory((prev) => [`${payout.toFixed(2)}x`, ...prev]);
                 setCrashAnim(true);
+                playCrashSound();
                 setTimeout(() => setCrashAnim(false), 1000);
+
                 setAviatorState((prev) => ({
                   ...prev,
                   game_anim_status: "ANIM_CRASHED",
@@ -488,6 +493,39 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
       clearInterval(rotateInterval);
     };
   }, []);
+
+  useEffect(() => {
+    // Play background music when GameBoard mounts
+    if (!bgMusicRef.current) {
+      bgMusicRef.current = new Audio("/aviator/assets/sounds/bg_music.mp3");
+      bgMusicRef.current.loop = true;
+      bgMusicRef.current.volume = 0.5;
+      bgMusicRef.current.play();
+    }
+    return () => {
+      // Stop music when GameBoard unmounts
+      if (bgMusicRef.current) {
+        bgMusicRef.current.pause();
+        bgMusicRef.current.currentTime = 0;
+        bgMusicRef.current = null;
+      }
+    };
+  }, []);
+
+  const playCrashSound = () => {
+    // Play sprite_audio.mp3 when game_anim_status is ANIM_CRASHED
+    if (!crashAudioRef.current) {
+      crashAudioRef.current = new Audio(
+        "/aviator/assets/sounds/sprite_audio.mp3"
+      );
+      crashAudioRef.current.volume = 1.0;
+      crashAudioRef.current.currentTime = 2.5; // Start from 3 seconds
+      crashAudioRef.current.play();
+      crashAudioRef.current.onended = () => {
+        crashAudioRef.current = null;
+      };
+    }
+  };
 
   return (
     <div

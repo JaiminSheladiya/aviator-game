@@ -66,7 +66,7 @@ const Aviator = () => {
           "bet6",
           JSON.stringify(
             dummyConfig.data.data.config.chips
-              .slice(0, 6)
+              .slice(0, 4)
               .map((item: number) => `${item}`)
           )
         );

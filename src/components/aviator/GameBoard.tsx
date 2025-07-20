@@ -352,6 +352,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
       aviatorState.dimension.width,
       pixi_ref.current?.clientWidth || 0
     );
+
     const height = Math.max(
       150,
       window.innerHeight -
@@ -359,6 +360,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
         150 -
         (width > 1392 ? 0 : 10)
     );
+    console.log("width, height: ", { width, height });
     setPixiDimension({ width, height });
     setAviatorState((prev) => {
       const new_width = prev.dimension.width;
@@ -589,7 +591,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
       <div className="w-[460px] hidden lg:block h-full">
         <BetBoard />
       </div>
-      <div className="flex flex-col gap-2 w-full bg-black p-2 text-white overflow-auto pb-0">
+      <div className="flex flex-col gap-0 w-full bg-[#171717] p-2 text-white overflow-auto pb-0">
         <div className="flex justify-between items-center">
           <div className="score-bomb flex gap-x-2 w-full flex-wrap pr-4 h-[26px] overflow-y-hidden">
             {crashHistory.map((item, i) => (
@@ -607,6 +609,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
         </div>
         <div
           style={{
+            marginTop: "1rem",
             background: "rgba(229, 148, 7, .8)",
             textAlign: "center",
             fontSize: "14px",
@@ -646,17 +649,21 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
               }
             >
               <div className="flex flex-col items-center justify-center w-[300px] rounded-lg">
-                <div className="flex flex-col items-center">
-                  {/* UFC/Aviator Logo */}
-                  <img src="/aviator/aviator-brand.svg" alt="UFC" />
-                  {/* Progress Bar */}
-                  <div className="mt-4 h-2 bg-gray-700 rounded w-[250px]">
-                    <div
-                      className="h-2 bg-red-600 rounded transition-all duration-100"
-                      style={{ width: `${progress}%` }}
-                    />
+                {aviatorState.game_anim_status === "ANIM_CRASHED" ? (
+                  <></>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    {/* UFC/Aviator Logo */}
+                    <img src="/aviator/aviator-brand.svg" alt="UFC" />
+                    {/* Progress Bar */}
+                    <div className="mt-4 h-2 bg-gray-700 rounded w-[250px]">
+                      <div
+                        className="h-2 bg-red-600 rounded transition-all duration-100"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
             <div className="flex flex-col justify-center items-center px-4 py-2 lg:px-8 lg:py-2 rounded-lg">
@@ -679,7 +686,11 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
             trigParachute={trigParachute}
           />
         </div>
-        <div className="flex flex-col w-full" ref={footer_ref}>
+        <div
+          className="flex flex-col w-full"
+          style={{ marginTop: "1.25rem" }}
+          ref={footer_ref}
+        >
           <div
             className={`grid grid-cols-1 gap-2 relative ${
               betButtonCount === 1 ? "" : "lg:grid-cols-2"
@@ -691,7 +702,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                 setTimeout(handleResize, 500);
               }}
               disabled={betPlaceStatus[1] === "success" || pendingBet[1]}
-              className={`absolute right-1 top-1 rounded-full bg-black w-6 h-6 pb-[2px] flex justify-center items-center text-lg cursor-pointer disabled:opacity-30`}
+              className={`absolute right-1 top-1 rounded-full bg-[#171717] w-6 h-6 pb-[2px] flex justify-center items-center text-lg cursor-pointer disabled:opacity-30`}
             >
               {betButtonCount === 1 ? (
                 <span>+</span>
@@ -702,7 +713,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
             {[0, 1].map((item, i) => (
               <div
                 key={i}
-                className={`flex flex-col justify-start items-center gap-1 lg:gap-4 w-full rounded-lg bg-gradient-to-b from-[#1C1C1C] to-black p-4 pb-0 ${
+                className={`flex flex-col justify-start items-center gap-1 lg:gap-4 w-full rounded-lg bg-gradient-to-b from-[#1C1C1C] to-black p-4 ${
                   betPlaceStatus[i] === "success" || pendingBet[i]
                     ? allowedBet || pendingBet[i]
                       ? "border border-red-700"
@@ -726,17 +737,20 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                 <div className="flex gap-2">
                   <div className="flex flex-col w-[100px] lg:w-[130px] 3xl:w-[260px] h-full">
                     <div
-                      className="flex justify-between items-center text-[10px] 3xl:text-xl w-full h-[27px] 3xl:h-[54px] bg-black rounded-full px-2"
-                      style={{ fontFamily: "Roboto" }}
+                      className="flex justify-between items-center text-[10px] 3xl:text-xl w-full h-[27px] 3xl:h-[54px] bg-[#171717] rounded-full px-2"
+                      style={{
+                        fontFamily: "Roboto",
+                        paddingBlock: "1rem",
+                      }}
                     >
                       <button
                         disabled={
                           betPlaceStatus[i] === "success" || pendingBet[i]
                         }
                         onClick={() => modifyBetValue(-10, i)}
-                        className="flex justify-center items-center w-[16px] h-[16px] 3xl:w-[36px] 3xl:h-[36px]  text-white rounded-full border-2 border-white"
+                        className="flex justify-center items-center w-6 h-6 3xl:w-9 3xl:h-9 text-white font-bold text-base 3xl:text-xl rounded-full bg-[#3e3e3e]"
                       >
-                        <div className="w-2/3 h-1/6 bg-white" />
+                        −
                       </button>
                       <input
                         disabled={
@@ -745,20 +759,22 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                         onChange={(e) => handleBetValueChange(e, i)}
                         value={betValue[i]}
                         type="string"
-                        className="w-[30px] lg:w-[70px] 3xl:w-[150px] bg-black text-center text-[13px] 3xl:text-[26px]"
+                        className="w-[30px] lg:w-[70px] 3xl:w-[150px] bg-[#171717] text-center text-[13px] 3xl:text-[26px]"
                       />
                       <button
                         disabled={
                           betPlaceStatus[i] === "success" || pendingBet[i]
                         }
                         onClick={() => modifyBetValue(10, i)}
-                        className="flex relative justify-center items-center w-[16px] h-[16px] 3xl:w-[36px] 3xl:h-[36px] text-white rounded-full border-2 border-white"
+                        className="flex justify-center items-center w-6 h-6 3xl:w-9 3xl:h-9 text-white font-bold text-base 3xl:text-xl rounded-full bg-[#3e3e3e]"
                       >
-                        <div className="w-2/3 h-1/6 bg-white" />
-                        <div className="absolute top-[2px] h-2/3 w-1/6 bg-white" />
+                        +
                       </button>
                     </div>
-                    <div className="grid grid-cols-2 gap-1 w-full h-[40px] 3xl:h-[78px]">
+                    <div
+                      className="grid grid-cols-2 gap-1 w-full h-[40px] 3xl:h-[78px]"
+                      style={{ marginTop: "0.3rem" }}
+                    >
                       {bet6.map((item, j) => (
                         <button
                           disabled={
@@ -766,7 +782,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                           }
                           key={j}
                           onClick={() => _setBetValue(`${item}`, i)}
-                          className="flex justify-center items-center bg-[#171717] rounded-lg gap-[2px] w-full h-[17px] 3xl:h-9 text-[13px] 3xl:text-[26px]"
+                          className="flex justify-center items-center bg-[#171717] rounded-lg gap-[2px] w-full h-[25px] 3xl:h-9 text-[13px] 3xl:text-[26px]"
                         >
                           {item}
                         </button>
@@ -789,7 +805,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                     ) : (
                       <button
                         onClick={() => handleCashOut(i, false)}
-                        className="flex flex-col w-[100px] lg:w-[160px] h-[72px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-gradient-to-b from-[#E59407] to-[#412900]  justify-center items-center font-bold border border-[#FFB432]/50 hover:opacity-80"
+                        className="flex flex-col w-[100px] lg:w-[160px] h-[80px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-gradient-to-b from-[#E59407] to-[#412900]  justify-center items-center font-bold border border-[#FFB432]/50 hover:opacity-80"
                       >
                         <h4 className="text-[16px] 3xl:text-[42px] leading-[20px] 3xl:leading-[42px] uppercase">
                           {cashingStatus[i] === "none"
@@ -816,7 +832,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                     <button
                       onClick={() => handleBet(i)}
                       disabled={!allowedBet || betPlaceStatus[i] !== "none"}
-                      className={`disabled:opacity-30 flex flex-col min-w-[120px] lg:min-w-[180px] h-[72px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-[#28a909] justify-center items-center border border-white hover:opacity-80`}
+                      className={`disabled:opacity-30 flex flex-col min-w-[120px] lg:min-w-[180px] h-[90px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-[#28a909] justify-center items-center border border-white hover:opacity-80`}
                     >
                       <p className="text-[22px] 3xl:text-[42px] leading-[20px] 3xl:leading-[42px]">
                         Bet

@@ -497,7 +497,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
   useEffect(() => {
     // Play background music when GameBoard mounts
     if (!bgMusicRef.current) {
-      bgMusicRef.current = new Audio("/aviator/assets/sounds/bg_music.mp3");
+      bgMusicRef.current = new Audio("/aviator/sounds/bg_music.mp3");
       bgMusicRef.current.loop = true;
       bgMusicRef.current.volume = 0.5;
       bgMusicRef.current.play();
@@ -516,7 +516,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
     // Play sprite_audio.mp3 when game_anim_status is ANIM_CRASHED
     if (!crashAudioRef.current) {
       crashAudioRef.current = new Audio(
-        "/aviator/assets/sounds/sprite_audio.mp3"
+        "/aviator/sounds/sprite_audio.mp3"
       );
       crashAudioRef.current.volume = 1.0;
       crashAudioRef.current.currentTime = 2.5; // Start from 3 seconds

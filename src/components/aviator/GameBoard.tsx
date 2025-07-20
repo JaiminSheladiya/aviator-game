@@ -638,43 +638,35 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
             }}
           >
             <div
-              style={
-                {
-                  // display:
-                  //   aviatorState.game_anim_status === "WAITING"
-                  //     ? "block"
-                  //     : "none",
-                  // width: Math.min(pixiDimension.width, pixiDimension.height) / 4,
-                }
-              }
+              style={{
+                display:
+                  aviatorState.game_anim_status === "WAITING"
+                    ? "block"
+                    : "none",
+                // width: Math.min(pixiDimension.width, pixiDimension.height) / 4,
+              }}
             >
               <div className="flex flex-col items-center justify-center w-[300px] rounded-lg">
-                {aviatorState.game_anim_status === "ANIM_CRASHED" ? (
-                  <></>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    {/* UFC/Aviator Logo */}
-                    <img src="/aviator/aviator-brand.svg" alt="UFC" />
-                    {/* Progress Bar */}
-                    <div className="mt-4 h-2 bg-gray-700 rounded w-[250px]">
-                      <div
-                        className="h-2 bg-red-600 rounded transition-all duration-100"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
+                <div className="flex flex-col items-center">
+                  {/* UFC/Aviator Logo */}
+                  <img src="/aviator/aviator-brand.svg" alt="UFC" />
+                  {/* Progress Bar */}
+                  <div className="mt-4 h-2 bg-gray-700 rounded w-[250px]">
+                    <div
+                      className="h-2 bg-red-600 rounded transition-all duration-100"
+                      style={{ width: `${progress}%` }}
+                    />
                   </div>
-                )}
+                </div>
               </div>
             </div>
             <div className="flex flex-col justify-center items-center px-4 py-2 lg:px-8 lg:py-2 rounded-lg">
-              <p className="text-[#E59407] uppercase text-[21px] lg:text-[30px]">
+              <p className="text-white uppercase text-[21px] lg:text-[30px]">
                 {aviatorState.game_anim_status === "ANIM_CRASHED" &&
                   "Flew away"}
-                {/* ? 
-                  : "PLACE YOUR BET"} */}
               </p>
               {aviatorState.game_anim_status === "ANIM_CRASHED" && (
-                <p className="text-white font-bold text-[42px] leading-[42px] lg:text-[100px] lg:leading-[100px]">
+                <p className="text-[#d0011b] font-bold text-[42px] leading-[42px] lg:text-[100px] lg:leading-[100px]">
                   {curPayout.toFixed(2)}x
                 </p>
               )}

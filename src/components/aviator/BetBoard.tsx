@@ -179,7 +179,7 @@ const BetBoardItem = ({
         style={{ objectFit: "cover" }}
       />
       <span className="w-24 truncate font-medium text-[15px]">{username}</span>
-      <span className="w-20 text-right font-mono">{betAmount.toFixed(2)}</span>
+      <span className="w-20 text-right font-inter">{betAmount.toFixed(2)}</span>
       <span
         className="w-16 text-center font-bold text-[16px]"
         style={{
@@ -195,7 +195,7 @@ const BetBoardItem = ({
           "-"
         )}
       </span>
-      <span className="w-20 text-right font-mono font-bold">
+      <span className="w-20 text-right font-inter font-bold">
         {cashout ? cashout.toFixed(2) : "-"}
       </span>
     </div>

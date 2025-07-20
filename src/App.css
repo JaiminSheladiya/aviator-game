@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
 * {
   box-sizing: border-box;
@@ -47,9 +48,12 @@
 }
 
 @font-face {
-  font-family: "Salsa";
-  src: url("https://s3.eu-west-2.amazonaws.com/lobbyuat.Gaming.games/crash/aviator/general/font/Salsa-Regular.ttf");
-  /* url('/public/assets/general//font//Salsa-Regular.ttf'); */
+  font-family: "Inter";
+  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+}
+
+body, .App, .App-header, .App-link, input, button, textarea {
+  font-family: 'Inter', sans-serif !important;
 }
 
 /* width */

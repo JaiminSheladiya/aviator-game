@@ -26,6 +26,7 @@ module.exports = {
         pinRight: 'pinRight 1s ease-in-out',
       },
       fontFamily: {
+        'inter': ['Inter', 'sans-serif'],
         'roboto': ['Roboto'],
       },
     },

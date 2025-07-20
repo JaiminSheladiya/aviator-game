@@ -64,7 +64,7 @@ const HistoryModal = ({ loaded, open, setOpen }: { loaded: boolean, open: boolea
         >
             <>
                 {showDetail &&
-                    <div className='bet-history-detail-modal user-history fixed w-full h-full bg-black z-20 text-white flex flex-col overflow-auto pb-12' style={{ width: "100%", fontFamily: "Salsa" }}>
+                    <div className='bet-history-detail-modal user-history fixed w-full h-full bg-black z-20 text-white flex flex-col overflow-auto pb-12' style={{ width: "100%", fontFamily: "Inter" }}>
                         <div className="user-data m-auto">
                             <div className="data-header">
                                 <img src={`${process.env.REACT_APP_ASSETS_IMAGE_URL}${webpORpng}/back.${webpORpng}`} alt="back" className='float-left cursor-pointer align-middle mx-4' onClick={() => setShowDetail(false)} />
@@ -146,7 +146,7 @@ const HistoryModal = ({ loaded, open, setOpen }: { loaded: boolean, open: boolea
                         </div>
                     </div>
                 }
-                <div className="user-history overflow-y-auto" style={{ fontFamily: "Salsa" }}>
+                <div className="user-history overflow-y-auto" style={{ fontFamily: "Inter" }}>
                     <div className="user-filter" ref={upper_ref}>
                         <div className="input-group">
                             <label className=' ' htmlFor="">Select a date to filter</label>

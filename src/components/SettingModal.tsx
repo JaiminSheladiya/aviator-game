@@ -23,7 +23,7 @@ export default function SettingModal({ open, setOpen, bet6: { bet6, setBet6 } }:
             <div className="w-full h-full max-h-screen min-h-screen bg-[#212121]">
                 <button onClick={handleClose} className="w-10 h-10 fixed top-10 right-10 cursor-pointer bg-[#333] rounded-full text-white"><CloseIcon /></button>
 
-                <div className="flex flex-col gap-4 justify-center items-center font-salsa text-white h-full min-h-screen">
+                <div className="flex flex-col gap-4 justify-center items-center font-inter text-white h-full min-h-screen">
                     <h1 className="text-2xl">Settings</h1>
                     <div className="grid grid-cols-2 gap-y-2 gap-x-4 w-[360px] justify-center items-center">
                         {bet6.map((_, i) =>

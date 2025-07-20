@@ -225,7 +225,7 @@ const TopLogoBar = ({
               <span className="text-white font-bold">Gaming</span>
             </div> */}
             <img
-              src="/aviator/aviator-logo.svg"
+              src="/aviator-logo.svg"
               alt="Aviator Logo"
               className="w-8 h-8 object-contain"
               style={{ transform: `scale(3)`, marginLeft: "2rem" }}

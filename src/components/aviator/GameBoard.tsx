@@ -521,7 +521,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
     // Play or stop background music based on aviatorState.musicChecked and set volume from aviatorState.vol
     if (aviatorState.musicChecked) {
       if (!bgMusicRef.current) {
-        bgMusicRef.current = new Audio("/aviator/sounds/bg_music.mp3");
+        bgMusicRef.current = new Audio("/sounds/bg_music.mp3");
         bgMusicRef.current.loop = true;
         bgMusicRef.current.volume = (aviatorState.vol ?? 50) / 100;
         bgMusicRef.current.play();
@@ -559,7 +559,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
 
   //   if (aviatorState.game_anim_status === "ANIM_CRASHED" && aviatorState.fxChecked) {
   //     if (!crashAudioRef.current) {
-  //       crashAudioRef.current = new Audio("/aviator/assets/sounds/sprite_audio.mp3");
+  //       crashAudioRef.current = new Audio("/assets/sounds/sprite_audio.mp3");
   //       crashAudioRef.current.volume = 1.0;
   //       crashAudioRef.current.play();
   //       crashAudioRef.current.onended = () => {
@@ -572,7 +572,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
   const playCrashSound = () => {
     // Play sprite_audio.mp3 when game_anim_status is ANIM_CRASHED
     if (!crashAudioRef.current && aviatorState.fxChecked) {
-      crashAudioRef.current = new Audio("/aviator/sounds/sprite_audio.mp3");
+      crashAudioRef.current = new Audio("/sounds/sprite_audio.mp3");
       crashAudioRef.current.volume = 1.0;
       crashAudioRef.current.currentTime = 2.5; // Start from 3 seconds
       crashAudioRef.current.play();
@@ -649,7 +649,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
               <div className="flex flex-col items-center justify-center w-[300px] rounded-lg">
                 <div className="flex flex-col items-center">
                   {/* UFC/Aviator Logo */}
-                  <img src="/aviator/aviator-brand.svg" alt="UFC" />
+                  <img src="/aviator-brand.svg" alt="UFC" />
                   {/* Progress Bar */}
                   <div className="mt-4 h-2 bg-gray-700 rounded w-[250px]">
                     <div

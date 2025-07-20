@@ -166,7 +166,7 @@ const AppStage = ({
   const planeFrames = useMemo(
     () =>
       Array.from({ length: 8 }, (_, i) =>
-        Texture.from(`/aviator/plane/plane-${i + 1}.png`)
+        Texture.from(`/plane/plane-${i + 1}.png`)
       ),
     []
   );

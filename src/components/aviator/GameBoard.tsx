@@ -47,7 +47,7 @@ function randomAvatar(seed: string) {
 
 const GameBoard = ({ bet6 }: { bet6: string[] }) => {
   const { aviatorState, setAviatorState } = useAviator();
-  console.log("aviatorState ::", aviatorState);
+  console.log("bet6 ::", bet6);
   const [autoPlayingIndex, setAutoPlayingIndex] = useState(0);
   const [snackState, setSnackState] = useState({
     open: false,
@@ -569,16 +569,6 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
           />
         </div>
         <div className="flex flex-col w-full" ref={footer_ref}>
-          {/* Betting status indicator */}
-          <div className="text-center mb-2">
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-bold ${
-                allowedBet ? "bg-green-600 text-white" : "bg-red-600 text-white"
-              }`}
-            >
-              {allowedBet ? "BETTING ENABLED" : "BETTING DISABLED"}
-            </span>
-          </div>
           <div
             className={`grid grid-cols-1 gap-2 relative ${
               betButtonCount === 1 ? "" : "lg:grid-cols-2"
@@ -608,6 +598,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                       : "border border-orange-500"
                     : ""
                 } ${i === 1 && betButtonCount === 1 ? "hidden" : ""}`}
+                style={{ background: "#1b1c1d" }}
               >
                 <BetAutoSwitch
                   disabled={aviatorState.RemainedAutoPlayCount[i] > 0}
@@ -656,7 +647,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                         <div className="absolute top-[2px] h-2/3 w-1/6 bg-white" />
                       </button>
                     </div>
-                    <div className="flex flex-wrap justify-between gap-1 w-full h-[40px] 3xl:h-[78px]">
+                    <div className="grid grid-cols-2 gap-1 w-full h-[40px] 3xl:h-[78px]">
                       {bet6.map((item, j) => (
                         <button
                           disabled={
@@ -664,7 +655,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                           }
                           key={j}
                           onClick={() => _setBetValue(`${item}`, i)}
-                          className="flex justify-center items-center bg-[#171717] rounded-lg gap-[2px] w-[28px] lg:w-[40px] h-[17px] 3xl:w-20 3xl:h-9 text-[13px] 3xl:text-[26px]"
+                          className="flex justify-center items-center bg-[#171717] rounded-lg gap-[2px] w-full h-[17px] 3xl:h-9 text-[13px] 3xl:text-[26px]"
                         >
                           {item}
                         </button>
@@ -714,12 +705,12 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                     <button
                       onClick={() => handleBet(i)}
                       disabled={!allowedBet || betPlaceStatus[i] !== "none"}
-                      className={`disabled:opacity-30 flex flex-col min-w-[120px] lg:min-w-[160px] h-[72px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-gradient-to-b from-[#E59407] to-[#412900]  justify-center items-center font-bold border border-[#FFB432]/50 hover:opacity-80`}
+                      className={`disabled:opacity-30 flex flex-col min-w-[120px] lg:min-w-[180px] h-[72px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-[#28a909] justify-center items-center border border-white hover:opacity-80`}
                     >
-                      <h4 className="text-[16px] 3xl:text-[42px] leading-[20px] 3xl:leading-[42px] uppercase">
+                      <p className="text-[22px] 3xl:text-[42px] leading-[20px] 3xl:leading-[42px]">
                         Bet
-                      </h4>
-                      <h4 className="text-[20px]">{betValue[i]}</h4>
+                      </p>
+                      <p className="text-[22px]">{betValue[i]} USD</p>
                     </button>
                   )}
                 </div>

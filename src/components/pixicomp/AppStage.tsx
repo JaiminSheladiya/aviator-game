@@ -52,7 +52,7 @@ const AppStage = ({
 
   useTick((delta) => {
     if (game_anim_status === "ANIM_STARTED" && containerRef.current) {
-      containerRef.current.rotation += 0.005 * delta;
+      containerRef.current.rotation += 0.003 * delta;
     }
   });
 
@@ -224,13 +224,15 @@ const AppStage = ({
       >
         <Graphics draw={drawRadialSlices} />
       </Container>
-      <Sprite
-        filters={[colorMatrix]}
-        texture={gradTexture}
-        width={dimension.width - 40}
-        height={dimension.height - 40}
-        position={{ x: 40, y: 0 }}
-      />
+      {game_anim_status === "ANIM_STARTED" ? (
+        <Sprite
+          filters={[colorMatrix]}
+          texture={gradTexture}
+          width={dimension.width - 40}
+          height={dimension.height - 40}
+          position={{ x: 40, y: 0 }}
+        />
+      ) : null}
       <Graphics
         draw={(g) => {
           g.clear();

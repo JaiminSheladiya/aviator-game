@@ -304,6 +304,6 @@ export const getUTCTimefromUTCTime: (timeString: string) => Date = (
 export const doDelay = (sec: number) =>
   new Promise((resolve) => setTimeout(resolve, sec));
 export const initBet6 = JSON.parse(
-  localStorage.getItem(`bet6`) || '["100","200","300","400","500","600"]'
+  localStorage.getItem(`bet6`) || '["100","200","300","400"]'
 );
 export const webpORpng = utils.isWebGLSupported() ? "webp" : "png";

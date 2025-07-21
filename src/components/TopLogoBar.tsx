@@ -10,156 +10,156 @@ import {
   testMobile,
 } from "../utils";
 import { useAviator } from "../store/aviator";
-// import HeaderMenu from "./HeaderMenu";
-const HeaderMenu = ({
-  loaded,
-  scaleFactor,
-  visible,
-  setVisible,
-  maxH,
-  openSettingModal,
-  openHistoryModal,
-  openRuleDialog,
-}: {
-  loaded: boolean;
-  scaleFactor: number;
-  visible: boolean;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  maxH: number;
-  openSettingModal: () => void;
-  openHistoryModal: () => void;
-  openRuleDialog: () => void;
-}) => {
-  const { aviatorState, setAviatorState } = useAviator();
+import HeaderMenu from "./HeaderMenu";
+// const HeaderMenu = ({
+//   loaded,
+//   scaleFactor,
+//   visible,
+//   setVisible,
+//   maxH,
+//   openSettingModal,
+//   openHistoryModal,
+//   openRuleDialog,
+// }: {
+//   loaded: boolean;
+//   scaleFactor: number;
+//   visible: boolean;
+//   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+//   maxH: number;
+//   openSettingModal: () => void;
+//   openHistoryModal: () => void;
+//   openRuleDialog: () => void;
+// }) => {
+//   const { aviatorState, setAviatorState } = useAviator();
 
-  const handleVolumeChange = (_: Event, newValue: number | number[]) => {
-    setAviatorState((prev) => ({ ...prev, vol: newValue as number }));
-  };
+//   const handleVolumeChange = (_: Event, newValue: number | number[]) => {
+//     setAviatorState((prev) => ({ ...prev, vol: newValue as number }));
+//   };
 
-  return (
-    <div
-      className="menu-wrapper w-80 absolute right-0 top-[100%] z-20 p-1 pr-0 origin-top-right overflow-auto"
-      style={{
-        display: visible ? "block" : "none",
-        scale: `${scaleFactor * 0.035}`,
-        maxHeight: maxH / (Math.max(scaleFactor, 0.1) * 0.035),
-      }}
-    >
-      <div className="menu flex flex-col  w-full h-full bg-[#3E3E43] gap-[2px] rounded-md overflow-hidden">
-        <div className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 ">
-          <div className="flex items-center gap-2 ">
-            <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span>Music</span>
-          </div>
-          <SwitchButton
-            checked={aviatorState.musicChecked}
-            onChange={(_, checked) =>
-              setAviatorState((prev) => ({ ...prev, musicChecked: checked }))
-            }
-            disabled={false}
-          />
-        </div>
-        <div className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 ">
-          <div className="flex items-center gap-2 ">
-            <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-            </div>
-            <span>Sound FX</span>
-          </div>
-          <SwitchButton
-            checked={aviatorState.fxChecked}
-            onChange={(_, checked) =>
-              setAviatorState((prev) => ({ ...prev, fxChecked: checked }))
-            }
-            disabled={false}
-          />
-        </div>
-        <div className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 ">
-          <div className="flex items-center gap-2 ">
-            <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
-              <div className="w-3 h-2 bg-white rounded-full"></div>
-            </div>
-            <span>Volume</span>
-          </div>
-          <Slider
-            onChange={handleVolumeChange}
-            value={aviatorState.vol}
-            sx={{
-              width: "160px",
-              color: "#EFAC01",
-              "& .MuiSlider-track": {
-                border: "none",
-              },
-              "& .MuiSlider-rail": {
-                opacity: 1,
-                backgroundColor: "#3E3E43",
-              },
-              "& .MuiSlider-thumb": {
-                width: 18,
-                height: 18,
-                backgroundColor: "#fff",
-                "&:before": {
-                  boxShadow: "0 4px 8px rgba(0,0,0,0.4)",
-                },
-                "&:hover, &.Mui-focusVisible, &.Mui-active": {
-                  boxShadow: "none",
-                },
-              },
-            }}
-            aria-label="Volume"
-            max={100}
-            min={0}
-          />
-        </div>
-        <div className="h-1" />
-        <div
-          onClick={() => {
-            setVisible(false);
-            openRuleDialog();
-          }}
-          className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 cursor-pointer"
-        >
-          <div className="flex items-center gap-2 ">
-            <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span>Game Rules</span>
-          </div>
-        </div>
-        <div
-          onClick={() => {
-            setVisible(false);
-            openHistoryModal();
-          }}
-          className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 cursor-pointer"
-        >
-          <div className="flex items-center gap-2 ">
-            <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span>My Bet History</span>
-          </div>
-        </div>
-        <div
-          onClick={() => {
-            setVisible(false);
-            openSettingModal();
-          }}
-          className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 cursor-pointer"
-        >
-          <div className="flex items-center gap-2 ">
-            <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-            <span>Chips Settings</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div
+//       className="menu-wrapper w-80 absolute right-0 top-[100%] z-20 p-1 pr-0 origin-top-right overflow-auto"
+//       style={{
+//         display: visible ? "block" : "none",
+//         scale: `${scaleFactor * 0.035}`,
+//         maxHeight: maxH / (Math.max(scaleFactor, 0.1) * 0.035),
+//       }}
+//     >
+//       <div className="menu flex flex-col  w-full h-full bg-[#3E3E43] gap-[2px] rounded-md overflow-hidden">
+//         <div className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 ">
+//           <div className="flex items-center gap-2 ">
+//             <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
+//               <div className="w-3 h-3 bg-white rounded-full"></div>
+//             </div>
+//             <span>Music</span>
+//           </div>
+//           <SwitchButton
+//             checked={aviatorState.musicChecked}
+//             onChange={(_, checked) =>
+//               setAviatorState((prev) => ({ ...prev, musicChecked: checked }))
+//             }
+//             disabled={false}
+//           />
+//         </div>
+//         <div className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 ">
+//           <div className="flex items-center gap-2 ">
+//             <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
+//               <div className="w-2 h-2 bg-white rounded-full"></div>
+//             </div>
+//             <span>Sound FX</span>
+//           </div>
+//           <SwitchButton
+//             checked={aviatorState.fxChecked}
+//             onChange={(_, checked) =>
+//               setAviatorState((prev) => ({ ...prev, fxChecked: checked }))
+//             }
+//             disabled={false}
+//           />
+//         </div>
+//         <div className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 ">
+//           <div className="flex items-center gap-2 ">
+//             <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
+//               <div className="w-3 h-2 bg-white rounded-full"></div>
+//             </div>
+//             <span>Volume</span>
+//           </div>
+//           <Slider
+//             onChange={handleVolumeChange}
+//             value={aviatorState.vol}
+//             sx={{
+//               width: "160px",
+//               color: "#EFAC01",
+//               "& .MuiSlider-track": {
+//                 border: "none",
+//               },
+//               "& .MuiSlider-rail": {
+//                 opacity: 1,
+//                 backgroundColor: "#3E3E43",
+//               },
+//               "& .MuiSlider-thumb": {
+//                 width: 18,
+//                 height: 18,
+//                 backgroundColor: "#fff",
+//                 "&:before": {
+//                   boxShadow: "0 4px 8px rgba(0,0,0,0.4)",
+//                 },
+//                 "&:hover, &.Mui-focusVisible, &.Mui-active": {
+//                   boxShadow: "none",
+//                 },
+//               },
+//             }}
+//             aria-label="Volume"
+//             max={100}
+//             min={0}
+//           />
+//         </div>
+//         <div className="h-1" />
+//         <div
+//           onClick={() => {
+//             setVisible(false);
+//             openRuleDialog();
+//           }}
+//           className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 cursor-pointer"
+//         >
+//           <div className="flex items-center gap-2 ">
+//             <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
+//               <div className="w-3 h-3 bg-white rounded-full"></div>
+//             </div>
+//             <span>Game Rules</span>
+//           </div>
+//         </div>
+//         <div
+//           onClick={() => {
+//             setVisible(false);
+//             openHistoryModal();
+//           }}
+//           className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 cursor-pointer"
+//         >
+//           <div className="flex items-center gap-2 ">
+//             <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
+//               <div className="w-3 h-3 bg-white rounded-full"></div>
+//             </div>
+//             <span>My Bet History</span>
+//           </div>
+//         </div>
+//         <div
+//           onClick={() => {
+//             setVisible(false);
+//             openSettingModal();
+//           }}
+//           className="flex justify-between items-center px-3 py-[8px] bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all ease-in-out duration-500 cursor-pointer"
+//         >
+//           <div className="flex items-center gap-2 ">
+//             <div className="w-5 h-5 bg-[#E59407] rounded-full flex items-center justify-center">
+//               <div className="w-3 h-3 bg-white rounded-full"></div>
+//             </div>
+//             <span>Chips Settings</span>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 const TopLogoBar = ({
   loaded,
@@ -225,7 +225,7 @@ const TopLogoBar = ({
               <span className="text-white font-bold">Gaming</span>
             </div> */}
             <img
-              src="/aviator-logo.svg"
+              src="/vimaan-logo.png"
               alt="Aviator Logo"
               className="w-8 h-8 object-contain"
               style={{ transform: `scale(3)`, marginLeft: "2rem" }}
@@ -305,7 +305,7 @@ const TopLogoBar = ({
               height: "calc(100vh - 50px)",
             }}
           ></div>
-          <HeaderMenu
+          {/* <HeaderMenu
             loaded={loaded}
             scaleFactor={w_factor / scale}
             visible={showMenu}
@@ -314,7 +314,9 @@ const TopLogoBar = ({
             openSettingModal={() => setSettingModalOpen(true)}
             openHistoryModal={() => setHistoryModalOpen(true)}
             openRuleDialog={() => setRuleModalOpen(true)}
-          />
+          /> */}
+
+          <HeaderMenu isOpen={showMenu} setIsOpen={setShowMenu} />
         </div>
       }
     </>

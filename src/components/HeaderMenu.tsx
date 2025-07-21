@@ -1,135 +1,246 @@
-// import React from "react";
-// import { Switch, Slider } from "@mui/material";
-// import {
-//   FaRegStar,
-//   FaHistory,
-//   FaGamepad,
-//   FaQuestionCircle,
-//   FaBook,
-//   FaBalanceScale,
-//   FaDoorOpen,
-//   FaUserCircle,
-// } from "react-icons/fa";
+import React, { useState } from "react";
+import {
+  Volume2,
+  Music,
+  Zap,
+  Star,
+  RotateCcw,
+  Camera,
+  HelpCircle,
+  FileText,
+  Shield,
+  Grid3X3,
+  Home,
+  User,
+} from "lucide-react";
+import FreeBetsModal from "./modals/FreeBetsModal";
+import MyBetHistoryModal from "./modals/MyBetHistoryModal";
+import GameLimitsModal from "./modals/GameLimitsModal";
+import ProvablyFairModal from "./modals/ProvablyFairModal";
+import HowToPlayModal from "./modals/HowToPlayModal";
 
-// const DummyIcon = ({ icon: Icon }: { icon: any }) => (
-//   <Icon className="text-white text-base" />
-// );
+interface MenuItem {
+  icon: React.ReactElement;
+  label: string;
+  hasToggle?: boolean;
+  isEnabled?: boolean;
+  onToggle?: () => void;
+}
 
-// const HeaderMenu = ({
-//   loaded,
-//   scaleFactor,
-//   visible,
-//   setVisible,
-//   maxH,
-//   openSettingModal,
-//   openHistoryModal,
-//   openRuleDialog,
-// }: {
-//   loaded: boolean;
-//   scaleFactor: number;
-//   visible: boolean;
-//   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-//   maxH: number;
-//   openSettingModal: () => void;
-//   openHistoryModal: () => void;
-//   openRuleDialog: () => void;
-// }) => {
-//   const [musicChecked, setMusicChecked] = React.useState(true);
-//   const [soundChecked, setSoundChecked] = React.useState(false);
-//   const [animationChecked, setAnimationChecked] = React.useState(false);
+interface RegularMenuItem {
+  icon: React.ReactElement;
+  label: string;
+}
 
-//   return (
-//     <div
-//       className="absolute right-0 top-[100%] w-80 z-50 rounded-lg overflow-hidden shadow-lg transition-all"
-//       style={{
-//         display: visible ? "block" : "none",
-//         scale: `${scaleFactor * 0.035}`,
-//         maxHeight: maxH / (Math.max(scaleFactor, 0.1) * 0.035),
-//       }}
-//     >
-//       <div className="bg-[#3E3E43] text-white flex flex-col gap-[2px]">
-//         {/* Avatar + Username */}
-//         <div className="flex justify-between items-center px-4 py-3 bg-[#2F3033]">
-//           <div className="flex items-center gap-3">
-//             <img
-//               src="/aviator-logo.svg"
-//               alt="avatar"
-//               className="w-10 h-10 rounded-full"
-//             />
-//             <div className="font-semibold">demo_64510</div>
-//           </div>
-//           <button className="text-sm text-gray-400 hover:text-white">
-//             Change Avatar
-//           </button>
-//         </div>
+const DropdownComponent: React.FC<{
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}> = ({ isOpen, setIsOpen }) => {
+  //   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(false); // Disabled in image
+  const [musicEnabled, setMusicEnabled] = useState<boolean>(true); // Enabled in image
+  const [animationEnabled, setAnimationEnabled] = useState<boolean>(true); // Enabled in image
+  const [showFreeBetsModal, setShowFreeBetsModal] = useState(false);
+  const [showBetHistory, setShowBetHistory] = useState(false);
+  const [showGameLimitsModal, setShowGameLimitsModal] = useState(false);
+    const [showProvablyFairModal, setShowProvablyFairModal] = useState(false);
+    const [showHowToPlayModal, setShowHowToPlayModal] = useState(false);
+  const toggleDropdown = (): void => {
+    setIsOpen(!isOpen);
+  };
 
-//         {/* Toggle Options */}
-//         {[
-//           { label: "Sound", state: soundChecked, setState: setSoundChecked },
-//           { label: "Music", state: musicChecked, setState: setMusicChecked },
-//           {
-//             label: "Animation",
-//             state: animationChecked,
-//             setState: setAnimationChecked,
-//           },
-//         ].map((item) => (
-//           <div
-//             key={item.label}
-//             className="flex justify-between items-center px-4 py-3 bg-[#1B1C1D] hover:bg-[#2B1C1D] transition-all"
-//           >
-//             <span>{item.label}</span>
-//             <Switch
-//               size="small"
-//               checked={item.state}
-//               onChange={() => item.setState(!item.state)}
-//               sx={{
-//                 "& .MuiSwitch-switchBase.Mui-checked": {
-//                   color: "#EFAC01",
-//                 },
-//                 "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-//                   backgroundColor: "#EFAC01",
-//                 },
-//               }}
-//             />
-//           </div>
-//         ))}
+  const menuItems: MenuItem[] = [
+    {
+      icon: <Volume2 size={16} />,
+      label: "Sound",
+      hasToggle: true,
+      isEnabled: soundEnabled,
+      onToggle: () => setSoundEnabled(!soundEnabled),
+    },
+    {
+      icon: <Music size={16} />,
+      label: "Music",
+      hasToggle: true,
+      isEnabled: musicEnabled,
+      onToggle: () => setMusicEnabled(!musicEnabled),
+    },
+    {
+      icon: <Zap size={16} />,
+      label: "Animation",
+      hasToggle: true,
+      isEnabled: animationEnabled,
+      onToggle: () => setAnimationEnabled(!animationEnabled),
+    },
+  ];
 
-//         {/* Menu Items */}
-//         {[
-//           { label: "Free Bets", icon: FaRegStar },
-//           {
-//             label: "My Bet History",
-//             icon: FaHistory,
-//             onClick: openHistoryModal,
-//           },
-//           { label: "Game Limits", icon: FaGamepad },
-//           { label: "How To Play", icon: FaQuestionCircle },
-//           { label: "Game Rules", icon: FaBook, onClick: openRuleDialog },
-//           { label: "Provably Fair Settings", icon: FaBalanceScale },
-//           { label: "Game Room: Room #2", icon: FaDoorOpen },
-//         ].map(({ label, icon, onClick }) => (
-//           <div
-//             key={label}
-//             onClick={() => {
-//               setVisible(false);
-//               onClick?.();
-//             }}
-//             className="flex items-center justify-between px-4 py-3 bg-[#1B1C1D] hover:bg-[#2B1C1D] cursor-pointer transition-all"
-//           >
-//             <div className="flex items-center gap-2">
-//               <DummyIcon icon={icon} />
-//               <span>{label}</span>
-//             </div>
-//           </div>
-//         ))}
+  const regularMenuItems: (RegularMenuItem & { onClick?: () => void })[] = [
+    {
+      icon: <Star size={16} />,
+      label: "Free Bets",
+      onClick: () => setShowFreeBetsModal(true),
+    },
+    {
+      icon: <RotateCcw size={16} />,
+      label: "My Bet History",
+      onClick: () => setShowBetHistory(true),
+    },
+    {
+      icon: <Camera size={16} />,
+      label: "Game Limits",
+      onClick: () => setShowGameLimitsModal(true),
+    },
+    { icon: <HelpCircle size={16} />, label: "How To Play" , onClick : () => setShowHowToPlayModal(true)},
+    { icon: <FileText size={16} />, label: "Game Rules" },
+    { icon: <Shield size={16} />, label: "Provably Fair Settings" , onClick : () => setShowProvablyFairModal(true)},
+    { icon: <Grid3X3 size={16} />, label: "Game Room: Room #1" },
+  ];
 
-//         {/* Footer */}
-//         <div className="text-center py-2 text-sm text-gray-400 bg-[#2F3033]">
-//           Home
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
+  return (
+    // <div className="bg-gray-900 p-8 min-h-screen flex items-start justify-center">
+    <div className="relative">
+      {/* Trigger Button */}
+      {/* <button
+          onClick={toggleDropdown}
+          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+        >
+          {isOpen ? "Close Menu" : "Open Menu"}
+        </button> */}
 
-// export default HeaderMenu;
+      {/* Dropdown Menu */}
+      {isOpen && (
+        <div className="absolute top-full right-2 mt-2 w-80 bg-[#1b1c1d] border border-gray-700 rounded-lg shadow-2xl z-50">
+          {/* User section */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-700">
+            <div className="flex items-center space-x-3">
+              <div className="relative w-10 h-10">
+                <div className="w-10 h-10 bg-yellow-600 rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-yellow-400 rounded-full relative">
+                    <div className="absolute inset-0 bg-yellow-300 rounded-full transform rotate-45 origin-center w-3 h-3 top-1.5 left-1.5"></div>
+                  </div>
+                </div>
+              </div>
+              <span
+                className="text-white font-medium text-base"
+                style={{ fontSize: "14px" }}
+              >
+                demo_31525
+              </span>
+            </div>
+            <button className="flex items-center border border-[#2c2d30] rounded-full px-2 py-2 text-gray-400 hover:text-gray-300 transition-colors">
+              <div className="border border-[#2c2d30] rounded-full p-1">
+                <User size={18} />
+              </div>
+              <span
+                className="ml-2 text-sm leading-[1rem] pr-2"
+                style={{ fontSize: "12px" }}
+              >
+                Change
+                <br />
+                Avatar
+              </span>
+            </button>
+          </div>
+
+          {/* Toggle items */}
+          <div className="border-b border-gray-700">
+            {menuItems.map((item, index) => (
+              <div
+                key={index}
+                className={`flex items-center justify-between px-4 py-2.5 hover:bg-gray-750 transition-colors cursor-pointer ${
+                  index !== menuItems.length - 1 ? "border-b" : ""
+                }`}
+                style={{ borderColor: "#2c2d30" }}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="text-gray-400 w-4">{item.icon}</div>
+                  <span
+                    className="text-white font-normal text-base"
+                    style={{ fontSize: "14px" }}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+
+                <button
+                  onClick={item.onToggle}
+                  className={`w-12 h-6 rounded-full transition-colors relative ${
+                    item.isEnabled ? "bg-gray-400" : "bg-gray-700"
+                  }`}
+                >
+                  <div
+                    className={`absolute w-5 h-5 rounded-full transition-transform top-0.5 ${
+                      item.isEnabled
+                        ? "translate-x-6 bg-gray-200"
+                        : "translate-x-0.5 bg-gray-600"
+                    }`}
+                  />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Spacer div */}
+          <div className="h-4 bg-[#2c2d30]"></div>
+
+          {/* Regular menu items */}
+          <div>
+            {regularMenuItems.map((item, index) => (
+              <div
+                key={index}
+                onClick={item.onClick}
+                className={`flex items-center px-4 py-2.5 hover:bg-gray-750 transition-colors cursor-pointer ${
+                  index !== regularMenuItems.length - 1 ? "border-b" : ""
+                }`}
+                style={{ borderColor: "#2c2d30" }}
+              >
+                <div className="text-gray-400 w-4 mr-3">{item.icon}</div>
+                <span
+                  className="text-white font-normal text-base"
+                  style={{ fontSize: "14px" }}
+                >
+                  {item.label}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Home section with different background */}
+          <div className="bg-gray-750 rounded-b-lg">
+            <div className="flex items-center justify-center px-4 py-3 cursor-pointer bg-[#2c2d30] rounded-b-lg transition-colors">
+              <Home size={16} className="text-gray-400 mr-2" />
+              <span
+                className="text-gray-400 font-normal text-base"
+                style={{ fontSize: "14px" }}
+              >
+                Home
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+      <FreeBetsModal
+        isOpen={showFreeBetsModal}
+        onClose={() => setShowFreeBetsModal(false)}
+      />
+      <MyBetHistoryModal
+        isOpen={showBetHistory}
+        onClose={() => setShowBetHistory(false)}
+      />
+      <GameLimitsModal
+        isOpen={showGameLimitsModal}
+        onClose={() => setShowGameLimitsModal(false)}
+      />
+      <ProvablyFairModal
+        isOpen={showProvablyFairModal}
+        onClose={() => setShowProvablyFairModal(false)}
+      />
+      <HowToPlayModal
+        isOpen={showHowToPlayModal}
+        onClose={() => setShowHowToPlayModal(false)}
+      />
+    </div>
+    // </div>
+  );
+};
+
+export default DropdownComponent;

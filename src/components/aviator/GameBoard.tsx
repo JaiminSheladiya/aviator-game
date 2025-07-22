@@ -353,13 +353,18 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
       pixi_ref.current?.clientWidth || 0
     );
 
-    const height = Math.max(
-      150,
-      window.innerHeight -
-        (footer_ref.current?.clientHeight || 0) -
-        150 -
-        (width > 1392 ? 0 : 10)
-    );
+    // Mobile check: set height to 240px if on mobile
+    const isMobile = window.innerWidth < 600;
+    const height = isMobile
+      ? 240
+      : Math.max(
+          150,
+          window.innerHeight -
+            (footer_ref.current?.clientHeight || 0) -
+            150 -
+            (width > 1392 ? 0 : 10)
+        );
+
     console.log("width, height: ", { width, height });
     setPixiDimension({ width, height });
     setAviatorState((prev) => {
@@ -608,19 +613,14 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
           </div>
         </div>
         <div
+          className="mt-0 sm:mt-4 text-center text-sm font-bold w-full rounded-t-[20px] border border-[#e59407]"
           style={{
-            marginTop: "1rem",
             background: "rgba(229, 148, 7, .8)",
-            textAlign: "center",
-            fontSize: "14px",
-            fontWeight: 700,
-            width: "100%",
-            borderRadius: "20px 20px 0 0",
-            border: "1px solid #e59407",
           }}
         >
           FUN MODE
         </div>
+
         <div
           className={`flex justify-center w-full relative`}
           style={{ height: pixiDimension.height }}
@@ -726,8 +726,8 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                       }),
                   }}
                 />
-                <div className="flex gap-2">
-                  <div className="flex flex-col w-[100px] lg:w-[130px] 3xl:w-[260px] h-full">
+                <div className="w-full md:w-auto flex gap-2">
+                  <div className="flex flex-col w-[42%] lg:w-[165px] 3xl:w-[260px] h-full">
                     <div
                       className="flex justify-between items-center text-[10px] 3xl:text-xl w-full h-[27px] 3xl:h-[54px] bg-[#171717] rounded-full px-2"
                       style={{
@@ -824,7 +824,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                     <button
                       onClick={() => handleBet(i)}
                       disabled={!allowedBet || betPlaceStatus[i] !== "none"}
-                      className={`disabled:opacity-30 flex flex-col min-w-[120px] lg:min-w-[180px] h-[90px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-[#28a909] justify-center items-center border border-white hover:opacity-80`}
+                      className={`disabled:opacity-30 flex flex-col min-w-[58%] lg:min-w-[180px] h-[90px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-[#28a909] justify-center items-center border border-white hover:opacity-80`}
                     >
                       <p className="text-[22px] 3xl:text-[42px] leading-[20px] 3xl:leading-[42px]">
                         Bet

@@ -228,7 +228,7 @@ const TopLogoBar = ({
               src="/vimaan-logo.png"
               alt="Aviator Logo"
               className="w-8 h-8 object-contain"
-              style={{ transform: `scale(3)`, marginLeft: "2rem" }}
+              style={{ transform: `scale(2.5)`, marginLeft: "2rem" }}
             />
             <div className="flex " style={{ gap: (w_factor / scale) * 0.3 }}>
               <div

@@ -140,7 +140,7 @@ const Tab = ({
   onClick: () => void;
 }) => (
   <button
-    className={`px-6 py-1 rounded-full text-sm focus:outline-none transition-all ${
+    className={`px-6 py-1 rounded-full text-sm focus:outline-none w-[100%] transition-all ${
       active ? "bg-[#232325] text-gray-400" : "text-gray-400"
     }`}
     style={{ marginRight: 8, marginLeft: 0 }}

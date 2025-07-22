@@ -648,8 +648,18 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
             >
               <div className="flex flex-col items-center justify-center w-[300px] rounded-lg">
                 <div className="flex flex-col items-center">
-                  {/* UFC/Aviator Logo */}
-                  <img src="/aviator-brand.svg" alt="UFC" />
+                  <div className="flex items-center gap-4">
+                    <img src="/vimaan-logo.png" alt="vimaan" className="h-10" />
+
+                    <div className="w-px h-10 bg-gray-300" />
+
+                    <img
+                      src="/vimaan-plane.png"
+                      alt="vimaan plane"
+                      className="h-10 rotate-[340deg]"
+                    />
+                  </div>
+
                   {/* Progress Bar */}
                   <div className="mt-4 h-2 bg-gray-700 rounded w-[250px]">
                     <div

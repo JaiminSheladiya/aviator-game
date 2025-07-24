@@ -434,8 +434,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
             ...prev,
             game_anim_status: "ANIM_STARTED",
           }));
-          // playSound("take");
-
+          if (aviatorState.fxChecked) playSound("take");
           // Simulate payout increase
           let payout = 1.0;
           const payoutInterval = setInterval(() => {
@@ -474,6 +473,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                 setCrashHistory((prev) => [`${payout.toFixed(2)}x`, ...prev]);
                 setCrashAnim(true);
                 if (aviatorState.fxChecked) playCrashSound();
+                if (aviatorState.fxChecked) playSound("flew");
                 setTimeout(() => setCrashAnim(false), 1000);
 
                 setAviatorState((prev) => ({
@@ -559,20 +559,14 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
     }
   }, [aviatorState.musicChecked, aviatorState.vol]);
 
-  // useEffect(() => {
-  //   console.log("aviatorState.fxChecked", aviatorState.fxChecked);
-
-  //   if (aviatorState.game_anim_status === "ANIM_CRASHED" && aviatorState.fxChecked) {
-  //     if (!crashAudioRef.current) {
-  //       crashAudioRef.current = new Audio("/assets/sounds/sprite_audio.mp3");
-  //       crashAudioRef.current.volume = 1.0;
-  //       crashAudioRef.current.play();
-  //       crashAudioRef.current.onended = () => {
-  //         crashAudioRef.current = null;
-  //       };
-  //     }
-  //   }
-  // }, [aviatorState.game_anim_status, aviatorState.fxChecked]);
+  useEffect(() => {
+    // Stop any currently playing crash sound if FX is turned off
+    if (!aviatorState.fxChecked && crashAudioRef.current) {
+      crashAudioRef.current.pause();
+      crashAudioRef.current.currentTime = 0;
+      crashAudioRef.current = null;
+    }
+  }, [aviatorState.fxChecked]);
 
   const playCrashSound = () => {
     // Play sprite_audio.mp3 when game_anim_status is ANIM_CRASHED

@@ -18,6 +18,7 @@ import MyBetHistoryModal from "./modals/MyBetHistoryModal";
 import GameLimitsModal from "./modals/GameLimitsModal";
 import ProvablyFairModal from "./modals/ProvablyFairModal";
 import HowToPlayModal from "./modals/HowToPlayModal";
+import { useAviator } from "../store/aviator";
 
 interface MenuItem {
   icon: React.ReactElement;
@@ -36,15 +37,17 @@ const DropdownComponent: React.FC<{
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }> = ({ isOpen, setIsOpen }) => {
-  //   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(false); // Disabled in image
-  const [musicEnabled, setMusicEnabled] = useState<boolean>(true); // Enabled in image
+  // Use global aviatorState for sound/music toggles
+  const { aviatorState, setAviatorState } = useAviator();
+  // Remove local state for sound/music
+  // const [soundEnabled, setSoundEnabled] = useState<boolean>(false); // Disabled in image
+  // const [musicEnabled, setMusicEnabled] = useState<boolean>(true); // Enabled in image
   const [animationEnabled, setAnimationEnabled] = useState<boolean>(true); // Enabled in image
   const [showFreeBetsModal, setShowFreeBetsModal] = useState(false);
   const [showBetHistory, setShowBetHistory] = useState(false);
   const [showGameLimitsModal, setShowGameLimitsModal] = useState(false);
-    const [showProvablyFairModal, setShowProvablyFairModal] = useState(false);
-    const [showHowToPlayModal, setShowHowToPlayModal] = useState(false);
+  const [showProvablyFairModal, setShowProvablyFairModal] = useState(false);
+  const [showHowToPlayModal, setShowHowToPlayModal] = useState(false);
   const toggleDropdown = (): void => {
     setIsOpen(!isOpen);
   };
@@ -54,15 +57,20 @@ const DropdownComponent: React.FC<{
       icon: <Volume2 size={16} />,
       label: "Sound",
       hasToggle: true,
-      isEnabled: soundEnabled,
-      onToggle: () => setSoundEnabled(!soundEnabled),
+      isEnabled: aviatorState.fxChecked,
+      onToggle: () =>
+        setAviatorState((prev) => ({ ...prev, fxChecked: !prev.fxChecked })),
     },
     {
       icon: <Music size={16} />,
       label: "Music",
       hasToggle: true,
-      isEnabled: musicEnabled,
-      onToggle: () => setMusicEnabled(!musicEnabled),
+      isEnabled: aviatorState.musicChecked,
+      onToggle: () =>
+        setAviatorState((prev) => ({
+          ...prev,
+          musicChecked: !prev.musicChecked,
+        })),
     },
     {
       icon: <Zap size={16} />,
@@ -89,9 +97,17 @@ const DropdownComponent: React.FC<{
       label: "Game Limits",
       onClick: () => setShowGameLimitsModal(true),
     },
-    { icon: <HelpCircle size={16} />, label: "How To Play" , onClick : () => setShowHowToPlayModal(true)},
+    {
+      icon: <HelpCircle size={16} />,
+      label: "How To Play",
+      onClick: () => setShowHowToPlayModal(true),
+    },
     { icon: <FileText size={16} />, label: "Game Rules" },
-    { icon: <Shield size={16} />, label: "Provably Fair Settings" , onClick : () => setShowProvablyFairModal(true)},
+    {
+      icon: <Shield size={16} />,
+      label: "Provably Fair Settings",
+      onClick: () => setShowProvablyFairModal(true),
+    },
     { icon: <Grid3X3 size={16} />, label: "Game Room: Room #1" },
   ];
 

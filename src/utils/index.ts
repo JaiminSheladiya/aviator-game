@@ -55,7 +55,6 @@ export const curveFunction = (x: number, dimension: dimensionType) => {
 //   }
 // };
 
-
 export const renderCurve = (g: Graphics, _dimension: dimensionType) => {
   const dimension = { width: _dimension.width, height: _dimension.height - 40 };
   const xAxis = Array.from(
@@ -88,8 +87,6 @@ export const renderCurve = (g: Graphics, _dimension: dimensionType) => {
     g.lineTo(points[i].x, points[i].y);
   }
 };
-
-
 
 export const _drawOuterBoundery = (g: Graphics, dimension: dimensionType) => {
   g.clear();
@@ -151,18 +148,11 @@ export const _drawBar =
   };
 
 export const playSound = (type: "bg" | "flew" | "win" | "take") => {
-  // let status = "";
-  // switch (type) {
-  //   case "bg":
-  //     status = localStorage.getItem("music") || "true";
-  //     break;
-  //   case "flew":
-  //   case "win":
-  //   case "take":
-  //     status = localStorage.getItem("fx") || "true";
-  //     break;
-  // }
-  // if (status === "true") sound.play(`${type}-sound`, { loop: type === "bg" });
+  // Actually play the sound using @pixi/sound
+  // Only play if the sound is loaded
+  if (sound.exists(`${type}-sound`)) {
+    sound.play(`${type}-sound`, { loop: type === "bg" });
+  }
 };
 export const stopSound = (type: "bg" | "flew" | "win" | "take") => {
   sound.stop(`${type}-sound`);

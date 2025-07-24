@@ -19,6 +19,7 @@ import GameLimitsModal from "./modals/GameLimitsModal";
 import ProvablyFairModal from "./modals/ProvablyFairModal";
 import HowToPlayModal from "./modals/HowToPlayModal";
 import { useAviator } from "../store/aviator";
+import ChangeAvatarModal from "./modals/ChangeAvatarModal";
 
 interface MenuItem {
   icon: React.ReactElement;
@@ -48,6 +49,10 @@ const DropdownComponent: React.FC<{
   const [showGameLimitsModal, setShowGameLimitsModal] = useState(false);
   const [showProvablyFairModal, setShowProvablyFairModal] = useState(false);
   const [showHowToPlayModal, setShowHowToPlayModal] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [selectedAvatarId, setSelectedAvatarId] = useState(1); // default avatar #1
+
+  const getAvatarUrl = (id: number) => `/avatars/av-${id}.png`;
   const toggleDropdown = (): void => {
     setIsOpen(!isOpen);
   };
@@ -129,11 +134,11 @@ const DropdownComponent: React.FC<{
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
             <div className="flex items-center space-x-3">
               <div className="relative w-10 h-10">
-                <div className="w-10 h-10 bg-yellow-600 rounded-full flex items-center justify-center">
-                  <div className="w-6 h-6 bg-yellow-400 rounded-full relative">
-                    <div className="absolute inset-0 bg-yellow-300 rounded-full transform rotate-45 origin-center w-3 h-3 top-1.5 left-1.5"></div>
-                  </div>
-                </div>
+                <img
+                  src={getAvatarUrl(selectedAvatarId)}
+                  alt="Current Avatar"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
               </div>
               <span
                 className="text-white font-medium text-base"
@@ -142,7 +147,10 @@ const DropdownComponent: React.FC<{
                 demo_31525
               </span>
             </div>
-            <button className="flex items-center border border-[#2c2d30] rounded-full px-2 py-2 text-gray-400 hover:text-gray-300 transition-colors">
+            <button
+              onClick={() => setShowAvatarModal(true)}
+              className="flex items-center border border-[#2c2d30] rounded-full px-2 py-2 text-gray-400 hover:text-gray-300 transition-colors"
+            >
               <div className="border border-[#2c2d30] rounded-full p-1">
                 <User size={18} />
               </div>
@@ -253,6 +261,12 @@ const DropdownComponent: React.FC<{
       <HowToPlayModal
         isOpen={showHowToPlayModal}
         onClose={() => setShowHowToPlayModal(false)}
+      />
+      <ChangeAvatarModal
+        isOpen={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+        selectedId={selectedAvatarId}
+        onSelect={(id) => setSelectedAvatarId(id)}
       />
     </div>
     // </div>

@@ -229,7 +229,7 @@ const DropdownComponent: React.FC<{
           </div>
 
           {/* Home section with different background */}
-          <div className="bg-gray-750 rounded-b-lg">
+          <div className="bg-gray-750 rounded-b-lg" onClick={()=>window.location.href = '/'}>
             <div className="flex items-center justify-center px-4 py-3 cursor-pointer bg-[#2c2d30] rounded-b-lg transition-colors">
               <Home size={16} className="text-gray-400 mr-2" />
               <span

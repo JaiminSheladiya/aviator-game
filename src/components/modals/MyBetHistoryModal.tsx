@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { X } from "lucide-react";
 
 interface Bet {
@@ -10,7 +10,9 @@ interface Bet {
   won: boolean;
 }
 
+// Expanded dummy data (more than 10)
 const dummyBets: Bet[] = [
+  // original 10
   {
     time: "00:56",
     date: "22-07-25",
@@ -85,6 +87,82 @@ const dummyBets: Bet[] = [
     cashout: 18.68,
     won: true,
   },
+  // 10 more dummy entries
+  {
+    time: "00:52",
+    date: "22-07-25",
+    amount: 10.0,
+    multiplier: "1.50x",
+    won: false,
+  },
+  {
+    time: "00:51",
+    date: "22-07-25",
+    amount: 15.5,
+    multiplier: "2.00x",
+    cashout: 31.0,
+    won: true,
+  },
+  {
+    time: "00:50",
+    date: "22-07-25",
+    amount: 11.1,
+    multiplier: "2.30x",
+    cashout: 25.5,
+    won: true,
+  },
+  {
+    time: "00:49",
+    date: "22-07-25",
+    amount: 7.2,
+    multiplier: "1.10x",
+    won: false,
+  },
+  {
+    time: "00:48",
+    date: "22-07-25",
+    amount: 9.9,
+    multiplier: "3.00x",
+    cashout: 29.7,
+    won: true,
+  },
+  {
+    time: "00:47",
+    date: "22-07-25",
+    amount: 6.6,
+    multiplier: "1.20x",
+    won: false,
+  },
+  {
+    time: "00:46",
+    date: "22-07-25",
+    amount: 13.3,
+    multiplier: "2.50x",
+    cashout: 33.25,
+    won: true,
+  },
+  {
+    time: "00:45",
+    date: "22-07-25",
+    amount: 5.5,
+    multiplier: "4.00x",
+    won: false,
+  },
+  {
+    time: "00:44",
+    date: "22-07-25",
+    amount: 14.2,
+    multiplier: "1.80x",
+    cashout: 25.56,
+    won: true,
+  },
+  {
+    time: "00:43",
+    date: "22-07-25",
+    amount: 12.5,
+    multiplier: "3.00x",
+    won: false,
+  },
 ];
 
 const MyBetHistoryModal = ({
@@ -94,6 +172,11 @@ const MyBetHistoryModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
+  const [visibleCount, setVisibleCount] = useState(10); // initial 10
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 10);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -119,21 +202,19 @@ const MyBetHistoryModal = ({
 
         {/* Bet List */}
         <div className="max-h-[360px] overflow-y-auto">
-          {dummyBets.map((bet, index) => (
+          {dummyBets.slice(0, visibleCount).map((bet, index) => (
             <div
               key={index}
               className={`px-6 py-2 flex justify-between items-center text-sm ${
                 bet.won ? "bg-green-800 bg-opacity-70" : "bg-[#1b1c1d]"
-              } ${index !== dummyBets.length - 1 ? "border-b" : ""}`}
+              } ${index !== visibleCount - 1 ? "border-b" : ""}`}
               style={{ borderColor: "#2c2d30" }}
             >
-              {/* Date */}
               <div className="w-[30%] text-gray-300 leading-tight">
                 <div>{bet.time}</div>
                 <div className="text-xs text-gray-500">{bet.date}</div>
               </div>
 
-              {/* Bet + X */}
               <div className="w-[30%] text-center font-medium">
                 <div className={`${bet.won ? "text-white" : "text-gray-300"}`}>
                   {bet.amount.toFixed(2)}
@@ -151,7 +232,6 @@ const MyBetHistoryModal = ({
                 </div>
               </div>
 
-              {/* Cashout */}
               <div className="w-[30%] text-right text-white text-sm">
                 {bet.cashout ? (
                   <span className="font-semibold">
@@ -159,19 +239,24 @@ const MyBetHistoryModal = ({
                   </span>
                 ) : (
                   <div className="text-green-400 flex justify-end items-center gap-1">
-                    ✅ {/* Replace with icon if needed */}
+                    ✅
                   </div>
                 )}
               </div>
             </div>
           ))}
-        </div>
 
-        {/* Load More Button */}
-        <div className="px-6 py-4 border-t border-[#2c2d30] bg-[#1b1c1d]">
-          <button className="w-full bg-[#2c2d30] text-gray-400 text-sm py-2 rounded-full hover:bg-[#3a3b3c] transition">
-            Load more
-          </button>
+          {/* Load More Button */}
+          {visibleCount < dummyBets.length && (
+            <div className="px-6 py-4 border-t border-[#2c2d30] bg-[#1b1c1d]">
+              <button
+                className="w-full bg-[#2c2d30] text-gray-400 text-sm py-2 rounded-full hover:bg-[#3a3b3c] transition"
+                onClick={handleLoadMore}
+              >
+                Load more
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

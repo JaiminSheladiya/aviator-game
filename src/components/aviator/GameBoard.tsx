@@ -684,7 +684,9 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                   {/* Progress Bar */}
                   <div className="mt-4 h-2 bg-gray-700 rounded w-[250px]">
                     <div
-                      className="h-2 bg-red-600 rounded transition-all duration-100"
+                      className={`h-2 bg-red-600 rounded ${
+                        progress > 0 ? "transition-all duration-100" : ""
+                      }`}
                       style={{ width: `${progress}%` }}
                     />
                   </div>

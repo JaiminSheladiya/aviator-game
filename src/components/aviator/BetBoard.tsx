@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { betBoardAllItemType } from "../../@types";
-import {getHistoryItemColor} from "../../utils"
+import { getHistoryItemColor } from "../../utils";
 
 const GREEN_WIN_BG = "#23391a";
 const GREEN_PROGRESS = "#7be22a";
@@ -134,16 +134,20 @@ const Tab = ({
   label,
   active,
   onClick,
+  rounded,
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
+  rounded: boolean;
 }) => (
   <button
-    className={`px-6 py-1 rounded-full text-sm focus:outline-none w-[100%] transition-all ${
-      active ? "bg-[#232325] text-gray-400" : "text-gray-400"
+    className={`px-6 rounded-${
+      rounded ? "full" : "xl"
+    } focus:outline-none m-1 w-[100%] transition-all ${
+      active ? "bg-[#2c2d30] text-gray-400" : "text-gray-400"
     }`}
-    style={{ marginRight: 8, marginLeft: 0 }}
+    style={{  paddingBlock : "0.15rem" }}
     onClick={onClick}
   >
     {label}
@@ -213,6 +217,8 @@ const BetBoard = () => {
   const [revealedWinners, setRevealedWinners] = useState<number>(0);
   const [roundActive, setRoundActive] = useState(false);
   const [roundTimerId, setRoundTimerId] = useState<any>(null);
+  const [topTab, setTopTab] = useState("X");
+  const [topTabFilter, setTopTabFilter] = useState("Day");
 
   // Top bar winner count (independent from user list)
   const [topWinners, setTopWinners] = useState(0);
@@ -363,80 +369,84 @@ const BetBoard = () => {
       className="flex flex-col w-full h-full max-w-[480px] mx-auto bg-[#18191b] rounded-2xl shadow-lg p-0"
       style={{ maxHeight: "100vh" }}
     >
-      {/* Tabs & Summary */}
-      <div className="flex flex-col w-full px-4 pt-4 pb-2">
-        <div className="flex items-center mb-2">
+      <div className="flex flex-col w-full px-2 pt-2 pb-2">
+        <div
+          className="flex items-center mb-1 bg-[#141516] rounded-full "
+          style={{ fontSize: "12px" }}
+        >
           <Tab
             label="All Bets"
             active={tab === "All Bets"}
             onClick={() => setTab("All Bets")}
+            rounded
           />
           <Tab
             label="Previous"
             active={tab === "Previous"}
             onClick={() => setTab("Previous")}
+            rounded
           />
           <Tab
             label="Top"
             active={tab === "Top"}
             onClick={() => setTab("Top")}
+            rounded
           />
         </div>
-        {/* Avatars, Bets, Win, Progress */}
         {tab === "All Bets" && (
-          <div className="flex items-center justify-between w-full bg-[#232325] rounded-xl px-3 py-2 mb-2">
-            <div className="flex -space-x-3">
-              {users.slice(0, 4).map((u, i) => (
-                <img
-                  key={i}
-                  src={u.avatar}
-                  alt="avatar"
-                  width={24}
-                  height={24}
-                  className="rounded-full border border-[#28a90a] bg-[#232325]"
-                  onError={(e) => (e.currentTarget.src = PLACEHOLDER_AVATAR)}
-                  style={{ zIndex: 10 - i }}
-                />
-              ))}
+          <div className="bg-[#141516] px-3 py-2 rounded-xl">
+            <div className="flex items-center justify-between w-full    mb-2">
+              <div className="flex -space-x-3">
+                {users.slice(0, 4).map((u, i) => (
+                  <img
+                    key={i}
+                    src={u.avatar}
+                    alt="avatar"
+                    width={24}
+                    height={24}
+                    className="rounded-full border border-[#28a90a] bg-[#232325]"
+                    onError={(e) => (e.currentTarget.src = PLACEHOLDER_AVATAR)}
+                    style={{ zIndex: 10 - i }}
+                  />
+                ))}
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-[18px] text-white leading-none">
+                  {topTotalWin.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+                <span className="text-xs text-gray-400">Total win USD</span>
+              </div>
             </div>
-            <div className="flex flex-col items-end">
-              <span className="text-[18px] text-white leading-none">
-                {topTotalWin.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+            <div className="flex items-center w-full mb-1">
+              <span className="text-[15px] text-white mr-2">
+                {topWinners}/{totalBets} Bets
               </span>
-              <span className="text-xs text-gray-400">Total win USD</span>
-            </div>
-          </div>
-        )}
-        {tab === "All Bets" && (
-          <div className="flex items-center w-full mb-1">
-            <span className="text-[15px] text-white mr-2">
-              {topWinners}/{totalBets} Bets
-            </span>
-            <div className="flex-1 h-2 rounded-full bg-[#232325] overflow-hidden">
-              <div
-                className="h-2 rounded-full"
-                style={{
-                  width: `${(topWinners / totalBets) * 100}%`,
-                  background: GREEN_PROGRESS,
-                }}
-              />
+              <div className="flex-1 h-2 rounded-full bg-[#232325] overflow-hidden">
+                <div
+                  className="h-2 rounded-full"
+                  style={{
+                    width: `${(topWinners / totalBets) * 100}%`,
+                    background: GREEN_PROGRESS,
+                  }}
+                />
+              </div>
             </div>
           </div>
         )}
       </div>
-      {/* Table Headings */}
-      {tab === "All Bets" && (
-        <div className="flex px-4 py-1 text-gray-400 text-[10px]">
-          <span className="w-20">Player</span>
-          <span className="w-24 text-right">Bet USD</span>
-          <span className="w-20 text-center">X</span>
-          <span className="w-20 text-right">Win USD</span>
-        </div>
-      )}
-      {/* Table Body */}
+      <>
+        {tab === "All Bets" && (
+          <div className="flex px-4 py-1 text-gray-400 text-[10px]">
+            <span className="w-20">Player</span>
+            <span className="w-24 text-right">Bet USD</span>
+            <span className="w-20 text-center">X</span>
+            <span className="w-20 text-right">Win USD</span>
+          </div>
+        )}
+      </>
       <div className="flex-1 flex flex-col gap-[2px] w-full text-[12px] overflow-auto px-4 pb-2">
         {tab === "All Bets" &&
           users.map((item, i) => {
@@ -461,7 +471,9 @@ const BetBoard = () => {
               <div className="text-xs text-gray-400">Round Result</div>
               <span
                 className="text-[28px] font-extrabold"
-                style={{ color: getHistoryItemColor(previous.roundResult.toFixed(2)) }}
+                style={{
+                  color: getHistoryItemColor(previous.roundResult.toFixed(2)),
+                }}
               >
                 {previous.roundResult.toFixed(2)}x
               </span>
@@ -479,25 +491,47 @@ const BetBoard = () => {
         )}
         {tab === "Top" && (
           <>
-            <div className="flex gap-2 mb-2">
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-white">
-                X
-              </button>
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400">
-                Win
-              </button>
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400">
-                Rounds
-              </button>
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-white">
-                Day
-              </button>
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400">
-                Month
-              </button>
-              <button className="px-3 py-1 rounded-full bg-[#232325] text-gray-400">
-                Year
-              </button>
+            <div className="bg-[#141516] rounded-xl">
+              <div className="flex gap-2 ">
+                <Tab
+                  label="X"
+                  active={topTab === "X"}
+                  onClick={() => setTopTab("X")}
+                  rounded={false}
+                />
+                <Tab
+                  label="Win"
+                  active={topTab === "Win"}
+                  onClick={() => setTopTab("Win")}
+                  rounded={false}
+                />
+                <Tab
+                  label="Rounds"
+                  active={topTab === "Rounds"}
+                  onClick={() => setTopTab("Rounds")}
+                  rounded={false}
+                />
+              </div>
+              <div className="flex gap-2 mb-2">
+                <Tab
+                  label="Day"
+                  active={topTabFilter === "Day"}
+                  onClick={() => setTopTabFilter("Day")}
+                  rounded={false}
+                />
+                <Tab
+                  label="Month"
+                  active={topTabFilter === "Month"}
+                  onClick={() => setTopTabFilter("Month")}
+                  rounded={false}
+                />
+                <Tab
+                  label="Year"
+                  active={topTabFilter === "Year"}
+                  onClick={() => setTopTabFilter("Year")}
+                  rounded={false}
+                />
+              </div>
             </div>
             {top.map((item, i) => (
               <div

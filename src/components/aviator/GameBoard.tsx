@@ -587,7 +587,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
       style={{ height: "calc(100vh - 50px)" }}
     >
       <CustomSnackBar cashes={cashes} setCashes={setCashes} />
-      <div className="w-[460px] hidden lg:block h-full">
+      <div className="w-[460px] hidden lg:block h-full" style={{ marginTop: "0.2rem" }}>
         <BetBoard />
       </div>
       <div className="flex flex-col gap-0 w-full bg-[#171717] p-2 text-white overflow-auto pb-0">

@@ -44,10 +44,13 @@ function randomAvatar(seed: string) {
   const base = AVATAR_URLS[Math.floor(Math.random() * AVATAR_URLS.length)];
   return base + encodeURIComponent(seed);
 }
-
+const dummyUsers = [
+  "/avatars/av-1.png",
+  "/avatars/av-2.png",
+  "/avatars/av-3.png",
+];
 const GameBoard = ({ bet6 }: { bet6: string[] }) => {
   const { aviatorState, setAviatorState } = useAviator();
-  console.log("bet6 ::", bet6);
   const [autoPlayingIndex, setAutoPlayingIndex] = useState(0);
   const [snackState, setSnackState] = useState({
     open: false,
@@ -587,7 +590,10 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
       style={{ height: "calc(100vh - 50px)" }}
     >
       <CustomSnackBar cashes={cashes} setCashes={setCashes} />
-      <div className="w-[460px] hidden lg:block h-full" style={{ marginTop: "0.2rem" }}>
+      <div
+        className="w-[460px] hidden lg:block h-full"
+        style={{ marginTop: "0.2rem" }}
+      >
         <BetBoard />
       </div>
       <div className="flex flex-col gap-0 w-full bg-[#171717] p-2 text-white overflow-auto pb-0">
@@ -617,9 +623,30 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
 
         <div
           className={`flex justify-center w-full relative`}
-          style={{ height: pixiDimension.height }}
+          style={{
+            height: pixiDimension.height,
+          }}
           ref={pixi_ref}
         >
+          <div className="absolute bottom-8 right-2 bg-[#2c2d30] p-1 pr-2 rounded-full">
+            <div className="flex items-center gap-2 text-xs">
+              <div className="flex -space-x-2">
+                {dummyUsers.map((u, i) => (
+                  <img
+                    key={i}
+                    src={u}
+                    alt="avatar"
+                    width={24}
+                    height={24}
+                    className="rounded-full border border-[#28a90a] bg-[#232325]"
+                    // onError={(e) => (e.currentTarget.src = PLACEHOLDER_AVATAR)}
+                    style={{ zIndex: 10 - i }}
+                  />
+                ))}
+              </div>
+              <div>138</div>
+            </div>
+          </div>
           <div
             className="flex flex-col gap-10 absolute top-0 justify-center items-center"
             style={{
@@ -787,18 +814,20 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                   </div>
                   {betPlaceStatus[i] === "success" || pendingBet[i] ? (
                     pendingBet[i] ? (
-                      <div className="flex flex-col justify-center items-center text-xs w-[100px] lg:w-[160px] 3xl:w-[395px]">
-                        <p className="uppercase w-full text-center">
+                      // <div className="flex flex-col justify-center items-center text-xs w-[100px] lg:w-[160px] 3xl:w-[395px]">
+                      <button
+                        onClick={() => cancelBet(i)}
+                        className="flex flex-col w-full h-full   rounded-[14px] 3xl:rounded-[30px] bg-red-600 hover:bg-red-700 border border-red-500 justify-center items-center font-bold transition-colors"
+                      >
+                        <span className="text-white text-xs mt-1 opacity-90">
                           Waiting for next round
-                        </p>
-                        <button
-                          onClick={() => cancelBet(i)}
-                          className="flex flex-col w-full h-[42px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-red-700 border border-red-400  justify-center items-center font-bold hover:opacity-80"
-                        >
+                        </span>
+                        <span className="text-white text-lg mt-2 font-bold leading-none">
                           Cancel
-                        </button>
-                      </div>
+                        </span>
+                      </button>
                     ) : (
+                      // </div>
                       <button
                         onClick={() => handleCashOut(i, false)}
                         className="flex flex-col w-[100px] lg:w-[160px] h-[80px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-gradient-to-b from-[#E59407] to-[#412900]  justify-center items-center font-bold border border-[#FFB432]/50 hover:opacity-80"
@@ -827,7 +856,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                   ) : (
                     <button
                       onClick={() => handleBet(i)}
-                      disabled={!allowedBet || betPlaceStatus[i] !== "none"}
+                      // disabled={!allowedBet || betPlaceStatus[i] !== "none"}
                       className={`disabled:opacity-30 flex flex-col min-w-[58%] lg:min-w-[180px] h-[90px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-[#28a909] justify-center items-center border border-white hover:opacity-80`}
                     >
                       <p className="text-[22px] 3xl:text-[42px] leading-[20px] 3xl:leading-[42px]">

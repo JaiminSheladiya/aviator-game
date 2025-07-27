@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { betBoardAllItemType } from "../../@types";
 import { getHistoryItemColor } from "../../utils";
 
 const GREEN_WIN_BG = "#23391a";
-const GREEN_PROGRESS = "#7be22a";
+const GREEN_PROGRESS = "#427f00";
 const PURPLE_X = "#a259f7";
 const BLUE_X = "#07BDE5";
-const DARK_BG = "#18191b";
-const ROW_BG = "#141516";
 const AVATAR_SIZE = 24;
 const PLACEHOLDER_AVATAR =
   "https://api.dicebear.com/7.x/identicon/svg?seed=placeholder";
@@ -22,34 +19,13 @@ function getRandomFloat(min: number, max: number, decimals = 2) {
 }
 
 function getDummyUsers(count: number) {
-  const avatars = [
-    "https://api.dicebear.com/7.x/identicon/svg?seed=airplane",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=robot",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=cat",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=dog",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=fox",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=owl",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=lion",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=monkey",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=parrot",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=car",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=clover",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=money",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=duck",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=mask",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=pumpkin",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=chips",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=grape",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=orange",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=lemon",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=watermelon",
-  ];
   const users = [];
   for (let i = 0; i < count; i++) {
-    const n = Math.floor(Math.random() * 10);
-    const username = `d***${n}`;
-    const avatar = avatars[Math.floor(Math.random() * avatars.length)];
+    const avatarIndex = Math.floor(Math.random() * 72) + 1;
+    const avatar = `/avatars/av-${avatarIndex}.png`;
+    const username = `d***${Math.floor(Math.random() * 10)}`;
     const betAmount = 100;
+
     users.push({
       username,
       avatar,
@@ -60,38 +36,22 @@ function getDummyUsers(count: number) {
   return users;
 }
 
-// Dummy data for Previous tab
 function getDummyPrevious() {
   const roundResult = getRandomFloat(1.5, 3.0, 2);
   const users = [];
-  const avatars = [
-    "https://api.dicebear.com/7.x/identicon/svg?seed=clover",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=owl",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=lion",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=dog",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=cat",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=parrot",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=chips",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=duck",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=money",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=fox",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=mask",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=pumpkin",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=grape",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=orange",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=lemon",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=watermelon",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=airplane",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=robot",
-  ];
+
   for (let i = 0; i < 18; ++i) {
     const username = `d***${getRandomInt(1, 9)}`;
-    const avatar = avatars[i % avatars.length];
+    const avatarIndex = Math.floor(Math.random() * 72) + 1; // 1 to 72
+    const avatar = `/avatars/av-${avatarIndex}.png`; // served from /public/avatars
+
     const betAmount = 100;
+
     // About 40% are winners
     const isWinner = Math.random() < 0.4;
     const x = isWinner ? getRandomFloat(1.1, roundResult, 2) : undefined;
     const win = isWinner ? +(betAmount * (x || 1)).toFixed(2) : 0;
+
     users.push({
       username,
       avatar,
@@ -101,10 +61,10 @@ function getDummyPrevious() {
       isWinner,
     });
   }
+
   return { roundResult, users };
 }
 
-// Dummy data for Top tab
 function getDummyTop() {
   const avatars = [
     "https://api.dicebear.com/7.x/identicon/svg?seed=lion",
@@ -143,11 +103,23 @@ const Tab = ({
 }) => (
   <button
     className={`px-6 rounded-${
-      rounded ? "full" : "xl"
+      rounded ? "full" : "md"
     } focus:outline-none m-1 w-[100%] transition-all ${
       active ? "bg-[#2c2d30] text-gray-400" : "text-gray-400"
     }`}
-    style={{  paddingBlock : "0.15rem" }}
+    style={
+      rounded
+        ? { paddingBlock: "0.15rem" }
+        : {
+            paddingBlock: "0.4rem",
+            borderRadius: "12px",
+            paddingInline: "0.5rem",
+            fontSize: "12px",
+            fontWeight: "500",
+            lineHeight: "1.5",
+            marginBlock: "0.1rem",
+          }
+    }
     onClick={onClick}
   >
     {label}
@@ -165,7 +137,7 @@ const BetBoardItem = ({
 }: any) => {
   return (
     <div
-      className={`flex items-center px-2 py-1 mb-[2px] rounded-[32px] ${
+      className={`flex items-center py-1 mb-[2px] rounded-[32px] ${
         isWinner ? "" : isYou ? "bg-[#232a3a]" : "bg-[#141516]"
       }`}
       style={{
@@ -366,7 +338,7 @@ const BetBoard = () => {
   // Fill vertical space
   return (
     <div
-      className="flex flex-col w-full h-full max-w-[480px] mx-auto bg-[#18191b] rounded-2xl shadow-lg p-0"
+      className="flex flex-col w-full h-full max-w-[480px] mx-auto bg-[#1b1c1d] rounded-2xl shadow-lg p-0"
       style={{ maxHeight: "100vh" }}
     >
       <div className="flex flex-col w-full px-2 pt-2 pb-2">
@@ -395,9 +367,9 @@ const BetBoard = () => {
         </div>
         {tab === "All Bets" && (
           <div className="bg-[#141516] px-3 py-2 rounded-xl">
-            <div className="flex items-center justify-between w-full    mb-2">
-              <div className="flex -space-x-3">
-                {users.slice(0, 4).map((u, i) => (
+            <div className="flex items-center justify-between w-full mb-1">
+              <div className="flex -space-x-2">
+                {users.slice(0, 3).map((u, i) => (
                   <img
                     key={i}
                     src={u.avatar}
@@ -411,22 +383,27 @@ const BetBoard = () => {
                 ))}
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-[18px] text-white leading-none">
+                <span className="text-[16px] text-white leading-none">
                   {topTotalWin.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
                 </span>
-                <span className="text-xs text-gray-400">Total win USD</span>
               </div>
             </div>
+            <div className="flex items-center gap-1 justify-between mb-1">
+              <div className="text-[12px] text-white">
+                {topWinners}/{totalBets}{" "}
+                <span className="text-[#7b7b7b]"> Bets</span>
+              </div>
+              <div className="text-[12px] font-normal leading-[100%] align-middle text-[#7b7b7b]">
+                Total win USD
+              </div>
+            </div>{" "}
             <div className="flex items-center w-full mb-1">
-              <span className="text-[15px] text-white mr-2">
-                {topWinners}/{totalBets} Bets
-              </span>
-              <div className="flex-1 h-2 rounded-full bg-[#232325] overflow-hidden">
+              <div className="flex-1 h-2 rounded-full bg-[#232325] overflow-hidden flex items-center">
                 <div
-                  className="h-2 rounded-full"
+                  className="h-1 rounded-full"
                   style={{
                     width: `${(topWinners / totalBets) * 100}%`,
                     background: GREEN_PROGRESS,
@@ -436,10 +413,78 @@ const BetBoard = () => {
             </div>
           </div>
         )}
+        {tab === "Previous" && (
+          <>
+            <div className="w-full text-center py-2 bg-[#141516] rounded-xl">
+              <div className="text-xs text-gray-400">Round Result</div>
+              <span
+                className="text-[28px] font-extrabold"
+                style={{
+                  color: getHistoryItemColor(previous.roundResult.toFixed(2)),
+                }}
+              >
+                {previous.roundResult.toFixed(2)}x
+              </span>
+            </div>
+            <div className="flex px-4 py-1 text-gray-400 text-[10px] mb-1">
+              <span className="w-20">Player</span>
+              <span className="w-24 text-right">Bet USD</span>
+              <span className="w-20 text-center">X</span>
+              <span className="w-20 text-right">Win USD</span>
+            </div>
+            {previous.users.map((item, i) => (
+              <BetBoardItem key={i} {...item} />
+            ))}
+          </>
+        )}
+        {tab === "Top" && (
+          <div className="bg-[#141516] rounded-xl text-[12px]">
+            <div className="flex ">
+              <Tab
+                label="X"
+                active={topTab === "X"}
+                onClick={() => setTopTab("X")}
+                rounded={false}
+              />
+              <Tab
+                label="Win"
+                active={topTab === "Win"}
+                onClick={() => setTopTab("Win")}
+                rounded={false}
+              />
+              <Tab
+                label="Rounds"
+                active={topTab === "Rounds"}
+                onClick={() => setTopTab("Rounds")}
+                rounded={false}
+              />
+            </div>
+            <div className="flex">
+              <Tab
+                label="Day"
+                active={topTabFilter === "Day"}
+                onClick={() => setTopTabFilter("Day")}
+                rounded={false}
+              />
+              <Tab
+                label="Month"
+                active={topTabFilter === "Month"}
+                onClick={() => setTopTabFilter("Month")}
+                rounded={false}
+              />
+              <Tab
+                label="Year"
+                active={topTabFilter === "Year"}
+                onClick={() => setTopTabFilter("Year")}
+                rounded={false}
+              />
+            </div>
+          </div>
+        )}
       </div>
       <>
         {tab === "All Bets" && (
-          <div className="flex px-4 py-1 text-gray-400 text-[10px]">
+          <div className="flex px-4 py-1 text-gray-400 text-[10px] mb-1">
             <span className="w-20">Player</span>
             <span className="w-24 text-right">Bet USD</span>
             <span className="w-20 text-center">X</span>
@@ -465,74 +510,9 @@ const BetBoard = () => {
               />
             );
           })}
-        {tab === "Previous" && (
-          <>
-            <div className="w-full text-center py-2">
-              <div className="text-xs text-gray-400">Round Result</div>
-              <span
-                className="text-[28px] font-extrabold"
-                style={{
-                  color: getHistoryItemColor(previous.roundResult.toFixed(2)),
-                }}
-              >
-                {previous.roundResult.toFixed(2)}x
-              </span>
-            </div>
-            <div className="flex px-2 py-1 text-xs text-gray-400">
-              <span className="w-24">Player</span>
-              <span className="w-20 text-right">Bet USD</span>
-              <span className="w-16 text-center">X</span>
-              <span className="w-20 text-right">Win USD</span>
-            </div>
-            {previous.users.map((item, i) => (
-              <BetBoardItem key={i} {...item} />
-            ))}
-          </>
-        )}
+
         {tab === "Top" && (
           <>
-            <div className="bg-[#141516] rounded-xl">
-              <div className="flex gap-2 ">
-                <Tab
-                  label="X"
-                  active={topTab === "X"}
-                  onClick={() => setTopTab("X")}
-                  rounded={false}
-                />
-                <Tab
-                  label="Win"
-                  active={topTab === "Win"}
-                  onClick={() => setTopTab("Win")}
-                  rounded={false}
-                />
-                <Tab
-                  label="Rounds"
-                  active={topTab === "Rounds"}
-                  onClick={() => setTopTab("Rounds")}
-                  rounded={false}
-                />
-              </div>
-              <div className="flex gap-2 mb-2">
-                <Tab
-                  label="Day"
-                  active={topTabFilter === "Day"}
-                  onClick={() => setTopTabFilter("Day")}
-                  rounded={false}
-                />
-                <Tab
-                  label="Month"
-                  active={topTabFilter === "Month"}
-                  onClick={() => setTopTabFilter("Month")}
-                  rounded={false}
-                />
-                <Tab
-                  label="Year"
-                  active={topTabFilter === "Year"}
-                  onClick={() => setTopTabFilter("Year")}
-                  rounded={false}
-                />
-              </div>
-            </div>
             {top.map((item, i) => (
               <div
                 key={i}

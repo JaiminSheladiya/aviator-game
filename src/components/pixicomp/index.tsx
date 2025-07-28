@@ -13,6 +13,7 @@ const PIXIComponent = ({
   curPayout: number;
   trigParachute: { uniqId: number; isMe: boolean };
 }) => {
+  console.log('pixiDimension: ', pixiDimension);
   const { aviatorState } = useAviator();
   const [scale, setScale] = useState(0);
   useEffect(() => {

@@ -332,7 +332,7 @@ const BetBoard = () => {
   // Fill vertical space
   return (
     <div
-      className="flex flex-col w-full h-full max-w-[480px] mx-auto bg-[#1b1c1d] rounded-2xl shadow-lg p-0"
+      className="flex flex-col w-full h-full lg:max-w-[480px] mx-auto bg-[#1b1c1d] rounded-2xl shadow-lg p-0"
       style={{ maxHeight: "100vh" }}
     >
       <div className="flex flex-col w-full px-2 pt-2 pb-2">

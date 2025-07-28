@@ -360,7 +360,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
     // Mobile check: set height to 240px if on mobile
     const isMobile = window.innerWidth < 600;
     const height = isMobile
-      ? 240
+      ? 454
       : Math.max(
           150,
           window.innerHeight -
@@ -369,7 +369,6 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
             (width > 1392 ? 0 : 10)
         );
 
-    console.log("width, height: ", { width, height });
     setPixiDimension({ width, height });
     setAviatorState((prev) => {
       const new_width = prev.dimension.width;
@@ -666,7 +665,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
           )}
         </div>
         <div
-          className="mt-0 sm:mt-4 text-center text-sm font-bold w-full rounded-t-[20px] border border-[#e59407]"
+          className="mt-1 text-center text-sm font-bold w-full rounded-t-[20px] border border-[#e59407]"
           style={{
             background: "rgba(229, 148, 7, .8)",
           }}
@@ -771,7 +770,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
         >
           <div
             className={`grid grid-cols-1 gap-2 relative ${
-              betButtonCount === 1 ? "" : "lg:grid-cols-2"
+              betButtonCount === 1 ? "" : "lg:grid-cols-2 md:grid-cols-2"
             }`}
           >
             <button
@@ -812,7 +811,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
                       }),
                   }}
                 />
-                <div className="w-full md:w-auto flex gap-2">
+                <div className="w-full lg:w-auto flex gap-2">
                   <div className="flex flex-col w-[42%] lg:w-[165px] 3xl:w-[260px] h-full">
                     <div
                       className="flex justify-between items-center text-[10px] 3xl:text-xl w-full h-[27px] 3xl:h-[54px] bg-[#171717] rounded-full px-2"

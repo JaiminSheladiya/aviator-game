@@ -23,6 +23,7 @@ import SwitchButton from "../SwitchButton";
 import AutoBetModal from "../AutoBetModal";
 import BetBoard from "./BetBoard";
 import CustomSnackBar from "../CustomSnackBar";
+import { MoreHorizontal } from "lucide-react";
 
 const AVATAR_URLS = [
   // DiceBear Avatars (open source)
@@ -584,6 +585,8 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
     }
   };
 
+  const [showExpanded, setShowExpanded] = useState(false);
+
   return (
     <div
       className="flex overflow-auto"
@@ -597,7 +600,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
         <BetBoard />
       </div>
       <div className="flex flex-col gap-0 w-full bg-[#171717] p-2 text-white overflow-auto pb-0">
-        <div className="flex justify-between items-center">
+        {/* <div className="flex justify-between items-center">
           <div className="score-bomb flex gap-x-2 w-full flex-wrap pr-4 h-[26px] overflow-y-hidden">
             {crashHistory.map((item, i) => (
               <span
@@ -611,6 +614,56 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
               </span>
             ))}
           </div>
+        </div> */}
+        <div className="relative w-full">
+          {/* ─── Collapsed Bar ─── */}
+          <div className="flex justify-between items-center bg-[#111] rounded px-2">
+            <div className="flex gap-x-2 flex-wrap overflow-hidden pr-4 py-1 max-h-[26px]">
+              {crashHistory.slice(0, 50).map((item, i) => (
+                <span
+                  key={i}
+                  style={{ color: crashColor[i] }}
+                  className={`block px-2 py-[2px] rounded-full bg-gray-900 font-bold text-[11px] 3xl:text-[15px]`}
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+
+            {/* ─── Dots Icon ─── */}
+            <button
+              className="p-1 rounded-full bg-[#2c2d30] hover:bg-[#3a3b3e] transition"
+              onClick={() => setShowExpanded(true)}
+            >
+              <MoreHorizontal className="text-gray-400 w-4 h-4" />
+            </button>
+          </div>
+
+          {/* ─── Expanded Popup ─── */}
+          {showExpanded && (
+            <div className="absolute z-50 right-0 top-0  w-full w-full bg-[#1e1f21] text-gray-200 rounded-lg shadow-lg p-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-300">Round History</span>
+                <button
+                  onClick={() => setShowExpanded(false)}
+                  className="text-gray-400 hover:text-white text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {crashHistory.map((item, i) => (
+                  <span
+                    key={i}
+                    style={{ color: crashColor[i] }}
+                    className="text-[13px]"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <div
           className="mt-0 sm:mt-4 text-center text-sm font-bold w-full rounded-t-[20px] border border-[#e59407]"

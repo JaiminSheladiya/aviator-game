@@ -66,19 +66,11 @@ function getDummyPrevious() {
 }
 
 function getDummyTop() {
-  const avatars = [
-    "https://api.dicebear.com/7.x/identicon/svg?seed=lion",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=eagle",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=raccoon",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=tiger",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=clover",
-    "https://api.dicebear.com/7.x/identicon/svg?seed=gold",
-  ];
   const top = [];
-  for (let i = 0; i < 6; ++i) {
+  for (let i = 0; i < 32; ++i) {
     top.push({
       username: `d***${getRandomInt(1, 9)}`,
-      avatar: avatars[i % avatars.length],
+      avatar: `/avatars/av-${getRandomInt(1, 72)}.png`,
       date: "15.07.25",
       bet: getRandomFloat(0.3, 5, 2),
       win: getRandomFloat(300, 9000, 2),
@@ -151,11 +143,13 @@ const BetBoardItem = ({
         height={AVATAR_SIZE}
         src={avatar}
         onError={(e) => (e.currentTarget.src = PLACEHOLDER_AVATAR)}
-        className="rounded-full mr-2 border border-[#232325]"
+        className="rounded-full mr-2 ml-1 border border-[#232325]"
         style={{ objectFit: "cover" }}
       />
       <span className="w-20 truncate text-[12]">{username}</span>
-      <span className="w-20 text-right font-inter">{betAmount.toFixed(2)}</span>
+      <span className="w-[4.5rem] text-right font-inter">
+        {betAmount.toFixed(2)}
+      </span>
       <span
         className="w-16 text-center text-[12px]"
         style={{
@@ -426,15 +420,21 @@ const BetBoard = () => {
                 {previous.roundResult.toFixed(2)}x
               </span>
             </div>
-            <div className="flex px-4 py-1 text-gray-400 text-[10px] mb-1">
+            <div className="flex px-4 py-1 mt-2 text-gray-400 text-[10px] mb-1">
               <span className="w-20">Player</span>
               <span className="w-24 text-right">Bet USD</span>
               <span className="w-20 text-center">X</span>
               <span className="w-20 text-right">Win USD</span>
             </div>
-            {previous.users.map((item, i) => (
-              <BetBoardItem key={i} {...item} />
-            ))}
+            <div
+              className="flex-1 flex flex-col gap-[2px] w-full text-[12px] overflow-auto px-2 pb-2"
+              style={{ maxHeight: "calc(100vh - 200px)" }}
+              // style={{ border: "1px solid red" }}
+            >
+              {previous.users.map((item, i) => (
+                <BetBoardItem key={i} {...item} />
+              ))}
+            </div>
           </>
         )}
         {tab === "Top" && (
@@ -492,7 +492,7 @@ const BetBoard = () => {
           </div>
         )}
       </>
-      <div className="flex-1 flex flex-col gap-[2px] w-full text-[12px] overflow-auto px-4 pb-2">
+      <div className="flex-1 flex flex-col gap-[2px] w-full text-[12px] overflow-auto px-2 pb-2">
         {tab === "All Bets" &&
           users.map((item, i) => {
             const isWinner =

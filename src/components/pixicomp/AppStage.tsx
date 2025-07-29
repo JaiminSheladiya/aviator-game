@@ -72,7 +72,7 @@ const AppStage = ({
   const gradTexture = useMemo(() => createGradTexture(dimension), [dimension]);
 
   const handleResize = () => {
-    setPlaneScale(interpolate(window.innerWidth, 400, 1920, 0.5, 0.2));
+    setPlaneScale(interpolate(window.innerWidth, 400, 1920, 0.4, 0.2));
     setPulseBase(interpolate(window.innerWidth, 400, 1920, 0.6, 0.8));
   };
 
@@ -87,10 +87,13 @@ const AppStage = ({
       tickRef.current = 0;
       crashOffset.current = 0;
       planeXRef.current = 0;
-      posPlaneRef.current = { x: 0, y: dimension.height - 80 };
+      posPlaneRef.current = { 
+        x: interpolate(dimension.width, 400, 1920, 10, 5), 
+        y: dimension.height 
+      };
       crashOffset.current = 0;
     }
-  }, [game_anim_status]);
+  }, [game_anim_status, dimension]);
 
   useTick((delta) => {
     hueRotateRef.current += delta / 500;
@@ -119,10 +122,10 @@ const AppStage = ({
       game_anim_status === "ANIM_CRASHED" ? crashOffset.current * 1.5 : 0;
 
     posPlaneRef.current = {
-      x: (pulseBase + pulseGraphRef.current) * planeXRef.current + crashX + 50,
+      x: (pulseBase + pulseGraphRef.current) * planeXRef.current + crashX + interpolate(dimension.width, 400, 1920, 10, 5),
       y:
         dimension.height -
-        80 -
+        interpolate(dimension.width, 400, 1920, 15, 60) -
         (1 - pulseGraphRef.current) *
           curveFunction(planeXRef.current, {
             width: dimension.width - 40,
@@ -228,9 +231,9 @@ const AppStage = ({
         <Sprite
           filters={[colorMatrix]}
           texture={gradTexture}
-          width={dimension.width - 40}
-          height={dimension.height - 40}
-          position={{ x: 40, y: 0 }}
+          width={dimension.width}
+          height={dimension.height}
+          position={{ x: 0, y: 0 }}
         />
       ) : null}
       <Graphics
@@ -252,17 +255,17 @@ const AppStage = ({
       <Container
         mask={gameBoardMask.current}
         visible={game_anim_status === "ANIM_STARTED"}
-        position={{ x: 60, y: 0 }}
+        position={{ x: 0, y: 0 }}
       >
         <Graphics
           mask={maskRef.current}
           draw={renderCurve}
-          position={{ x: 60, y: dimension.height - 40 }}
+          position={{ x: 0, y: dimension.height }}
           scale={{
             x: pulseBase + pulseGraphRef.current,
             y: 1 - pulseGraphRef.current,
           }}
-          pivot={{ x: 60, y: dimension.height - 40 }}
+          pivot={{ x: 0, y: dimension.height }}
         />
         <Graphics
           scale={{
@@ -304,7 +307,7 @@ const AppStage = ({
           }
         />
       </Container>
-      <Graphics draw={drawInnerBoundery} />
+      {/* <Graphics draw={drawInnerBoundery} />
       <Container ref={dotRef}>
         <Graphics
           draw={dotLeftBottom}
@@ -357,7 +360,7 @@ const AppStage = ({
           </Container>
         ))}
       </Container>
-      <Graphics draw={drawOuterBoundery} />
+      <Graphics draw={drawOuterBoundery} /> */}
     </Container>
   );
 };

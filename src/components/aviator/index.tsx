@@ -85,7 +85,7 @@ const Aviator = () => {
         Game_Global_Vars.hash =
           "dummy-hash-" + Math.random().toString(36).substr(2, 9);
 
-        loadSound();
+        // loadSound();
       } catch (e) {
         console.log("Error in dummy setup:", e);
         setAviatorState((prev) => ({ ...prev, auth: true })); // Still allow access

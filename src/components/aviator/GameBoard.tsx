@@ -24,6 +24,7 @@ import AutoBetModal from "../AutoBetModal";
 import BetBoard from "./BetBoard";
 import CustomSnackBar from "../CustomSnackBar";
 import { MoreHorizontal } from "lucide-react";
+import { placeBet, Bet } from "../../api/universeCasino";
 
 const AVATAR_URLS = [
   // DiceBear Avatars (open source)
@@ -50,7 +51,9 @@ const dummyUsers = [
   "/avatars/av-2.png",
   "/avatars/av-3.png",
 ];
-const GameBoard = ({ bet6 }: { bet6: string[] }) => {
+// Add marketId to props
+type GameBoardProps = { bet6: string[]; marketId?: string | null };
+const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   const { aviatorState, setAviatorState } = useAviator();
   const [autoPlayingIndex, setAutoPlayingIndex] = useState(0);
   const [snackState, setSnackState] = useState({
@@ -59,6 +62,7 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
   });
   const [modalAutoPlayOpen, modalAutoPlaySetOpen] = useState(false);
   const [rotate, setRotate] = useState(0);
+  const [manualMarketId, setManualMarketId] = useState<string>("");
 
   const [trigParachute, setTrigParachute] = useState({ uniqId: 0, isMe: true });
 
@@ -223,24 +227,43 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
     Game_Global_Vars.cashStarted[i] = false;
     _setCashingStatus("none", i);
 
-    // Simulate bet placement
-    await doDelay(1000);
+    // Use real API call
+    try {
+      // Use manual marketId if provided, otherwise use WebSocket marketId, otherwise fallback
+      const usedMarketId = manualMarketId || marketId || "1183125";
+      const eventId = "88.0022";
+      const bets: Bet[] = [{ stake: parseFloat(betValue[i]), cashIn: i + 1 }];
 
-    // Simulate successful bet
-    _setBetPlaceStatus("success", i);
-    setAviatorState((prev) => ({
-      ...prev,
-      balance: prev.balance - parseFloat(betValue[i]),
-    }));
+      console.log("Placing bet with:", { usedMarketId, eventId, bets });
+      const response = await placeBet(usedMarketId, eventId, bets);
+      console.log("Bet response:", response);
 
-    // Add dummy bet to board
-    const dummyBet: betBoardAllItemType = {
-      gameCrashId: Date.now(),
-      username: "Player",
-      betAmount: parseFloat(betValue[i]),
-    };
-    setBetBoardAllItem((prev) => [dummyBet, ...prev]);
-    console.log("Bet placed successfully for index:", i);
+      if (response.status === "success") {
+        _setBetPlaceStatus("success", i);
+        setAviatorState((prev) => ({
+          ...prev,
+          balance: response.remainingBalance ?? prev.balance,
+        }));
+        setSnackState({
+          open: true,
+          msg: `Bet placed! Bet ID: ${response.betId}`,
+        });
+      } else {
+        _setBetPlaceStatus("none", i);
+        const errorMsg =
+          response.meta?.message || response.message || "Unknown error";
+        setSnackState({ open: true, msg: `Bet failed: ${errorMsg}` });
+      }
+    } catch (error: any) {
+      _setBetPlaceStatus("none", i);
+      const errorMsg =
+        error.response?.data?.meta?.message ||
+        error.response?.data?.message ||
+        error.message ||
+        "Network error";
+      setSnackState({ open: true, msg: `Bet error: ${errorMsg}` });
+      console.error("Bet placement error:", error.response?.data || error);
+    }
   };
 
   const handleBet = async (i: number) => {
@@ -255,7 +278,6 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
     } else {
       _setPendingBet(true, i);
       Game_Global_Vars.pendingBet[i] = true;
-      console.log("Bet queued for next round");
     }
   };
 
@@ -591,6 +613,36 @@ const GameBoard = ({ bet6 }: { bet6: string[] }) => {
       className="flex overflow-auto"
       style={{ height: "calc(100vh - 50px)" }}
     >
+      {/* Debug UI for development */}
+      {process.env.NODE_ENV === "development" && (
+        <div
+          style={{
+            position: "fixed",
+            top: 60,
+            right: 10,
+            background: "#333",
+            color: "white",
+            padding: "10px",
+            borderRadius: "5px",
+            fontSize: "12px",
+            zIndex: 1000,
+          }}
+        >
+          <div>Market ID: {marketId || "None"}</div>
+          <div style={{ marginTop: "5px" }}>
+            <input
+              type="text"
+              placeholder="Manual Market ID"
+              value={manualMarketId}
+              onChange={(e) => setManualMarketId(e.target.value)}
+              style={{ width: "120px", padding: "2px 4px", fontSize: "10px" }}
+            />
+          </div>
+          <div style={{ marginTop: "5px", fontSize: "10px" }}>
+            Using: {manualMarketId || marketId || "1183125"}
+          </div>
+        </div>
+      )}
       <CustomSnackBar cashes={cashes} setCashes={setCashes} />
       <div
         className="w-[460px] hidden lg:block h-full"

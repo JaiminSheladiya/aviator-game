@@ -224,21 +224,17 @@ export const testMobile = () => {
     /Mobi/i.test(navigator.userAgent) ||
     /Macintosh/i.test(navigator.userAgent)
   ) {
-    console.log("This is a mobile device");
     if (/iPhone/i.test(navigator.userAgent)) {
-      console.log("This is an iPhone");
       return {
         mobile: true,
         iPhone: true,
       };
     } else if (/iPad/i.test(navigator.userAgent)) {
-      console.log("This is an iPad");
       return {
         mobile: true,
         iPhone: true,
       };
     } else if (/Macintosh/i.test(navigator.userAgent)) {
-      console.log("This is a Macintosh");
       return {
         mobile: true,
         iPhone: true,
@@ -250,7 +246,6 @@ export const testMobile = () => {
       };
     }
   } else {
-    console.log("This is a browser");
     return {
       mobile: false,
       iPhone: false,

@@ -194,7 +194,6 @@ const TopLogoBar = ({
       setScale(window.devicePixelRatio / window.innerWidth > 400 ? 3 : 1);
     } else {
       setScale(window.devicePixelRatio);
-      console.log("This is a browser");
     }
   };
   React.useEffect(() => {

@@ -12,7 +12,7 @@ import SettingModal from "../SettingModal";
 import HistoryModal from "../HistoryModal";
 import axios from "axios";
 import { getUserBalance } from "../../api/universeCasino";
-import { connectCasinoWebSocket } from "../../api/universeCasino";
+import { useSocket } from "../../providers/SocketProvider";
 
 const API_BASE = "https://universeexchapi.com/casinoapp/exchange";
 const TOKEN =
@@ -24,6 +24,16 @@ const headers = {
 };
 
 const Aviator = () => {
+  const {
+    isConnected,
+    isAuthenticated,
+    balance,
+    marketData,
+    lastBetResult,
+    sendMessage,
+    connect,
+  } = useSocket();
+
   const { aviatorState, setAviatorState } = useAviator();
   const [loaded, setLoaded] = useState(false);
   const [openGame, setOpenGame] = useState(false);
@@ -127,10 +137,7 @@ const Aviator = () => {
     //   if (heartbeatInterval) clearInterval(heartbeatInterval);
     // };
 
-
-    connectCasinoWebSocket();
-
-
+    connect();
   }, []);
 
   // Manual balance refresh function for testing

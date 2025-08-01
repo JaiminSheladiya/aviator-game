@@ -459,7 +459,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
             ...prev,
             game_anim_status: "ANIM_STARTED",
           }));
-          if (aviatorState.fxChecked) playSound("take");
+          // if (aviatorState.fxChecked) playSound("take");
           // Simulate payout increase
           let payout = 1.0;
           const payoutInterval = setInterval(() => {
@@ -497,8 +497,8 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
                 // Crash phase
                 setCrashHistory((prev) => [`${payout.toFixed(2)}x`, ...prev]);
                 setCrashAnim(true);
-                if (aviatorState.fxChecked) playCrashSound();
-                if (aviatorState.fxChecked) playSound("flew");
+                // if (aviatorState.fxChecked) playCrashSound();
+                // if (aviatorState.fxChecked) playSound("flew");
                 setTimeout(() => setCrashAnim(false), 1000);
 
                 setAviatorState((prev) => ({
@@ -592,13 +592,17 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
       crashAudioRef.current = null;
     }
   }, [aviatorState.fxChecked]);
-
+  useEffect(() => {
+    
+  },[])
+  
   const playCrashSound = () => {
+    console.log('playCrashSound: ', aviatorState);
     // Play sprite_audio.mp3 when game_anim_status is ANIM_CRASHED
     if (!crashAudioRef.current && aviatorState.fxChecked) {
       crashAudioRef.current = new Audio("/sounds/sprite_audio.mp3");
       crashAudioRef.current.volume = 1.0;
-      crashAudioRef.current.currentTime = 2.5; // Start from 3 seconds
+      // crashAudioRef.current.currentTime = 2.5; // Start from 3 seconds
       crashAudioRef.current.play();
       crashAudioRef.current.onended = () => {
         crashAudioRef.current = null;
@@ -610,11 +614,11 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
 
   return (
     <div
-      className="flex overflow-auto"
+      className="flex overflow-hidden"
       style={{ height: "calc(100vh - 50px)" }}
     >
       {/* Debug UI for development */}
-      {process.env.NODE_ENV === "development" && (
+      {/* {process.env.NODE_ENV === "development" && (
         <div
           style={{
             position: "fixed",
@@ -642,7 +646,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
             Using: {manualMarketId || marketId || "1183125"}
           </div>
         </div>
-      )}
+      )} */}
       <CustomSnackBar cashes={cashes} setCashes={setCashes} />
       <div
         className="w-[460px] hidden lg:block h-full"

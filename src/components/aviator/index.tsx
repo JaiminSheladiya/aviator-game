@@ -5,7 +5,7 @@ import AccessDenied from "../AccessDenied";
 import { Assets } from "pixi.js";
 import { urls } from "../../utils/urls";
 import Splash from "../pixicomp/Splash";
-import { Game_Global_Vars, initBet6, loadSound } from "../../utils";
+import { Game_Global_Vars, initBet6, loadSound, playSound } from "../../utils";
 import TopLogoBar from "../TopLogoBar";
 import RuleModal from "../RuleDialog";
 import SettingModal from "../SettingModal";
@@ -27,6 +27,7 @@ const Aviator = () => {
   const { aviatorState, setAviatorState } = useAviator();
   const [loaded, setLoaded] = useState(false);
   const [openGame, setOpenGame] = useState(false);
+  console.log("openGame: ", openGame);
   const [marketId, setMarketId] = useState<string | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
 
@@ -38,9 +39,16 @@ const Aviator = () => {
   React.useEffect(() => {
     Game_Global_Vars.betValue = [bet6[0], bet6[0]];
   }, [bet6]);
+  React.useEffect(() => {
+    if (openGame && aviatorState.fxChecked) {
+      if (aviatorState.game_anim_status === "ANIM_CRASHED") playSound("flew");
+      if (aviatorState.game_anim_status === "ANIM_STARTED") playSound("take");
+    }
+  }, [aviatorState.game_anim_status]);
 
   React.useEffect(() => {
     // Load assets with error handling
+    loadSound();
     Assets.load(urls)
       .then(() => {
         setLoaded(true);
@@ -127,10 +135,7 @@ const Aviator = () => {
     //   if (heartbeatInterval) clearInterval(heartbeatInterval);
     // };
 
-
     connectCasinoWebSocket();
-
-
   }, []);
 
   // Manual balance refresh function for testing
@@ -153,7 +158,7 @@ const Aviator = () => {
         setRuleModalOpen={setRuleModalOpen}
       />
       {/* Debug UI for development */}
-      {process.env.NODE_ENV === "development" && (
+      {/* {process.env.NODE_ENV === "development" && (
         <div
           style={{
             position: "fixed",
@@ -184,7 +189,7 @@ const Aviator = () => {
             Refresh Balance
           </button>
         </div>
-      )}
+      )} */}
       {aviatorState.auth ? (
         openGame && loaded ? (
           <GameBoard bet6={bet6} marketId={marketId} />

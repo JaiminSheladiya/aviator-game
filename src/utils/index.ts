@@ -25,36 +25,6 @@ export const curveFunction = (x: number, dimension: dimensionType) => {
   return (0.0007 * Math.pow(x, 1.9) * dimension.height) / 1500;
 };
 
-// export const renderCurve = (g: Graphics, _dimension: dimensionType) => {
-//   const dimension = { width: _dimension.width, height: _dimension.height - 40 };
-//   const xAxis = Array.from(
-//     { length: dimension.width / 10 },
-//     (_, index) => index * 10
-//   );
-//   const points = xAxis.map((item) => ({
-//     x: item,
-//     y: dimension.height - curveFunction(item, dimension),
-//   }));
-//   g.clear();
-//   g.beginFill(0xe59407, 0.3);
-//   // g.lineStyle(4, 0xffd900, 1);
-//   g.moveTo(points[0].x, points[0].y);
-
-//   for (let i = 1; i < points.length; i++) {
-//     g.lineTo(points[i].x, points[i].y);
-//   }
-//   g.lineTo(points[points.length - 1].x, dimension.height);
-//   g.lineTo(0, dimension.height);
-//   g.endFill();
-//   const lineWidth = interpolate(window.innerWidth, 400, 1920, 16, 4);
-//   g.lineStyle(lineWidth, 0xffd900, 1);
-//   g.moveTo(points[0].x, points[0].y);
-
-//   for (let i = 1; i < points.length; i++) {
-//     g.lineTo(points[i].x, points[i].y);
-//   }
-// };
-
 export const renderCurve = (g: Graphics, _dimension: dimensionType) => {
   const dimension = { width: _dimension.width, height: _dimension.height - 40 };
   const xAxis = Array.from(
@@ -148,8 +118,7 @@ export const _drawBar =
   };
 
 export const playSound = (type: "bg" | "flew" | "win" | "take") => {
-  // Actually play the sound using @pixi/sound
-  // Only play if the sound is loaded
+  console.log("playSound: -==>>", `${type}-sound` , type, sound.exists(`${type}-sound`));
   if (sound.exists(`${type}-sound`)) {
     sound.play(`${type}-sound`, { loop: type === "bg" });
   }
@@ -159,13 +128,10 @@ export const stopSound = (type: "bg" | "flew" | "win" | "take") => {
 };
 
 export const loadSound = () => {
-  // Use dummy sound URLs that won't break the app
-  const baseUrl =
-    process.env.REACT_APP_ASSETS_IMAGE_URL || "https://via.placeholder.com/";
-  sound.add("bg-sound", `${baseUrl}bg-sound.mp3`);
-  sound.add("flew-sound", `${baseUrl}flew.mp3`);
-  sound.add("win-sound", `${baseUrl}win.mp3`);
-  sound.add("take-sound", `${baseUrl}take.mp3`);
+  sound.add("bg-sound", "/sounds/bg-sound.mp3");
+  sound.add("flew-sound", "/sounds/flew.mp3");
+  sound.add("win-sound", "/sounds/win.mp3");
+  sound.add("take-sound", "/sounds/take.mp3");
   sound.volumeAll = 0.5;
 };
 export const setVolume = (val: number) => {

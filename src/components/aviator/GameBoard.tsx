@@ -373,25 +373,80 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
     );
   };
 
+  // const handleResize = () => {
+  //   const width = Math.min(
+  //     aviatorState.dimension.width,
+  //     pixi_ref.current?.clientWidth || 0
+  //   );
+
+  //   // Mobile check: set height to 240px if on mobile
+  //   const isMobile = window.innerWidth < 600;
+  //   const height = isMobile
+  //     ? 454
+  //     : Math.max(
+  //         150,
+  //         window.innerHeight -
+  //           (footer_ref.current?.clientHeight || 0) -
+  //           150 -
+  //           (width > 1392 ? 0 : 10)
+  //       );
+
+  //   setPixiDimension({ width, height });
+  //   setAviatorState((prev) => {
+  //     const new_width = prev.dimension.width;
+  //     const new_height = (new_width * height) / width;
+  //     return {
+  //       ...prev,
+  //       dimension: {
+  //         width: new_width,
+  //         height: new_height,
+  //       },
+  //     };
+  //   });
+  // };
+
+  // Dummy game simulation
+
   const handleResize = () => {
     const width = Math.min(
       aviatorState.dimension.width,
       pixi_ref.current?.clientWidth || 0
     );
 
-    // Mobile check: set height to 240px if on mobile
-    const isMobile = window.innerWidth < 600;
-    const height = isMobile
-      ? 454
-      : Math.max(
-          150,
-          window.innerHeight -
-            (footer_ref.current?.clientHeight || 0) -
-            150 -
-            (width > 1392 ? 0 : 10)
-        );
+    const isMobile = window.innerWidth < 768;
+    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+    console.log('isTablet: ', isTablet);
+    const isDesktop = window.innerWidth >= 1024;
+
+    const footerHeight = footer_ref.current?.clientHeight || 0;
+    const betPanelHeight =
+      document.getElementById("bet-panels")?.clientHeight || 0;
+    const headerHeight = document.getElementById("header")?.clientHeight || 0;
+
+    let totalReservedHeight = footerHeight + betPanelHeight + headerHeight;
+
+    // Add buffer for mobile and tablet only
+    if (isMobile) {
+      totalReservedHeight += 250; // adjust as needed
+    }
+    if (isTablet) {
+      totalReservedHeight += 400; // adjust as needed
+    }
+
+    let height = window.innerHeight - totalReservedHeight;
+
+    // 📏 Limit canvas height for large screens (desktop)
+    if (isDesktop) {
+      const maxCanvasHeight = 470; // tweak for your layout
+      height = Math.min(height, maxCanvasHeight);
+    }
+
+    // Avoid canvas being too small
+    const minCanvasHeight = 150;
+    height = Math.max(height, minCanvasHeight);
 
     setPixiDimension({ width, height });
+
     setAviatorState((prev) => {
       const new_width = prev.dimension.width;
       const new_height = (new_width * height) / width;
@@ -405,7 +460,6 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
     });
   };
 
-  // Dummy game simulation
   useEffect(() => {
     const simulateGame = () => {
       // Generate dummy users for this round
@@ -592,12 +646,10 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
       crashAudioRef.current = null;
     }
   }, [aviatorState.fxChecked]);
-  useEffect(() => {
-    
-  },[])
-  
+  useEffect(() => {}, []);
+
   const playCrashSound = () => {
-    console.log('playCrashSound: ', aviatorState);
+    console.log("playCrashSound: ", aviatorState);
     // Play sprite_audio.mp3 when game_anim_status is ANIM_CRASHED
     if (!crashAudioRef.current && aviatorState.fxChecked) {
       crashAudioRef.current = new Audio("/sounds/sprite_audio.mp3");
@@ -846,7 +898,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
             {[0, 1].map((item, i) => (
               <div
                 key={i}
-                className={`flex flex-col justify-start items-center gap-1 lg:gap-4 w-full rounded-lg bg-gradient-to-b from-[#1C1C1C] to-black p-4 ${
+                className={`flex flex-col justify-start items-center gap-1 lg:gap-4 w-full rounded-lg bg-gradient-to-b from-[#1C1C1C] to-black p-3 ${
                   betPlaceStatus[i] === "success" || pendingBet[i]
                     ? allowedBet || pendingBet[i]
                       ? "border border-red-700"
@@ -924,17 +976,14 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
                   </div>
                   {betPlaceStatus[i] === "success" || pendingBet[i] ? (
                     pendingBet[i] ? (
-                      // <div className="flex flex-col justify-center items-center text-xs w-[100px] lg:w-[160px] 3xl:w-[395px]">
                       <button
                         onClick={() => cancelBet(i)}
-                        className="flex flex-col w-full h-full   rounded-[14px] 3xl:rounded-[30px] bg-red-600 hover:bg-red-700 border border-red-500 justify-center items-center font-bold transition-colors"
+                        className={`disabled:opacity-30 flex flex-col min-w-[58%] lg:min-w-[180px] h-[80px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-red-600 justify-center items-center border border-white hover:opacity-80`}
                       >
-                        <span className="text-white text-xs mt-1 opacity-90">
-                          Waiting for next round
-                        </span>
-                        <span className="text-white text-lg mt-2 font-bold leading-none">
+                        <p className="text-[22px] 3xl:text-[42px] leading-[20px] 3xl:leading-[42px]">
                           Cancel
-                        </span>
+                        </p>
+                        <p className="text-[14px]">Waiting for next round</p>
                       </button>
                     ) : (
                       // </div>
@@ -967,7 +1016,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
                     <button
                       onClick={() => handleBet(i)}
                       // disabled={!allowedBet || betPlaceStatus[i] !== "none"}
-                      className={`disabled:opacity-30 flex flex-col min-w-[58%] lg:min-w-[180px] h-[90px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-[#28a909] justify-center items-center border border-white hover:opacity-80`}
+                      className={`disabled:opacity-30 flex flex-col min-w-[58%] lg:min-w-[180px] h-[80px] 3xl:w-[395px] 3xl:h-[142px] rounded-[14px] 3xl:rounded-[30px] bg-[#28a909] justify-center items-center border border-white hover:opacity-80`}
                     >
                       <p className="text-[22px] 3xl:text-[42px] leading-[20px] 3xl:leading-[42px]">
                         Bet

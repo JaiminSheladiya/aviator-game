@@ -84,6 +84,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
 
   const [betButtonCount, setBetButtonCount] = useState(2);
   const [curPayout, setCurPayout] = useState(0);
+  console.log("curPayout: ", curPayout);
 
   const [pendingBet, setPendingBet] = useState<boolean[]>([false, false]);
   const [allowedBet, setAllowedBet] = useState(false);
@@ -236,7 +237,6 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
 
       console.log("Placing bet with:", { usedMarketId, eventId, bets });
       const response = await placeBet(usedMarketId, eventId, bets);
-      console.log("Bet response:", response);
 
       if (response.status === "success") {
         _setBetPlaceStatus("success", i);
@@ -415,7 +415,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
 
     const isMobile = window.innerWidth < 768;
     const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-    console.log('isTablet: ', isTablet);
+    console.log("isTablet: ", isTablet);
     const isDesktop = window.innerWidth >= 1024;
 
     const footerHeight = footer_ref.current?.clientHeight || 0;
@@ -518,7 +518,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
           let payout = 1.0;
           const payoutInterval = setInterval(() => {
             payout += 0.1;
-            setCurPayout(payout);
+              setCurPayout(payout);
             Game_Global_Vars.curPayout = payout;
             // Live update dummy bets: randomly cash out some users
             if (Math.random() < 0.1 && payout > 1.1) {
@@ -899,12 +899,8 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
               <div
                 key={i}
                 className={`flex flex-col justify-start items-center gap-1 lg:gap-4 w-full rounded-lg bg-gradient-to-b from-[#1C1C1C] to-black p-3 ${
-                  betPlaceStatus[i] === "success" || pendingBet[i]
-                    ? allowedBet || pendingBet[i]
-                      ? "border border-red-700"
-                      : "border border-orange-500"
-                    : ""
-                } ${i === 1 && betButtonCount === 1 ? "hidden" : ""}`}
+                  i === 1 && betButtonCount === 1 ? "hidden" : ""
+                }`}
                 style={{ background: "#1b1c1d" }}
               >
                 <BetAutoSwitch
@@ -1026,7 +1022,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
                   )}
                 </div>
                 {betAutoState[i] === "auto" ? (
-                  <div className="flex justify-between gap-2 items-center min-w-[300px]">
+                  <div className="flex justify-between gap-2 items-center min-w-[300px] mt-4 lg:mt-0">
                     <button
                       onClick={() => {
                         if (aviatorState.RemainedAutoPlayCount[i] < 1) {

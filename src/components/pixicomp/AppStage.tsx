@@ -70,7 +70,7 @@ const AppStage = ({
   );
 
   const gradTexture = useMemo(() => createGradTexture(dimension), [dimension]);
-
+  const isMobile = window.innerWidth < 768;
   const handleResize = () => {
     setPlaneScale(interpolate(window.innerWidth, 400, 1920, 0.4, 0.2));
     setPulseBase(interpolate(window.innerWidth, 400, 1920, 0.6, 0.8));
@@ -87,9 +87,9 @@ const AppStage = ({
       tickRef.current = 0;
       crashOffset.current = 0;
       planeXRef.current = 0;
-      posPlaneRef.current = { 
-        x: interpolate(dimension.width, 400, 1920, 10, 5), 
-        y: dimension.height 
+      posPlaneRef.current = {
+        x: interpolate(dimension.width, 400, 1920, 10, 5),
+        y: dimension.height,
       };
       crashOffset.current = 0;
     }
@@ -122,7 +122,10 @@ const AppStage = ({
       game_anim_status === "ANIM_CRASHED" ? crashOffset.current * 1.5 : 0;
 
     posPlaneRef.current = {
-      x: (pulseBase + pulseGraphRef.current) * planeXRef.current + crashX + interpolate(dimension.width, 400, 1920, 10, 5),
+      x:
+        (pulseBase + pulseGraphRef.current) * planeXRef.current +
+        crashX +
+        interpolate(dimension.width, 400, 1920, 10, 5),
       y:
         dimension.height -
         interpolate(dimension.width, 400, 1920, 15, 60) -
@@ -297,7 +300,7 @@ const AppStage = ({
             new TextStyle({
               align: "center",
               fontFamily: "Roboto",
-              fontSize: 100,
+              fontSize: isMobile ? 400 : 150,
               fontWeight: "700",
               fill: ["#ffffff", "#ffffff"],
               stroke: "#111111",

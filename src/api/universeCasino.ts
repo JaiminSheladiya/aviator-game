@@ -63,52 +63,42 @@ export async function placeBet(
   );
   return response.data;
 }
-let socket: any = null;
 
-export function connectCasinoWebSocket() {
-  // onMessage: (data: any) => void
-  socket = new WebSocket(
+export function connectCasinoWebSocket(): WebSocket {
+  const socket = new WebSocket(
     "wss://universeexchapi.com/universe_casino_8822?token=" +
       encodeURIComponent(TOKEN)
   );
-  console.log("Connecting to WebSocket...");
 
-  // Try with token as query parameter first
+  // socket.onopen = function (event) {
+  //   console.log("WebSocket connected");
 
-  socket.onopen = () => {
-    console.log("WebSocket connected, trying auth...");
+  //   // Send authentication
+  //   socket.send(
+  //     JSON.stringify({
+  //       type: "auth",
+  //       token: TOKEN,
+  //     })
+  //   );
+  // };
 
-    // Try different auth message formats
-    const authAttempts = [
-      { type: "auth", token: TOKEN },
-      { type: "auth", jwt: TOKEN },
-      { type: "auth", authorization: `Bearer ${TOKEN}` },
-      { type: "auth", accessToken: TOKEN },
-    ];
+  socket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    console.log("Received:", data);
 
-    console.log("Trying auth format 1:", authAttempts[0]);
-    socket.send(JSON.stringify(authAttempts[0]));
-
-    // If first fails, try others after a delay
-    setTimeout(() => {
-      console.log("Trying auth format 2:", authAttempts[1]);
-      socket.send(JSON.stringify(authAttempts[1]));
-    }, 2000);
-
-    setTimeout(() => {
-      console.log("Trying auth format 3:", authAttempts[2]);
-      socket.send(JSON.stringify(authAttempts[2]));
-    }, 4000);
-  };
-
-  socket.onmessage = (event: any) => {
-    console.log("Raw WebSocket message:", event.data);
-    try {
-      const data = JSON.parse(event.data);
-      console.log("Parsed WebSocket message:", data);
-      // onMessage(data);
-    } catch (e) {
-      console.error("WebSocket message parse error:", e);
+    // Handle different message types
+    switch (data.type) {
+      case "balance_update":
+        console.log("Balance updated:", data.balance);
+        break;
+      case "bet_result":
+        console.log("Bet result:", data);
+        break;
+      case "market_update":
+        console.log("Market update:", data);
+        break;
+      default:
+        console.log("Unknown message type:", data.type);
     }
   };
 
@@ -118,12 +108,7 @@ export function connectCasinoWebSocket() {
 
   socket.onclose = (event: any) => {
     console.log("WebSocket disconnected:", event.code, event.reason);
-    console.log("Close event details:", event);
   };
 
   return socket;
-}
-
-export function disconnectSocket() {
-  
 }

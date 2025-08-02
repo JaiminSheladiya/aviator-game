@@ -31,6 +31,7 @@ export const renderCurve = (g: Graphics, _dimension: dimensionType) => {
     { length: dimension.width / 10 },
     (_, index) => index * 10
   );
+  console.log("xAxis", xAxis);
   const points = xAxis.map((item) => ({
     x: item,
     y: dimension.height - curveFunction(item, dimension),

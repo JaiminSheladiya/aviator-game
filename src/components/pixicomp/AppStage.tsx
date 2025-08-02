@@ -300,7 +300,7 @@ const AppStage = ({
             new TextStyle({
               align: "center",
               fontFamily: "Roboto",
-              fontSize: isMobile ? 400 : 150,
+              fontSize: isMobile ? 350 : 150,
               fontWeight: "700",
               fill: ["#ffffff", "#ffffff"],
               stroke: "#111111",

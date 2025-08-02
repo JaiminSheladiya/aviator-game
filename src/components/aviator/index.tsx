@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import GameBoard from "./GameBoard";
 import { useAviator } from "../../store/aviator";
 import AccessDenied from "../AccessDenied";
@@ -24,15 +24,7 @@ const headers = {
 };
 
 const Aviator = () => {
-  const {
-    isConnected,
-    isAuthenticated,
-    balance,
-    marketData,
-    lastBetResult,
-    sendMessage,
-    connect,
-  } = useSocket();
+  const { isConnected, getMarketData, connect } = useSocket();
 
   const { aviatorState, setAviatorState } = useAviator();
   const [loaded, setLoaded] = useState(false);
@@ -43,6 +35,8 @@ const Aviator = () => {
 
   const [bet6, setBet6] = useState<string[]>(initBet6);
   const [ruleModalOpen, setRuleModalOpen] = useState(false);
+  const [marketData, setMarketData] = useState<any>(null);
+  const [messageHistory, setMessageHistory] = useState<any[]>([]);
   const [settingModalOpen, setSettingModalOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
 
@@ -145,8 +139,33 @@ const Aviator = () => {
     //   if (heartbeatInterval) clearInterval(heartbeatInterval);
     // };
 
-    connect();
+    connect("", {
+      type: "1",
+      id: "88.0022",
+    });
   }, []);
+
+  useEffect(() => {
+    console.log("isConnected: ===>>>", isConnected);
+    if (!isConnected) return;
+
+    // Subscribe to market data using getMessageFromSocket functionality
+    const unsubscribe = getMarketData().subscribe((data: any) => {
+      console.log("Market data received:", data);
+
+      if (data) {
+        setMarketData(data);
+        setMessageHistory((prev) => [...prev, { timestamp: new Date(), data }]);
+      } else {
+        // Handle connection closed or unsubscribed
+        console.log("Market data connection closed");
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isConnected, getMarketData]);
 
   // Manual balance refresh function for testing
   const refreshBalance = async () => {

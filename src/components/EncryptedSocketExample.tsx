@@ -1,17 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSocket, useSocketEvent } from '../providers/SocketProvider';
 
-const SocketExample: React.FC = () => {
+const EncryptedSocketExample: React.FC = () => {
   const { 
     isConnected, 
     isAuthenticated, 
     balance,
     marketData,
     lastBetResult,
-    sendMessage,
     connect,
-    disconnect 
+    disconnect,
+    sendMessage,
+    encryptionState
   } = useSocket();
+
+  const [gameId, setGameId] = useState('88.01'); // Example game ID
 
   // Listen to balance updates
   useSocketEvent('balance_update', (data) => {
@@ -28,21 +31,26 @@ const SocketExample: React.FC = () => {
     console.log('Market update received:', data);
   });
 
-  // Listen to connection status
-  useSocketEvent('connection_status', (data) => {
-    console.log('Connection status:', data.status);
-  });
+  // Connect with encryption
+  const connectWithEncryption = () => {
+    const messageToSocket = {
+      id: gameId,
+      type: 'join_game',
+      data: {
+        gameType: 'casino',
+        tableId: gameId.slice(-2)
+      }
+    };
+    
+    connect(undefined, messageToSocket);
+  };
 
-  // Listen to auth success/failure
-  useSocketEvent('auth_success', (data) => {
-    console.log('Authentication successful:', data);
-  });
+  // Connect without encryption (plain WebSocket)
+  const connectPlain = () => {
+    connect();
+  };
 
-  useSocketEvent('auth_failed', (data) => {
-    console.log('Authentication failed:', data);
-  });
-
-  // Example: Place a bet
+  // Place a bet
   const placeBet = () => {
     if (isAuthenticated) {
       sendMessage({
@@ -56,7 +64,7 @@ const SocketExample: React.FC = () => {
     }
   };
 
-  // Example: Get balance
+  // Get balance
   const getBalance = () => {
     sendMessage({
       type: 'get_balance'
@@ -64,12 +72,19 @@ const SocketExample: React.FC = () => {
   };
 
   return (
-    <div className="socket-example">
-      <h3>Socket Status</h3>
+    <div className="encrypted-socket-example">
+      <h3>Encrypted Socket Status</h3>
       <div>
         <p>Connected: {isConnected ? 'Yes' : 'No'}</p>
         <p>Authenticated: {isAuthenticated ? 'Yes' : 'No'}</p>
         <p>Balance: ${balance.toFixed(2)}</p>
+        
+        <div>
+          <h4>Encryption State</h4>
+          <p>Has Key Pair: {encryptionState.hasKeyPair ? 'Yes' : 'No'}</p>
+          <p>Has Server Key: {encryptionState.hasServerKey ? 'Yes' : 'No'}</p>
+          <p>Has Encryption Key: {encryptionState.hasEncryptionKey ? 'Yes' : 'No'}</p>
+        </div>
         
         {marketData && (
           <div>
@@ -86,9 +101,18 @@ const SocketExample: React.FC = () => {
         )}
 
         <div>
-          {/* <button onClick={connect} disabled={isConnected}>
-            Connect
-          </button> */}
+          <input 
+            type="text" 
+            value={gameId} 
+            onChange={(e) => setGameId(e.target.value)}
+            placeholder="Enter game ID (e.g., 88.01)"
+          />
+          <button onClick={connectWithEncryption} disabled={isConnected}>
+            Connect with Encryption
+          </button>
+          <button onClick={connectPlain} disabled={isConnected}>
+            Connect Plain WebSocket
+          </button>
           <button onClick={disconnect} disabled={!isConnected}>
             Disconnect
           </button>
@@ -104,4 +128,4 @@ const SocketExample: React.FC = () => {
   );
 };
 
-export default SocketExample; 
+export default EncryptedSocketExample; 

@@ -70,17 +70,17 @@ export function connectCasinoWebSocket(): WebSocket {
       encodeURIComponent(TOKEN)
   );
 
-  // socket.onopen = function (event) {
-  //   console.log("WebSocket connected");
+  socket.onopen = function (event) {
+    console.log("WebSocket connected");
 
-  //   // Send authentication
-  //   socket.send(
-  //     JSON.stringify({
-  //       type: "auth",
-  //       token: TOKEN,
-  //     })
-  //   );
-  // };
+    // Send authentication
+    socket.send(
+      JSON.stringify({
+        type: "auth",
+        token: TOKEN,
+      })
+    );
+  };
 
   socket.onmessage = function (event) {
     const data = JSON.parse(event.data);

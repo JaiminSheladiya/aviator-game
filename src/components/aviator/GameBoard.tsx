@@ -84,7 +84,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
 
   const [betButtonCount, setBetButtonCount] = useState(2);
   const [curPayout, setCurPayout] = useState(0);
-  console.log("curPayout: ", curPayout);
+  // console.log("curPayout: ", curPayout);
 
   const [pendingBet, setPendingBet] = useState<boolean[]>([false, false]);
   const [allowedBet, setAllowedBet] = useState(false);

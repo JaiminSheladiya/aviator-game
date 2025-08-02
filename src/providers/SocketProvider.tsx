@@ -6,9 +6,10 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import { connectCasinoWebSocket } from "../api/universeCasino";
+import EncryptDecryptService from "../services/EncryptDecryptService";
+
 const TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbmNyeXB0ZWRUb2tlbiI6IlUyRnNkR1ZrWDE5K21vOVJGcTgxK0p3RFg3dTgyeXhIS0xWNmx3NUxUYzlDVXBOcml1THZkSUFMNE5YYlVHb2c2YmU1b0dqbDR0azhWMS81Rllad2hKZkJmaUxmc0puZTNxZmx3cEl6SE1ZdVljUWlta3ZSQjRyVldzNzVJR0ErbFFDT0phSXdTMXRqU2tqWWR6YkU4Vk1ONDVmQVlvUWZkczh4V3dleHp5OGVDU0I1bzc3YnFOMnlsVHRCVDR5YmgxaGFkbUFPWDMvN3pnSjYzUFpicHhVWnNEOEdNNzdGNWtYUU9jYU40M1VqVTBVcVUwdXFsK0NkL3RZTER4ZVVXOFFUTEdza1dockQySUJLUXcvaEJySDZxQm9JajZ1Vk9aRm5vMmlMVXhWaU1hTlpvd3NTTWV1ckwwRVlVL3lmbTgzTnlGS0xaVXZFeXd5a0dncnhXdGxsT2dhMnRDUGx2a1l6REdIWlpFbHZENEprOWxKM1R6dnAxRzRpb1ZpbCIsImlhdCI6MTc1MzgxNjQ2N30.VeN0v2UhdqWjLaZQ8GDLK79EQYxbq_IgEcHWDN9MgxY";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbmNyeXB0ZWRUb2tlbiI6IlUyRnNkR1ZrWDE5K21vOVJGcTgxK0p3RFg3dTgyeXhIS0xWNmx3NUxUYzlDVXBOcml1THZkSUFMNE5YYlVHb2c2YmU1b0dqbDR0azhWMS81Rllad2hKZkJmaUxmc0JuZTNxZmx3cEl6SE1ZdVljUWlta3ZSQjRyVldzNzVJR0ErbFFDT0phSXdTMXRqU2tqWWR6YkU4Vk1ONDVmQVlvUWZkczh4V3dleHp5OGVDU0I1bzc3YnFOMnlsVHRCVDR5YmgxaGFkbUFPWDMvN3pnSjYzUFpicHhVWnNEOEdNNzdGNWtYUU9jYU40M1VqVTBVcVUwdXFsK0NkL3RZTER4ZVVXOFFUTEdza1dockQySUJLUXcvaEJySDZxQm9JajZ1Vk9aRm5vMmlMVXhWaU1hTlpvd3NTTWV1ckwwRVlVL3lmbTgzTnlGS0xaVXZFeXd5a0dncnhXdGxsT2dhMnRDUGx2a1l6REdIWlpFbHZENEprOWxKM1R6dnAxRzRpb1ZpbCIsImlhdCI6MTc1MzgxNjQ2N30.VeN0v2UhdqWjLaZQ8GDLK79EQYxbq_IgEcHWDN9MgxY";
 
 // Types for socket messages
 export interface SocketMessage {
@@ -58,7 +59,7 @@ interface SocketContextType {
   balance: number;
   marketData: any;
   lastBetResult: any;
-  connect: () => void;
+  connect: (url?: string, messageToSocket?: any) => void;
   disconnect: () => void;
   sendMessage: (message: any) => void;
   subscribe: (
@@ -69,6 +70,15 @@ interface SocketContextType {
     eventType: SocketEventType,
     callback: (data: any) => void
   ) => void;
+  needToSendPrevious: () => boolean;
+  encryptionState: {
+    hasKeyPair: boolean;
+    hasServerKey: boolean;
+    hasEncryptionKey: boolean;
+  };
+  getMarketData: () => {
+    subscribe: (callback: (data: any) => void) => () => void;
+  };
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -89,8 +99,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   );
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttempts = 3; // Reduced from 5 to 3
+  const maxReconnectAttempts = 1000; // Increased like Angular service
+  const reconnectInterval = 5000; // 5 seconds like Angular service
   const isReconnectingRef = useRef(false);
+  const isAttemptRef = useRef(false);
+  const previousMsgRef = useRef<any>(null);
+  const urlRef = useRef<string>(`wss://universeexchapi.com/universe_casino_88?token=${TOKEN}`);
+  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const encryptDecryptServiceRef = useRef<EncryptDecryptService>(new EncryptDecryptService());
 
   // Initialize subscribers map
   useEffect(() => {
@@ -108,6 +124,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         subscribersRef.current.set(type, new Set());
       }
     });
+
+    // Initialize getMessageFromSocket functionality
+    encryptDecryptServiceRef.current.getMessageFromSocket();
   }, []);
 
   // Notify subscribers of an event
@@ -132,17 +151,24 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Handle incoming messages
   const handleMessage = useCallback(
-    (event: MessageEvent) => {
+    async (event: MessageEvent) => {
       try {
-        const data = JSON.parse(event.data);
-        console.log("Received:", data);
+        console.log("Received before processing:", event);
+        // Process message through encryption service
+        const processedData = await encryptDecryptServiceRef.current.processMessage(event.data);
+        
+        if (!processedData) {
+          return;
+        }
+
+        console.log("Received:", processedData);
 
         // Handle different message types based on documentation
-        switch (data.type) {
+        switch (processedData.type) {
           case "auth_success":
             setIsAuthenticated(true);
             reconnectAttemptsRef.current = 0; // Reset reconnection attempts on successful auth
-            notifySubscribers("auth_success", data);
+            notifySubscribers("auth_success", processedData);
             break;
 
           case "auth_failed":
@@ -152,26 +178,26 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
               socketRef.current.close();
               socketRef.current = null;
             }
-            notifySubscribers("auth_failed", data);
+            notifySubscribers("auth_failed", processedData);
             break;
 
           case "balance_update":
-            setBalance(data.balance);
-            notifySubscribers("balance_update", data);
+            setBalance(processedData.balance);
+            notifySubscribers("balance_update", processedData);
             break;
 
           case "bet_result":
-            setLastBetResult(data);
-            notifySubscribers("bet_result", data);
+            setLastBetResult(processedData);
+            notifySubscribers("bet_result", processedData);
             break;
 
           case "market_update":
-            setMarketData(data);
-            notifySubscribers("market_update", data);
+            setMarketData(processedData);
+            notifySubscribers("market_update", processedData);
             break;
 
           default:
-            console.log("Unknown message type:", data.type);
+            console.log("Unknown message type:", processedData.type);
         }
       } catch (error) {
         console.error("Error parsing socket message:", error);
@@ -180,8 +206,33 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     [notifySubscribers]
   );
 
+  // Start ping interval
+  const startPing = useCallback(() => {
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+    }
+    
+    pingIntervalRef.current = setInterval(() => {
+      if (socketRef.current?.readyState === WebSocket.OPEN) {
+        socketRef.current.send(JSON.stringify({ type: 'ping' }));
+      }
+    }, 60000); // Send ping every 1 minute like Angular service
+  }, []);
+
+  // Stop ping interval
+  const stopPing = useCallback(() => {
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+  }, []);
+
   // Connect to WebSocket
-  const connect = useCallback(() => {
+  const connect = useCallback(async (url?: string, messageToSocket?: any) => {
+    if (url) {
+      urlRef.current = url;
+    }
+
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       console.log("Socket already connected");
       return;
@@ -194,65 +245,68 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       isReconnectingRef.current = true;
-      socketRef.current = connectCasinoWebSocket();
+      
+      // If messageToSocket is provided, use encryption service
+      if (messageToSocket) {
+        const encryptedUrl = await encryptDecryptServiceRef.current.generateEncryptionKey(
+          'casino', 
+          messageToSocket
+        );
+        socketRef.current = new WebSocket(encryptedUrl);
+      } else {
+        socketRef.current = new WebSocket(urlRef.current);
+      }
 
       socketRef.current.onopen = () => {
         console.log("Socket connected");
         setIsConnected(true);
         setIsAuthenticated(false);
         isReconnectingRef.current = false;
+        isAttemptRef.current = true;
         notifySubscribers("connection_status", { status: "connected" });
-        console.log("WebSocket connected");
-        // Send authentication
-        // socketRef.current?.send(
-        //   JSON.stringify({
-        //     type: "auth",
-        //     token: TOKEN,
-        //   })
-        // );
+        
+        // Send authentication if not using encryption
+        // if (!messageToSocket) {
+        //   socketRef.current?.send(
+        //     JSON.stringify({
+        //       type: "auth",
+        //       token: TOKEN,
+        //     })
+        //   );
+        // }
+
+        // Start ping
+        startPing();
+
+        // Send previous message if exists
+        setTimeout(() => {
+          if (socketRef.current && isAttemptRef.current) {
+            if (previousMsgRef.current == null || previousMsgRef.current == undefined) {
+              previousMsgRef.current = { type: "2", id: "" };
+            }
+          }
+        }, 1000);
       };
 
       socketRef.current.onmessage = handleMessage;
-
-      setInterval(() => {
-        if (socketRef.current?.readyState === WebSocket.OPEN) {
-            socketRef.current?.send(JSON.stringify({ type: 'ping' }));
-        }
-    }, 30000);
 
       socketRef.current.onclose = (event) => {
         console.log("Socket disconnected:", event.code, event.reason);
         setIsConnected(false);
         setIsAuthenticated(false);
         isReconnectingRef.current = false;
+        isAttemptRef.current = false;
+        stopPing();
         notifySubscribers("connection_status", {
           status: "disconnected",
           code: event.code,
         });
 
-        // Only attempt to reconnect if it's not an auth failure and we haven't exceeded max attempts
-        if (
-          event.code !== 1000 &&
-          event.code !== 1001 &&
-          reconnectAttemptsRef.current < maxReconnectAttempts
-        ) {
-          reconnectAttemptsRef.current++;
-          const delay = Math.min(
-            2000 * Math.pow(2, reconnectAttemptsRef.current),
-            10000
-          );
-
-          console.log(
-            `Attempting to reconnect (${reconnectAttemptsRef.current}/${maxReconnectAttempts}) in ${delay}ms`
-          );
-
-          reconnectTimeoutRef.current = setTimeout(() => {
-            connect();
-          }, delay);
-        } else {
-          console.log(
-            "Max reconnection attempts reached or connection closed normally"
-          );
+        // Reconnect logic like Angular service
+        try {
+          reconnect();
+        } catch (error) {
+          reconnect();
         }
       };
 
@@ -261,11 +315,30 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         isReconnectingRef.current = false;
         notifySubscribers("connection_status", { status: "error", error });
       };
+
     } catch (error) {
       console.error("Error connecting to socket:", error);
       isReconnectingRef.current = false;
     }
-  }, [handleMessage, notifySubscribers]);
+  }, [handleMessage, notifySubscribers, startPing, stopPing]);
+
+  // Reconnect function like Angular service
+  const reconnect = useCallback(() => {
+    if (!isReconnectingRef.current) {
+      isReconnectingRef.current = true;
+      reconnectAttemptsRef.current++;
+      
+      if (reconnectAttemptsRef.current <= maxReconnectAttempts) {
+        setTimeout(() => {
+          console.log(`WebSocket reconnecting... (attempt ${reconnectAttemptsRef.current} of ${maxReconnectAttempts})`);
+          isAttemptRef.current = true;
+          connect();
+        }, reconnectInterval);
+      } else {
+        console.error('WebSocket connection failed after maximum reconnect attempts');
+      }
+    }
+  }, [connect]);
 
   // Disconnect from WebSocket
   const disconnect = useCallback(() => {
@@ -274,8 +347,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       reconnectTimeoutRef.current = null;
     }
 
+    stopPing();
     isReconnectingRef.current = false;
     reconnectAttemptsRef.current = 0;
+    isAttemptRef.current = false;
+
+    // Close encryption service
+    encryptDecryptServiceRef.current.closeExistingSocket();
 
     if (socketRef.current) {
       socketRef.current.close(1000, "Manual disconnect");
@@ -287,15 +365,47 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     setBalance(0);
     setMarketData(null);
     setLastBetResult(null);
-  }, []);
+  }, [stopPing]);
 
   // Send message through WebSocket
   const sendMessage = useCallback((message: any) => {
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify(message));
+    isAttemptRef.current = false;
+    previousMsgRef.current = message;
+
+    let messageToSend: string;
+
+    // Check if encryption is available
+    const encryptionState = encryptDecryptServiceRef.current.getEncryptionState();
+    if (encryptionState.hasEncryptionKey) {
+      // Send encrypted message
+      messageToSend = encryptDecryptServiceRef.current.sendMessageToSocket(message);
     } else {
-      console.warn("Cannot send message: socket not connected");
+      // Send plain JSON message
+      messageToSend = JSON.stringify(message);
     }
+
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(messageToSend);
+    }
+
+    socketRef.current!.onopen = () => {
+      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        socketRef.current.send(messageToSend);
+      } else {
+        try {
+          socketRef.current?.send(messageToSend);
+        } catch (error) {
+          setTimeout(() => {
+            socketRef.current?.send(messageToSend);
+          }, 1000);
+        }
+      }
+    };
+  }, []);
+
+  // Check if need to send previous message
+  const needToSendPrevious = useCallback(() => {
+    return !!(socketRef.current && isAttemptRef.current);
   }, []);
 
   // Subscribe to socket events
@@ -328,6 +438,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
+  // Get market data (similar to Angular service)
+  const getMarketData = useCallback(() => {
+    return encryptDecryptServiceRef.current.getMarketData();
+  }, []);
+
   // Auto-connect on mount
   useEffect(() => {
     connect();
@@ -348,6 +463,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     sendMessage,
     subscribe,
     unsubscribe,
+    needToSendPrevious,
+    encryptionState: encryptDecryptServiceRef.current.getEncryptionState(),
+    getMarketData,
   };
 
   return (

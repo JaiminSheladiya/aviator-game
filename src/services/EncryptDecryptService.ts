@@ -69,29 +69,8 @@ export class EncryptDecryptService {
    * Process incoming socket message
    */
   async processMessage(message: any): Promise<any> {
-    if (message === "WebSocket connection closed" || 
-        message === "unsubscribed successfully" || 
-        message === null) {
-      // Close socket and return
-      this.updateMarketData(null);
-      return null;
-    }
-
-    try {
-      // Try to parse as plain JSON first
-      const plainData = JSON.parse(message);
-      this.updateMarketData(message);
-      return plainData;
-    } catch (error) {
-      // If not plain JSON, try to decrypt
-      return this.messageReader(message);
-    }
-  }
-
-  /**
-   * Read and decrypt message
-   */
-  private async messageReader(message: string): Promise<any> {
+    // console.log('Received message:', message);
+    // Decrypt the data using the private key
     if (message === "WebSocket connection closed" || 
         message === "unsubscribed successfully" || 
         message === null) {
@@ -100,7 +79,7 @@ export class EncryptDecryptService {
     }
 
     const decryptedBuffer = forge.util.decode64(message);
-
+    console.log('decryptedBuffer:', decryptedBuffer);
     try {
       const dataParse = JSON.parse(decryptedBuffer);
       if (dataParse?.type === 1) {
@@ -182,11 +161,13 @@ export class EncryptDecryptService {
 
     if (msg.id.startsWith("99.")) {
       const tableId = msg.id.slice(-2); // Extract last 2 digits
-      url = `wss://universeexchapi.com/universe_casino_99${tableId}`;
+      // url = `wss://universeexchapi.com/universe_casino_99${tableId}`;
+      url = `wss://casino.betever365.com/universe_casino_99${tableId}`;
     }
     if (msg.id.startsWith("88.")) {
       const tableId = msg.id.slice(-2); // Extract last 2 digits
-      url = `wss://universeexchapi.com/universe_casino_88${tableId}`;
+      // url = `wss://universeexchapi.com/universe_casino_88${tableId}`;
+      url = `wss://casino.betever365.com/universe_casino_88${tableId}`;
     }
 
     return url;

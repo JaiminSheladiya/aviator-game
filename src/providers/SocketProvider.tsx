@@ -156,12 +156,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log("Received before processing:", event);
         // Process message through encryption service
         const processedData = await encryptDecryptServiceRef.current.processMessage(event.data);
-        
+        console.log("Received:", processedData);
         if (!processedData) {
           return;
         }
-
-        console.log("Received:", processedData);
 
         // Handle different message types based on documentation
         switch (processedData.type) {
@@ -175,7 +173,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             setIsAuthenticated(false);
             // Don't reconnect on auth failure
             if (socketRef.current) {
-              socketRef.current.close();
+              socketRef.current.close(1000, "Auth failed");
               socketRef.current = null;
             }
             notifySubscribers("auth_failed", processedData);
@@ -247,11 +245,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       isReconnectingRef.current = true;
       
       // If messageToSocket is provided, use encryption service
+      console.log("messageToSocket:", messageToSocket);
       if (messageToSocket) {
         const encryptedUrl = await encryptDecryptServiceRef.current.generateEncryptionKey(
           'casino', 
           messageToSocket
         );
+        console.log("encryptedUrl:", encryptedUrl);
         socketRef.current = new WebSocket(encryptedUrl);
       } else {
         socketRef.current = new WebSocket(urlRef.current);
@@ -265,16 +265,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         isAttemptRef.current = true;
         notifySubscribers("connection_status", { status: "connected" });
         
-        // Send authentication if not using encryption
-        // if (!messageToSocket) {
-        //   socketRef.current?.send(
-        //     JSON.stringify({
-        //       type: "auth",
-        //       token: TOKEN,
-        //     })
-        //   );
-        // }
-
         // Start ping
         startPing();
 
@@ -301,6 +291,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           status: "disconnected",
           code: event.code,
         });
+        
+        // Send authentication if not using encryption
+        // if (!messageToSocket) {
+        //   socketRef.current?.send(
+        //     JSON.stringify({
+        //       type: "auth",
+        //       token: TOKEN,
+        //     })
+        //   );
+        // }
 
         // Reconnect logic like Angular service
         try {

@@ -155,48 +155,48 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         console.log("Received before processing:", event);
         // Process message through encryption service
-        const processedData = await encryptDecryptServiceRef.current.processMessage(event.data);
+        const processedData = await encryptDecryptServiceRef.current.processMessage(event.data, socketRef.current);
         console.log("Received:", processedData);
         if (!processedData) {
           return;
         }
 
         // Handle different message types based on documentation
-        switch (processedData.type) {
-          case "auth_success":
-            setIsAuthenticated(true);
-            reconnectAttemptsRef.current = 0; // Reset reconnection attempts on successful auth
-            notifySubscribers("auth_success", processedData);
-            break;
+        // switch (processedData.type) {
+        //   case "auth_success":
+        //     setIsAuthenticated(true);
+        //     reconnectAttemptsRef.current = 0; // Reset reconnection attempts on successful auth
+        //     notifySubscribers("auth_success", processedData);
+        //     break;
 
-          case "auth_failed":
-            setIsAuthenticated(false);
-            // Don't reconnect on auth failure
-            if (socketRef.current) {
-              socketRef.current.close(1000, "Auth failed");
-              socketRef.current = null;
-            }
-            notifySubscribers("auth_failed", processedData);
-            break;
+        //   case "auth_failed":
+        //     setIsAuthenticated(false);
+        //     // Don't reconnect on auth failure
+        //     if (socketRef.current) {
+        //       socketRef.current.close(1000, "Auth failed");
+        //       socketRef.current = null;
+        //     }
+        //     notifySubscribers("auth_failed", processedData);
+        //     break;
 
-          case "balance_update":
-            setBalance(processedData.balance);
-            notifySubscribers("balance_update", processedData);
-            break;
+        //   case "balance_update":
+        //     setBalance(processedData.balance);
+        //     notifySubscribers("balance_update", processedData);
+        //     break;
 
-          case "bet_result":
-            setLastBetResult(processedData);
-            notifySubscribers("bet_result", processedData);
-            break;
+        //   case "bet_result":
+        //     setLastBetResult(processedData);
+        //     notifySubscribers("bet_result", processedData);
+        //     break;
 
-          case "market_update":
-            setMarketData(processedData);
-            notifySubscribers("market_update", processedData);
-            break;
+        //   case "market_update":
+        //     setMarketData(processedData);
+        //     notifySubscribers("market_update", processedData);
+        //     break;
 
-          default:
-            console.log("Unknown message type:", processedData.type);
-        }
+        //   default:
+        //     console.log("Unknown message type:", processedData.type);
+        // }
       } catch (error) {
         console.error("Error parsing socket message:", error);
       }

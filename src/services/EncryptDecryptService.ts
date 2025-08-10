@@ -83,15 +83,12 @@ export class EncryptDecryptService {
     // First, try to parse the message as JSON directly (in case it's already unencrypted)
     try {
       const directParse = JSON.parse(message);
-      console.log("Message is already JSON (unencrypted):", directParse);
 
       if (directParse?.type === 0) {
         // Handle server public key and encryption setup
         this.serverPublicKey = directParse.data; // Store the PEM string directly
         this.ivhex = this.decryptString(directParse.iv);
         this.encryptionKey = this.decryptString(directParse.encryptionKey);
-        console.log("this.messageToSocket:", this.messageToSocket);
-        // Send the original message to socket
         const msg = this.sendMessageToSocket(this.messageToSocket);
         socket?.send(msg);
         return this.messageToSocket;
@@ -105,17 +102,14 @@ export class EncryptDecryptService {
 
       try {
         const decryptedBuffer = forge.util.decode64(message);
-        console.log("decryptedBuffer:", decryptedBuffer);
 
         const dataParse = JSON.parse(decryptedBuffer);
-        console.log("dataParse:", dataParse);
 
         if (dataParse?.type === 0) {
           // Handle server public key and encryption setup
           this.serverPublicKey = dataParse.data; // Store the PEM string directly
           this.ivhex = this.decryptString(dataParse.iv);
           this.encryptionKey = this.decryptString(dataParse.encryptionKey);
-          console.log("this.messageToSocket:", this.messageToSocket);
           // Send the original message to socket
           const msg = this.sendMessageToSocket(this.messageToSocket);
           socket?.send(msg);

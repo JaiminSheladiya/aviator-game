@@ -159,14 +159,23 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const handleMessage = useCallback(
     async (event: MessageEvent) => {
       try {
-        console.log("Received before processing:", event);
         // Process message through encryption service
         const processedData =
           await encryptDecryptServiceRef.current.processMessage(
             event.data,
             socketRef.current
           );
-        console.log("Received:-=>>", processedData);
+
+        // Handle user_count updates from socket messages
+        if (processedData.user_count !== undefined) {
+          // Emit custom event for Redux connector to catch
+          window.dispatchEvent(
+            new CustomEvent("socketUserCountUpdate", {
+              detail: { userCount: processedData.user_count },
+            })
+          );
+        }
+
         if (!processedData) {
           return;
         }
@@ -205,7 +214,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             break;
 
           default:
-            console.log("Unknown message type:", processedData.type);
             // For game data like multiplier updates, notify subscribers
             if (processedData.data && processedData.data.multiplier) {
               notifySubscribers("game_update", processedData);
@@ -247,12 +255,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       if (socketRef.current?.readyState === WebSocket.OPEN) {
-        console.log("Socket already connected");
         return;
       }
 
       if (isReconnectingRef.current) {
-        console.log("Already attempting to reconnect");
         return;
       }
 
@@ -260,21 +266,20 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         isReconnectingRef.current = true;
 
         // If messageToSocket is provided, use encryption service
-        console.log("messageToSocket:", messageToSocket);
+
         if (messageToSocket) {
           const encryptedUrl =
             await encryptDecryptServiceRef.current.generateEncryptionKey(
               "casino",
               messageToSocket
             );
-          console.log("encryptedUrl:", encryptedUrl);
+
           socketRef.current = new WebSocket(encryptedUrl);
         } else {
           socketRef.current = new WebSocket(urlRef.current);
         }
 
         socketRef.current.onopen = () => {
-          console.log("Socket connected");
           setIsConnected(true);
           setIsAuthenticated(false);
           isReconnectingRef.current = false;
@@ -300,7 +305,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         socketRef.current.onmessage = handleMessage;
 
         socketRef.current.onclose = (event) => {
-          console.log("Socket disconnected:", event.code, event.reason);
           setIsConnected(false);
           setIsAuthenticated(false);
           isReconnectingRef.current = false;

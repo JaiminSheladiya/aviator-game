@@ -25,6 +25,7 @@ import BetBoard from "./BetBoard";
 import CustomSnackBar from "../CustomSnackBar";
 import { MoreHorizontal } from "lucide-react";
 import { placeBet, Bet } from "../../api/universeCasino";
+import { useUserCount } from "../../hooks/useUserCount";
 
 const AVATAR_URLS = [
   // DiceBear Avatars (open source)
@@ -55,6 +56,7 @@ const dummyUsers = [
 type GameBoardProps = { bet6: string[]; marketId?: string | null };
 const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   const { aviatorState, setAviatorState } = useAviator();
+  const { userCount } = useUserCount();
   const [autoPlayingIndex, setAutoPlayingIndex] = useState(0);
   const [snackState, setSnackState] = useState({
     open: false,
@@ -804,7 +806,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
                   />
                 ))}
               </div>
-              <div>138</div>
+              <div>{userCount}</div>
             </div>
           </div>
           <div

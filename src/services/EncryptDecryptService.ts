@@ -70,7 +70,7 @@ export class EncryptDecryptService {
    */
   async processMessage(message: any, socket?: any): Promise<any> {
     // console.log('Received message:', message);
-    // Decrypt the data using the private key
+
     if (
       message === "WebSocket connection closed" ||
       message === "unsubscribed successfully" ||
@@ -80,36 +80,66 @@ export class EncryptDecryptService {
       return null;
     }
 
-    const decryptedBuffer = forge.util.decode64(message);
-    console.log("decryptedBuffer:", decryptedBuffer);
-
+    // First, try to parse the message as JSON directly (in case it's already unencrypted)
     try {
-      const dataParse = JSON.parse(decryptedBuffer);
-      console.log("dataParse:", dataParse);
+      const directParse = JSON.parse(message);
+      console.log("Message is already JSON (unencrypted):", directParse);
 
-      if (dataParse?.type === 0) {
+      if (directParse?.type === 0) {
         // Handle server public key and encryption setup
-        this.serverPublicKey = dataParse.data; // Store the PEM string directly
-        this.ivhex = this.decryptString(dataParse.iv);
-        this.encryptionKey = this.decryptString(dataParse.encryptionKey);
+        this.serverPublicKey = directParse.data; // Store the PEM string directly
+        this.ivhex = this.decryptString(directParse.iv);
+        this.encryptionKey = this.decryptString(directParse.encryptionKey);
         console.log("this.messageToSocket:", this.messageToSocket);
         // Send the original message to socket
         const msg = this.sendMessageToSocket(this.messageToSocket);
         socket?.send(msg);
         return this.messageToSocket;
       } else {
-        this.updateMarketData(dataParse);
-        return dataParse;
+        this.updateMarketData(directParse);
+        return directParse;
       }
-    } catch (error) {
-      // Decrypt using AES if not JSON
-      const decryptedData = this.decryptusingNodeforge(
-        decryptedBuffer,
-        this.encryptionKey!,
-        this.ivhex!
-      );
-      this.updateMarketData(decryptedData);
-      return decryptedData;
+    } catch (jsonError) {
+      // If direct JSON parsing fails, try to decrypt the message
+      console.log("Message is not JSON, attempting to decrypt...");
+
+      try {
+        const decryptedBuffer = forge.util.decode64(message);
+        console.log("decryptedBuffer:", decryptedBuffer);
+
+        const dataParse = JSON.parse(decryptedBuffer);
+        console.log("dataParse:", dataParse);
+
+        if (dataParse?.type === 0) {
+          // Handle server public key and encryption setup
+          this.serverPublicKey = dataParse.data; // Store the PEM string directly
+          this.ivhex = this.decryptString(dataParse.iv);
+          this.encryptionKey = this.decryptString(dataParse.encryptionKey);
+          console.log("this.messageToSocket:", this.messageToSocket);
+          // Send the original message to socket
+          const msg = this.sendMessageToSocket(this.messageToSocket);
+          socket?.send(msg);
+          return this.messageToSocket;
+        } else {
+          this.updateMarketData(dataParse);
+          return dataParse;
+        }
+      } catch (error) {
+        // Decrypt using AES if not JSON
+        try {
+          const decryptedBuffer = forge.util.decode64(message);
+          const decryptedData = this.decryptusingNodeforge(
+            decryptedBuffer,
+            this.encryptionKey!,
+            this.ivhex!
+          );
+          this.updateMarketData(decryptedData);
+          return decryptedData;
+        } catch (decryptError) {
+          console.error("Failed to decrypt message:", decryptError);
+          return null;
+        }
+      }
     }
   }
 
@@ -177,7 +207,11 @@ export class EncryptDecryptService {
   sendMessageToSocket(message: any): string {
     const msg = JSON.stringify(message);
     console.log("this.encryptionKey:", this.encryptionKey);
-    const encryptedText = this.encryptUsingNodeForge(msg, this.encryptionKey!, this.ivhex!);
+    const encryptedText = this.encryptUsingNodeForge(
+      msg,
+      this.encryptionKey!,
+      this.ivhex!
+    );
     return forge.util.encode64(encryptedText);
     // return msg;
   }
@@ -234,7 +268,7 @@ export class EncryptDecryptService {
       decipher.finish();
 
       const decryptedString = decipher.output.data;
-      
+
       // Try to parse as JSON, but return raw string if it fails
       try {
         return JSON.parse(decryptedString);

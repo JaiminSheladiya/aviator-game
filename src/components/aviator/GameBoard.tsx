@@ -26,6 +26,7 @@ import CustomSnackBar from "../CustomSnackBar";
 import { MoreHorizontal } from "lucide-react";
 import { placeBet, Bet } from "../../api/universeCasino";
 import { useUserCount } from "../../hooks/useUserCount";
+import { useSocket } from "../../providers/SocketProvider";
 
 const AVATAR_URLS = [
   // DiceBear Avatars (open source)
@@ -126,6 +127,14 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   const crashAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const [progress, setProgress] = useState(100);
+
+  const { getMarketData, marketData } = useSocket();
+// FOR VIJAY
+  useEffect(() => {
+    if (marketData) {
+      console.log("marketData: ", marketData);
+    }
+  }, [marketData]);
 
   const _setBetValue = (
     val: string | ((prev: string) => string),
@@ -520,7 +529,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
           let payout = 1.0;
           const payoutInterval = setInterval(() => {
             payout += 0.1;
-              setCurPayout(payout);
+            setCurPayout(payout);
             Game_Global_Vars.curPayout = payout;
             // Live update dummy bets: randomly cash out some users
             if (Math.random() < 0.1 && payout > 1.1) {
@@ -857,8 +866,9 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
             </div>
             <div className="flex flex-col gap-1 justify-center items-center px-4 py-2 lg:px-8 lg:py-2 rounded-lg">
               <p className="text-white uppercase text-[21px] lg:text-[30px]">
-                {aviatorState.game_anim_status === "ANIM_CRASHED" ?
-                  "Flew away" : ""}
+                {aviatorState.game_anim_status === "ANIM_CRASHED"
+                  ? "Flew away"
+                  : ""}
               </p>
               {aviatorState.game_anim_status === "ANIM_CRASHED" && (
                 <p className="text-[#d0011b] font-bold text-[56px] leading-[42px] lg:text-[100px] lg:leading-[100px]">

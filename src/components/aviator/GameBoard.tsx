@@ -61,7 +61,7 @@ const dummyUsers = [
 type GameBoardProps = { bet6: string[]; marketId?: string | null };
 const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   const { aviatorState, setAviatorState } = useAviator();
-  const { userCount } = useUserCount();
+  // const { userCount = 15 } = useUserCount();
   const [autoPlayingIndex, setAutoPlayingIndex] = useState(0);
   const [snackState, setSnackState] = useState({
     open: false,
@@ -70,7 +70,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   const [modalAutoPlayOpen, modalAutoPlaySetOpen] = useState(false);
   const [rotate, setRotate] = useState(0);
   const [manualMarketId, setManualMarketId] = useState<string>("");
-
+  const { userCount } = useSocket();
   const [trigParachute, setTrigParachute] = useState({ uniqId: 0, isMe: true });
 
   const [crashHistory, setCrashHistory] = useState<string[]>([

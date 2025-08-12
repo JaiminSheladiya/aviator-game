@@ -134,6 +134,7 @@ interface SocketContextType {
   gameData: GameData;
   // countdownSeconds: number;
   bets: Bet[];
+  userCount: number;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -181,6 +182,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   );
   const [gameData, setGameData] = useState<GameData>({});
   const [bets, setBets] = useState<Bet[]>([]);
+  const [userCount, setUserCount] = useState<number>(0);
 
   // Initialize subscribers map
   useEffect(() => {
@@ -386,6 +388,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
               // user count
               // setMarketData(processedData);
               // notifySubscribers("market_update", processedData);
+              setUserCount(processedData.user_count);
 
               break;
 
@@ -709,6 +712,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     getMarketData,
     gameData,
     bets,
+    userCount,
   };
 
   return (

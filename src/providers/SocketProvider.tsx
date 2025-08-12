@@ -70,6 +70,7 @@ export interface Bet {
   roundId?: string;
   stake?: string;
   createdAt?: string;
+  avatar?: string;
 }
 
 export interface BetResult {
@@ -136,6 +137,19 @@ interface SocketContextType {
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
+
+// Add this function at the top level of the file
+function generateUserAvatar(userName: string) {
+  // Use userName as seed to generate consistent avatar
+  let hash = 0;
+  for (let i = 0; i < userName.length; i++) {
+    const char = userName.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  const avatarIndex = Math.abs(hash % 72) + 1;
+  return `/avatars/av-${avatarIndex}.png`;
+}
 
 // Socket Provider Component
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -319,14 +333,25 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
                 setBets((cur) => {
                   const bets = [...cur];
                   if (nation === Status.PLACED) {
-                    bets.push(data);
+                    // Add avatar when placing bet
+                    const betWithAvatar = {
+                      ...data,
+                      avatar: generateUserAvatar(data.userName),
+                    };
+                    bets.push(betWithAvatar);
                   }
                   if (nation === Status.CASHOUT) {
                     const index = bets.findIndex(
                       (bet) => bet.betId === data.betId
                     );
                     if (index > -1) {
-                      bets[index] = { ...bets[index], ...data };
+                      // Preserve existing avatar when updating
+                      const existingAvatar = bets[index].avatar;
+                      bets[index] = {
+                        ...bets[index],
+                        ...data,
+                        avatar: existingAvatar,
+                      };
                     }
                   }
                   return bets;
@@ -341,6 +366,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
                   ...cur,
                   status,
                 }));
+                // setBets((cur) => {
+                if (status === GameStages.BLAST) {
+                  // setBets((cur) => {
+                  //   return cur.map((bet) => ({
+                  //     ...bet,
+                  //     nation: Status.CASHOUT,
+                  //   }));
+                  // });
+                  setBets([]);
+                }
               }
 
               // setMarketData(processedData);

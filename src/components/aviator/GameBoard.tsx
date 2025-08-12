@@ -91,7 +91,6 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
 
   const [betButtonCount, setBetButtonCount] = useState(2);
   const [curPayout, setCurPayout] = useState(0);
-  console.log("curPayout: ", curPayout);
 
   const [pendingBet, setPendingBet] = useState<boolean[]>([false, false]);
   // const [allowedBet, setAllowedBet] = useState(false);
@@ -133,7 +132,6 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   const [progress, setProgress] = useState(0);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
-  console.log("progress", progress);
 
   const { getMarketData, isConnected, subscribe, marketData, gameData, bets } =
     useSocket();

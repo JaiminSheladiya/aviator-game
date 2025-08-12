@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getHistoryItemColor } from "../../utils";
+import { useSocket } from "../../providers/SocketProvider";
 
 const GREEN_WIN_BG = "#23391a";
 const GREEN_PROGRESS = "#427f00";
@@ -24,7 +25,7 @@ function getDummyUsers(count: number) {
     const avatarIndex = Math.floor(Math.random() * 72) + 1;
     const avatar = `/avatars/av-${avatarIndex}.png`;
     const username = `d***${Math.floor(Math.random() * 10)}`;
-    const betAmount = 100;
+    const betAmount = 150;
 
     users.push({
       username,
@@ -181,149 +182,70 @@ const BetBoard = () => {
     [idx: number]: { x: number; win: number };
   } | null>(null);
   const [revealedWinners, setRevealedWinners] = useState<number>(0);
-  const [roundActive, setRoundActive] = useState(false);
-  const [roundTimerId, setRoundTimerId] = useState<any>(null);
   const [topTab, setTopTab] = useState("X");
   const [topTabFilter, setTopTabFilter] = useState("Day");
 
-  // Top bar winner count (independent from user list)
-  const [topWinners, setTopWinners] = useState(0);
-  const [topWinnersTarget, setTopWinnersTarget] = useState(0);
-  const [topWinnersInterval, setTopWinnersInterval] = useState<any>(null);
-  const [topWinIncrements, setTopWinIncrements] = useState<number[]>([]);
-  const [topTotalWin, setTopTotalWin] = useState(0);
-  const [topTotalWinInterval, setTopTotalWinInterval] = useState<any>(null);
+  const { bets } = useSocket();
 
-  // For smooth round end
-  const roundEndRef = useRef(false);
-
-  // Start a new round
-  const startNewRound = () => {
-    roundEndRef.current = false;
-    const userCount = getRandomInt(25, 40);
-    const newUsers = getDummyUsers(userCount);
-    setUsers(newUsers);
-    const bets = getRandomInt(1000, 2000);
-    setTotalBets(bets);
-    // Pick winners and assign their X and win USD
-    let winnersToReveal = getRandomInt(
-      Math.floor(userCount * 0.3),
-      Math.floor(userCount * 0.7)
-    );
-    let indexes = [...Array(userCount).keys()];
-    indexes = indexes.sort(() => Math.random() - 0.5);
-    const winIndexes = indexes.slice(0, winnersToReveal);
-    const winData: { [idx: number]: { x: number; win: number } } = {};
-    for (const idx of winIndexes) {
-      const x = getRandomFloat(1.1, 4.0, 2);
-      winData[idx] = { x, win: +(100 * x).toFixed(2) };
-    }
-    setWinnerIndexes(winIndexes);
-    setWinnerData(winData);
-    setRevealedWinners(0);
-    setRoundActive(true);
-    // Top bar logic
-    setTopWinners(0);
-    // Target: 30-60% of total bets
-    const target = getRandomInt(Math.floor(bets * 0.3), Math.floor(bets * 0.6));
-    setTopWinnersTarget(target);
-    // Precompute win increments for smooth total win USD
-    const increments: number[] = [];
-    let total = 0;
-    for (let i = 0; i < target; ++i) {
-      // Each win is between $110 and $400
-      const win = getRandomFloat(110, 400, 2);
-      increments.push(win);
-      total += win;
-    }
-    setTopWinIncrements(increments);
-    setTopTotalWin(0);
+  // Convert socket bets to user format
+  const convertBetsToUsers = (socketBets: any[]) => {
+    return socketBets.map((bet, index) => {
+      return {
+        username: bet.userName,
+        avatar: bet.avatar, // Use avatar from socket data
+        betAmount: bet.stake,
+        betId: bet.betId,
+        eventId: bet.eventId,
+        roundId: bet.roundId,
+        nation: bet.nation,
+        createdAt: bet.createdAt,
+        oddsRate: bet.oddsRate,
+        cashOut: bet.cashOut,
+        isYou: false, // You can set this based on your user logic
+      };
+    });
   };
 
-  // Start new round every 8-15s (simulate natural round duration)
+  // Update users and calculate winners whenever bets change
   useEffect(() => {
-    startNewRound();
-    let roundDuration = getRandomInt(8000, 15000);
-    let timerId = setTimeout(function roundLoop() {
-      startNewRound();
-      roundDuration = getRandomInt(8000, 15000);
-      timerId = setTimeout(roundLoop, roundDuration);
-    }, roundDuration);
-    setRoundTimerId(timerId);
-    return () => clearTimeout(timerId);
-  }, []);
+    if (bets && bets.length > 0) {
+      const convertedUsers = convertBetsToUsers(bets);
+      setUsers(convertedUsers);
+      setTotalBets(bets.length);
 
-  // Reveal winners in fast, natural-feeling batches (user list)
-  useEffect(() => {
-    if (!roundActive || !winnerIndexes.length) return;
-    let revealed = 0;
-    let stopped = false;
-    const batchReveal = () => {
-      if (roundEndRef.current) return;
-      const batchSize = getRandomInt(3, 6);
-      revealed = Math.min(revealed + batchSize, winnerIndexes.length);
-      setRevealedWinners(revealed);
-      if (revealed < winnerIndexes.length && !roundEndRef.current) {
-        setTimeout(batchReveal, getRandomInt(180, 260));
-      }
-    };
-    batchReveal();
-    return () => {
-      stopped = true;
-    };
-    // eslint-disable-next-line
-  }, [winnerIndexes, roundActive]);
+      // Find actual winners (users who cashed out)
+      const actualWinners = bets.filter((bet) => bet.nation === "CASHOUT");
+      const winnerIndexes = actualWinners.map((winner) =>
+        bets.findIndex((bet) => bet.betId === winner.betId)
+      );
 
-  // Top bar winner count and total win USD animation (super smooth, stops at round end)
-  useEffect(() => {
-    if (topWinnersInterval) clearTimeout(topWinnersInterval);
-    if (topTotalWinInterval) clearTimeout(topTotalWinInterval);
-    if (!roundActive) return;
-    let current = 0;
-    let winSum = 0;
-    const animate = () => {
-      if (roundEndRef.current) return;
-      const increment = getRandomInt(1, 3);
-      let next = Math.min(current + increment, topWinnersTarget);
-      // For each new winner, add their win to total win USD
-      let winAdd = 0;
-      for (let i = current; i < next; ++i) {
-        winAdd += topWinIncrements[i] || 0;
-      }
-      winSum += winAdd;
-      setTopWinners(next);
-      setTopTotalWin(winSum);
-      current = next;
-      if (current < topWinnersTarget && !roundEndRef.current) {
-        setTopWinnersInterval(setTimeout(animate, getRandomInt(60, 120)));
-      }
-    };
-    animate();
-    return () => {
-      if (topWinnersInterval) clearTimeout(topWinnersInterval);
-      if (topTotalWinInterval) clearTimeout(topTotalWinInterval);
-    };
-    // eslint-disable-next-line
-  }, [roundActive, topWinnersTarget, topWinIncrements]);
+      // Create winner data from actual cashout information
+      const winData: { [idx: number]: { x: number; win: number } } = {};
+      actualWinners.forEach((winner, index) => {
+        const betIndex = winnerIndexes[index];
+        if (betIndex !== -1) {
+          winData[betIndex] = {
+            x: winner.oddsRate,
+            win: winner.cashOut,
+          };
+        }
+      });
 
-  // When round ends, stop all animations immediately
-  useEffect(() => {
-    if (!roundActive) {
-      roundEndRef.current = true;
-      if (topWinnersInterval) clearTimeout(topWinnersInterval);
-      if (topTotalWinInterval) clearTimeout(topTotalWinInterval);
+      setWinnerIndexes(winnerIndexes);
+      setWinnerData(winData);
+      setRevealedWinners(actualWinners.length); // All winners are already revealed
     }
-    // eslint-disable-next-line
-  }, [roundActive]);
+  }, [bets]);
 
-  // Calculate total win for visible user list
-  let totalWin = 0;
-  if (winnerData) {
-    for (let i = 0; i < winnerIndexes.length && i < revealedWinners; ++i) {
-      const idx = winnerIndexes[i];
-      totalWin += winnerData[idx]?.win || 0;
-    }
-  }
+  // Calculate total win from actual cashout data
+  const actualTotalWin = bets
+    .filter((bet) => bet.nation === "CASHOUT")
+    .reduce((sum, bet) => sum + (bet.cashOut || 0), 0);
+
+  // Calculate actual winner count from live data
+  const actualWinnerCount = bets.filter(
+    (bet) => bet.nation === "CASHOUT"
+  ).length;
 
   // Make Previous and Top tab data static
   const [previous] = useState(() => getDummyPrevious());
@@ -365,7 +287,7 @@ const BetBoard = () => {
               <div className="flex -space-x-2">
                 {users.slice(0, 3).map((u, i) => (
                   <img
-                    key={i}
+                    key={u.betId || i}
                     src={u.avatar}
                     alt="avatar"
                     width={24}
@@ -378,7 +300,7 @@ const BetBoard = () => {
               </div>
               <div className="flex flex-col items-end">
                 <span className="text-[16px] text-white leading-none">
-                  {topTotalWin.toLocaleString(undefined, {
+                  {actualTotalWin.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
@@ -387,19 +309,19 @@ const BetBoard = () => {
             </div>
             <div className="flex items-center gap-1 justify-between mb-1">
               <div className="text-[12px] text-white">
-                {topWinners}/{totalBets}{" "}
+                {actualWinnerCount}/{totalBets}{" "}
                 <span className="text-[#7b7b7b]"> Bets</span>
               </div>
               <div className="text-[12px] font-normal leading-[100%] align-middle text-[#7b7b7b]">
                 Total win USD
               </div>
-            </div>{" "}
+            </div>
             <div className="flex items-center w-full mb-1">
               <div className="flex-1 h-2 rounded-full bg-[#232325] overflow-hidden flex items-center">
                 <div
                   className="h-1 rounded-full"
                   style={{
-                    width: `${(topWinners / totalBets) * 100}%`,
+                    width: `${(actualWinnerCount / totalBets) * 100}%`,
                     background: GREEN_PROGRESS,
                   }}
                 />
@@ -495,18 +417,16 @@ const BetBoard = () => {
       <div className="flex-1 flex flex-col gap-[2px] w-full text-[12px] overflow-auto px-2 pb-2">
         {tab === "All Bets" &&
           users.map((item, i) => {
-            const isWinner =
-              winnerIndexes.indexOf(i) > -1 &&
-              winnerIndexes.indexOf(i) < revealedWinners;
-            const winnerInfo =
-              isWinner && winnerData ? winnerData[i] : undefined;
+            // Check if user has cashed out based on actual data
+            const isWinner = item.nation === "CASHOUT";
+
             return (
               <BetBoardItem
-                key={i}
+                key={item.betId || i} // Use betId as key for better React performance
                 {...item}
                 isWinner={isWinner}
-                crashedAt={isWinner && winnerInfo ? winnerInfo.x : undefined}
-                cashout={isWinner && winnerInfo ? winnerInfo.win : undefined}
+                crashedAt={isWinner ? item.oddsRate : undefined}
+                cashout={isWinner ? item.cashOut : undefined}
               />
             );
           })}

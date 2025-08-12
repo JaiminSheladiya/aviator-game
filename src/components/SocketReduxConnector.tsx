@@ -7,16 +7,16 @@ const SocketReduxConnector: React.FC = () => {
   const dispatch = useDispatch();
   const { subscribe } = useSocket();
 
-  useEffect(() => {
-    // Subscribe to all socket messages to catch user_count updates
-    const unsubscribe = subscribe("market_update", (data: any) => {
-      if (data && data.user_count !== undefined) {
-        dispatch(updateUserCount(data.user_count));
-      }
-    });
+  // useEffect(() => {
+  //   // Subscribe to all socket messages to catch user_count updates
+  //   const unsubscribe = subscribe("market_update", (data: any) => {
+  //     if (data && data.user_count !== undefined) {
+  //       dispatch(updateUserCount(data.user_count));
+  //     }
+  //   });
 
-    return unsubscribe;
-  }, [dispatch, subscribe]);
+  //   return unsubscribe;
+  // }, [dispatch, subscribe]);
 
   // Listen for custom socket user_count update events
   useEffect(() => {

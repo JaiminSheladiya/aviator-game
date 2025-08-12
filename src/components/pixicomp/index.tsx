@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { dimensionType } from "../../@types";
 import AppStage from "./AppStage";
 import { useAviator } from "../../store/aviator";
+import { GameStages, useSocket } from "../../providers/SocketProvider";
 
 const PIXIComponent = ({
   pixiDimension,
@@ -14,6 +15,7 @@ const PIXIComponent = ({
   trigParachute: { uniqId: number; isMe: boolean };
 }) => {
   const { aviatorState } = useAviator();
+  const { gameData } = useSocket();
   const [scale, setScale] = useState(0);
   useEffect(() => {
     setScale(
@@ -32,7 +34,7 @@ const PIXIComponent = ({
       <Container scale={scale}>
         <AppStage
           payout={curPayout}
-          game_anim_status={aviatorState.game_anim_status}
+          game_anim_status={gameData.status || GameStages.WAIT}
           dimension={aviatorState.dimension}
           pixiDimension={pixiDimension}
           // trigParachute={trigParachute}

@@ -35,6 +35,43 @@ export interface Player {
   isWinner?: boolean;
 }
 
+// {
+//   "betId": "689ae0d34b63cb03c69927f3",
+//   "userName": "o********4",
+//   "eventId": "88.0022",
+//   "eventName": "VIMAAN",
+//   "roundId": "1243261",
+//   "oddsRate": 0,
+//   "cashOut": 0,
+//   "nation": "PLACED",
+//   "stake": 100,
+//   "createdAt": "2025-08-12T06:36:03.039Z"
+// }
+
+// {
+//   "cashOut": 113,
+//   "nation": "CASHOUT",
+//   "oddsRate": 1.13,
+//   "betId": "689ae0f70fefc803fc2dccaf"
+// }
+export enum Status {
+  PLACED = "PLACED",
+  CASHOUT = "CASHOUT",
+}
+export type BetStatus = Status.PLACED | Status.CASHOUT;
+export interface Bet {
+  betId: string;
+  oddsRate: number;
+  cashOut: number;
+  nation: BetStatus;
+  userName?: string;
+  eventId?: string;
+  eventName?: string;
+  roundId?: string;
+  stake?: string;
+  createdAt?: string;
+}
+
 export interface BetResult {
   betId: string;
   status: "pending" | "placed" | "cashed_out" | "lost";
@@ -52,6 +89,19 @@ export type SocketEventType =
   | "auth_failed"
   | "connection_status"
   | "game_update";
+
+export enum GameStages {
+  WAIT = "WAIT",
+  RUN = "RUN",
+  BLAST = "BLAST",
+}
+export type GameStatus = GameStages.WAIT | GameStages.RUN | GameStages.BLAST;
+
+export type GameData = {
+  status?: GameStatus;
+  startsIn?: number;
+  multiplier?: number;
+};
 
 // Socket provider context
 interface SocketContextType {
@@ -80,6 +130,9 @@ interface SocketContextType {
   getMarketData: () => {
     subscribe: (callback: (data: any) => void) => () => void;
   };
+  gameData: GameData;
+  // countdownSeconds: number;
+  bets: Bet[];
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -112,6 +165,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const encryptDecryptServiceRef = useRef<EncryptDecryptService>(
     new EncryptDecryptService()
   );
+  const [gameData, setGameData] = useState<GameData>({});
+  const [bets, setBets] = useState<Bet[]>([]);
 
   // Initialize subscribers map
   useEffect(() => {
@@ -126,6 +181,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     ];
 
     eventTypes.forEach((type) => {
+      // console.log(
+      //   "subscribersRef.current.has(type)",
+      //   subscribersRef.current.has(type)
+      // );
+
       if (!subscribersRef.current.has(type)) {
         subscribersRef.current.set(type, new Set());
       }
@@ -139,8 +199,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const notifySubscribers = useCallback(
     (eventType: SocketEventType, data: any) => {
       const subscribers = subscribersRef.current.get(eventType);
+      // console.log("subscribers", eventType, data?.data, data, subscribers);
+
       if (subscribers) {
+        // console.log("subscribers into if");
+
         subscribers.forEach((callback) => {
+          // console.log("subscribers into foreach");
           try {
             callback(data);
           } catch (error) {
@@ -165,60 +230,157 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             event.data,
             socketRef.current
           );
+        // console.log("processedData", processedData);
 
         // Handle user_count updates from socket messages
-        if (processedData.user_count !== undefined) {
-          // Emit custom event for Redux connector to catch
-          window.dispatchEvent(
-            new CustomEvent("socketUserCountUpdate", {
-              detail: { userCount: processedData.user_count },
-            })
-          );
-        }
+        // if (processedData.user_count !== undefined) {
+        //   // Emit custom event for Redux connector to catch
+        //   window.dispatchEvent(
+        //     new CustomEvent("socketUserCountUpdate", {
+        //       detail: { userCount: processedData.user_count },
+        //     })
+        //   );
+        // }
 
         if (!processedData) {
           return;
         }
+        // console.log(
+        //   "processedData.type",
+        //   processedData.type,
+        //   Array.isArray(processedData)
+        // );
+
+        const emitEvent = (processedData: any) => {
+          // console.log(
+          //   "processedData",
+          //   processedData?.data?.nation,
+          //   processedData.data,
+          //   processedData
+          // );
+
+          switch (processedData.type) {
+            case "auth_success":
+              setIsAuthenticated(true);
+              reconnectAttemptsRef.current = 0; // Reset reconnection attempts on successful auth
+              notifySubscribers("auth_success", processedData);
+              break;
+
+            case "auth_failed":
+              setIsAuthenticated(false);
+              // Don't reconnect on auth failure
+              if (socketRef.current) {
+                socketRef.current.close(1000, "Auth failed");
+                socketRef.current = null;
+              }
+              notifySubscribers("auth_failed", processedData);
+              break;
+
+            case "balance_update":
+              setBalance(processedData.balance);
+              notifySubscribers("balance_update", processedData);
+              break;
+
+            case "bet_result":
+              setLastBetResult(processedData);
+              notifySubscribers("bet_result", processedData);
+              break;
+
+            // case "market_update":
+            //   setMarketData(processedData);
+            //   notifySubscribers("market_update", processedData);
+            //   break;
+
+            case "1":
+              const data = processedData.data;
+              if (!data) {
+                return;
+              }
+              const { multiplier, seconds, status, nation } = data;
+              if (multiplier) {
+                // notifySubscribers("game_update", processedData);
+                setGameData((cur) => ({
+                  ...cur,
+                  multiplier,
+                }));
+              }
+              if (seconds) {
+                // notifySubscribers("game_update", processedData);
+                setGameData((cur) => ({
+                  ...cur,
+                  startsIn: seconds,
+                }));
+              }
+
+              // MARKET UPDATE on status
+              if (nation) {
+                // nation - CASHOUT, PLACED
+                // notifySubscribers("market_update", processedData);
+                setBets((cur) => {
+                  const bets = [...cur];
+                  if (nation === Status.PLACED) {
+                    bets.push(data);
+                  }
+                  if (nation === Status.CASHOUT) {
+                    const index = bets.findIndex(
+                      (bet) => bet.betId === data.betId
+                    );
+                    if (index > -1) {
+                      bets[index] = { ...bets[index], ...data };
+                    }
+                  }
+                  return bets;
+                });
+              }
+              if (status) {
+                // status - RUN, BLAST
+                // console.log("statusstatusstatus", status);
+
+                // update game data
+                setGameData((cur) => ({
+                  ...cur,
+                  status,
+                }));
+              }
+
+              // setMarketData(processedData);
+              // notifySubscribers("market_update", processedData);
+              break;
+
+            case "3":
+              // user count
+              // setMarketData(processedData);
+              // notifySubscribers("market_update", processedData);
+
+              break;
+
+            default:
+            // For game data like multiplier updates, notify subscribers
+            // if (processedData.data && processedData.data.multiplier) {
+            //   notifySubscribers("game_update", processedData);
+            // } else {
+            //   console.log(
+            //     "subscribers else",
+            //     processedData?.data?.nation,
+            //     processedData.data,
+            //     processedData
+            //   );
+            // }
+          }
+        };
+
+        if (Array.isArray(processedData)) {
+          for (let i = 0; i < processedData.length; i++) {
+            const element = processedData[i];
+            // console.log("element", element);
+
+            emitEvent(element);
+          }
+        } else {
+          emitEvent(processedData);
+        }
 
         // Handle different message types based on documentation
-        switch (processedData.type) {
-          case "auth_success":
-            setIsAuthenticated(true);
-            reconnectAttemptsRef.current = 0; // Reset reconnection attempts on successful auth
-            notifySubscribers("auth_success", processedData);
-            break;
-
-          case "auth_failed":
-            setIsAuthenticated(false);
-            // Don't reconnect on auth failure
-            if (socketRef.current) {
-              socketRef.current.close(1000, "Auth failed");
-              socketRef.current = null;
-            }
-            notifySubscribers("auth_failed", processedData);
-            break;
-
-          case "balance_update":
-            setBalance(processedData.balance);
-            notifySubscribers("balance_update", processedData);
-            break;
-
-          case "bet_result":
-            setLastBetResult(processedData);
-            notifySubscribers("bet_result", processedData);
-            break;
-
-          case "market_update":
-            setMarketData(processedData);
-            notifySubscribers("market_update", processedData);
-            break;
-
-          default:
-            // For game data like multiplier updates, notify subscribers
-            if (processedData.data && processedData.data.multiplier) {
-              notifySubscribers("game_update", processedData);
-            }
-        }
       } catch (error) {
         console.error("Error parsing socket message:", error);
       }
@@ -253,6 +415,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       if (url) {
         urlRef.current = url;
       }
+      console.log("url", url);
 
       if (socketRef.current?.readyState === WebSocket.OPEN) {
         return;
@@ -261,6 +424,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       if (isReconnectingRef.current) {
         return;
       }
+      console.log("isReconnectingRef.current", isReconnectingRef.current);
 
       try {
         isReconnectingRef.current = true;
@@ -287,7 +451,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           notifySubscribers("connection_status", { status: "connected" });
 
           // Start ping
-          startPing();
+          // startPing();
 
           // Send previous message if exists
           setTimeout(() => {
@@ -358,7 +522,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             `WebSocket reconnecting... (attempt ${reconnectAttemptsRef.current} of ${maxReconnectAttempts})`
           );
           isAttemptRef.current = true;
-          connect();
+          connect("", {
+            type: "1",
+            id: "88.0022",
+          });
         }, reconnectInterval);
       } else {
         console.error(
@@ -444,7 +611,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   // Subscribe to socket events
   const subscribe = useCallback(
     (eventType: SocketEventType, callback: (data: any) => void) => {
+      // console.log("eventType", eventType);
+
       const subscribers = subscribersRef.current.get(eventType);
+      // console.log("eventType subscribers", subscribers);
       if (subscribers) {
         subscribers.add(callback);
       }
@@ -457,7 +627,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       };
     },
-    []
+    [subscribersRef.current]
   );
 
   // Unsubscribe from socket events
@@ -478,7 +648,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Auto-connect on mount
   useEffect(() => {
-    connect();
+    connect("", {
+      type: "1",
+      id: "88.0022",
+    });
 
     return () => {
       disconnect();
@@ -499,6 +672,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     needToSendPrevious,
     encryptionState: encryptDecryptServiceRef.current.getEncryptionState(),
     getMarketData,
+    gameData,
+    bets,
   };
 
   return (
@@ -520,6 +695,8 @@ export const useSocketEvent = (
   eventType: SocketEventType,
   callback: (data: any) => void
 ) => {
+  // console.log("useSocketEvent");
+
   const { subscribe, unsubscribe } = useSocket();
 
   useEffect(() => {

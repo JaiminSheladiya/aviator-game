@@ -12,7 +12,7 @@ import SettingModal from "../SettingModal";
 import HistoryModal from "../HistoryModal";
 import axios from "axios";
 import { getUserBalance } from "../../api/universeCasino";
-import { useSocket } from "../../providers/SocketProvider";
+import { GameStages, useSocket } from "../../providers/SocketProvider";
 
 const API_BASE = "https://universeexchapi.com/casinoapp/exchange";
 const TOKEN =
@@ -27,9 +27,9 @@ const Aviator = () => {
   const { isConnected, getMarketData, connect } = useSocket();
 
   const { aviatorState, setAviatorState } = useAviator();
+  const { gameData } = useSocket();
   const [loaded, setLoaded] = useState(false);
   const [openGame, setOpenGame] = useState(false);
-  console.log("openGame: ", openGame);
   const [marketId, setMarketId] = useState<string | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
 
@@ -45,10 +45,10 @@ const Aviator = () => {
   }, [bet6]);
   React.useEffect(() => {
     if (openGame && aviatorState.fxChecked) {
-      if (aviatorState.game_anim_status === "ANIM_CRASHED") playSound("flew");
-      if (aviatorState.game_anim_status === "ANIM_STARTED") playSound("take");
+      if (gameData.status === GameStages.BLAST) playSound("flew");
+      if (gameData.status === GameStages.RUN) playSound("take");
     }
-  }, [aviatorState.game_anim_status]);
+  }, [gameData.status]);
 
   React.useEffect(() => {
     // Load assets with error handling
@@ -150,20 +150,20 @@ const Aviator = () => {
     if (!isConnected) return;
 
     // Subscribe to market data using getMessageFromSocket functionality
-    const unsubscribe = getMarketData().subscribe((data: any) => {
-      console.log("Market data received:", data);
+    // const unsubscribe = getMarketData().subscribe((data: any) => {
+    //   // console.log("Market data received:", data);
 
-      if (data) {
-        setMarketData(data);
-        setMessageHistory((prev) => [...prev, { timestamp: new Date(), data }]);
-      } else {
-        // Handle connection closed or unsubscribed
-        console.log("Market data connection closed");
-      }
-    });
+    //   if (data) {
+    //     setMarketData(data);
+    //     setMessageHistory((prev) => [...prev, { timestamp: new Date(), data }]);
+    //   } else {
+    //     // Handle connection closed or unsubscribed
+    //     console.log("Market data connection closed");
+    //   }
+    // });
 
     return () => {
-      unsubscribe();
+      // unsubscribe();
     };
   }, [isConnected, getMarketData]);
 

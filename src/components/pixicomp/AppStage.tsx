@@ -25,6 +25,7 @@ import {
 } from "../../utils";
 import { dimensionType, gameAnimStatusType } from "../../@types";
 import type { Container as ContainerType } from "pixi.js";
+import { GameStages } from "../../providers/SocketProvider";
 
 const AppStage = ({
   payout,
@@ -33,7 +34,7 @@ const AppStage = ({
   pixiDimension,
 }: {
   payout: number;
-  game_anim_status: gameAnimStatusType;
+  game_anim_status: GameStages;
   dimension: dimensionType;
   pixiDimension: dimensionType;
 }) => {
@@ -51,7 +52,7 @@ const AppStage = ({
   const containerRef = useRef<ContainerType>(null);
 
   useTick((delta) => {
-    if (game_anim_status === "ANIM_STARTED" && containerRef.current) {
+    if (game_anim_status === GameStages.RUN && containerRef.current) {
       containerRef.current.rotation += 0.003 * delta;
     }
   });
@@ -83,7 +84,7 @@ const AppStage = ({
   }, []);
 
   useEffect(() => {
-    if (game_anim_status === "WAITING") {
+    if (game_anim_status === GameStages.WAIT) {
       tickRef.current = 0;
       crashOffset.current = 0;
       planeXRef.current = 0;
@@ -98,7 +99,7 @@ const AppStage = ({
   useTick((delta) => {
     hueRotateRef.current += delta / 500;
 
-    if (game_anim_status === "ANIM_STARTED") {
+    if (game_anim_status === GameStages.RUN) {
       tickRef.current += delta * 0.02;
 
       const amp = 0.06;
@@ -112,14 +113,14 @@ const AppStage = ({
       planeXRef.current = smoothedX;
     }
 
-    if (game_anim_status === "ANIM_CRASHED") {
+    if (game_anim_status === GameStages.BLAST) {
       crashOffset.current += delta * 4;
     }
 
     const crashX =
-      game_anim_status === "ANIM_CRASHED" ? crashOffset.current * 4 : 0;
+      game_anim_status === GameStages.BLAST ? crashOffset.current * 4 : 0;
     const crashY =
-      game_anim_status === "ANIM_CRASHED" ? crashOffset.current * 1.5 : 0;
+      game_anim_status === GameStages.BLAST ? crashOffset.current * 1.5 : 0;
 
     posPlaneRef.current = {
       x:
@@ -230,7 +231,7 @@ const AppStage = ({
       >
         <Graphics draw={drawRadialSlices} />
       </Container>
-      {game_anim_status === "ANIM_STARTED" ? (
+      {game_anim_status === GameStages.RUN ? (
         <Sprite
           filters={[colorMatrix]}
           texture={gradTexture}
@@ -257,7 +258,7 @@ const AppStage = ({
       />
       <Container
         mask={gameBoardMask.current}
-        visible={game_anim_status === "ANIM_STARTED"}
+        visible={game_anim_status === GameStages.RUN}
         position={{ x: 0, y: 0 }}
       >
         <Graphics
@@ -291,8 +292,8 @@ const AppStage = ({
           position={posPlaneRef.current}
         />
         <Text
-          visible={game_anim_status === "ANIM_STARTED"}
-          text={payout.toFixed(2) + "x"}
+          visible={game_anim_status === GameStages.RUN}
+          text={payout + "x"}
           anchor={0.5}
           x={dimension.width / 2}
           y={dimension.height / 2}

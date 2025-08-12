@@ -24,9 +24,9 @@ const SocketExample: React.FC = () => {
   });
 
   // Listen to market updates
-  useSocketEvent('market_update', (data) => {
-    console.log('Market update received:', data);
-  });
+  // useSocketEvent('market_update', (data) => {
+  //   console.log('Market update received:', data);
+  // });
 
   // Listen to connection status
   useSocketEvent('connection_status', (data) => {

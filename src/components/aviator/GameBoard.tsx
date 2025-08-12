@@ -26,7 +26,11 @@ import CustomSnackBar from "../CustomSnackBar";
 import { MoreHorizontal } from "lucide-react";
 import { placeBet, Bet } from "../../api/universeCasino";
 import { useUserCount } from "../../hooks/useUserCount";
-import { useSocket } from "../../providers/SocketProvider";
+import {
+  GameStages,
+  useSocket,
+  useSocketEvent,
+} from "../../providers/SocketProvider";
 
 const AVATAR_URLS = [
   // DiceBear Avatars (open source)
@@ -87,10 +91,10 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
 
   const [betButtonCount, setBetButtonCount] = useState(2);
   const [curPayout, setCurPayout] = useState(0);
-  // console.log("curPayout: ", curPayout);
+  console.log("curPayout: ", curPayout);
 
   const [pendingBet, setPendingBet] = useState<boolean[]>([false, false]);
-  const [allowedBet, setAllowedBet] = useState(false);
+  // const [allowedBet, setAllowedBet] = useState(false);
   const [betAutoState, setBetAutoState] = useState<betAutoStateType[]>([
     "bet",
     "bet",
@@ -126,15 +130,25 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const crashAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [progress, setProgress] = useState(100);
+  const [progress, setProgress] = useState(0);
+  const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
-  const { getMarketData, marketData } = useSocket();
-// FOR VIJAY
-  useEffect(() => {
-    if (marketData) {
-      console.log("marketData: ", marketData);
-    }
-  }, [marketData]);
+  console.log("progress", progress);
+
+  const { getMarketData, isConnected, subscribe, marketData, gameData, bets } =
+    useSocket();
+
+  // console.log("gameData", gameData);
+
+  // // FOR VIJAY
+  // useSocketEvent("game_update", (data) => {
+  //   console.log("Game update received:", data);
+  //   // Handle game state updates
+  // });
+  // useSocketEvent("market_update", (data) => {
+  //   console.log("Market update received:", data);
+  //   // Handle game state updates
+  // });
 
   const _setBetValue = (
     val: string | ((prev: string) => string),
@@ -314,23 +328,46 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   }, [crashHistory]);
 
   useEffect(() => {
-    if (aviatorState.game_anim_status === "WAITING") {
-      setProgress(100);
-      const totalDuration = 5000; // 5 seconds
+    if (gameData.status === GameStages.WAIT && !progressInterval.current) {
+      const totalDuration = 8000; // 5 seconds
+      const startsIn = (gameData.startsIn || 0) * 1000;
       const intervalMs = 20;
-      const decrement = 100 / (totalDuration / intervalMs);
-      const interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev <= 0) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - decrement;
-        });
+      Game_Global_Vars.allowedBet = true;
+
+      if (progress <= 0) {
+        setProgress(100 / (totalDuration / startsIn));
+      }
+
+      progressInterval.current = setInterval(() => {
+        const decrement = 100 / (totalDuration / intervalMs);
+        setProgress((prev) => prev - decrement);
       }, intervalMs);
-      return () => clearInterval(interval);
     }
-  }, [aviatorState.game_anim_status]);
+    if (gameData.status === GameStages.RUN) {
+      setProgress(0);
+      Game_Global_Vars.allowedBet = false;
+
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current);
+        progressInterval.current = null;
+      }
+    }
+    if (gameData.status === GameStages.BLAST) {
+      Game_Global_Vars.allowedBet = false;
+    }
+    // return () => {
+    //   console.log("return ");
+
+    //   progressInterval.current && clearInterval(progressInterval.current);
+    // };
+  }, [gameData.status, gameData.startsIn]);
+
+  useEffect(() => {
+    if (gameData.multiplier) {
+      setCurPayout(gameData.multiplier);
+      Game_Global_Vars.curPayout = gameData.multiplier;
+    }
+  }, [gameData.multiplier]);
 
   const handleCashOut = async (i: number, auto?: boolean) => {
     console.log(
@@ -471,132 +508,132 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
     });
   };
 
-  useEffect(() => {
-    const simulateGame = () => {
-      // Generate dummy users for this round
-      const userCount = 30 + Math.floor(Math.random() * 10);
-      const users: any[] = [];
-      for (let i = 0; i < userCount; i++) {
-        const username = randomUsername();
-        users.push({
-          username,
-          avatar: randomAvatar(username),
-        });
-      }
-      // Always include "You"
-      users[0] = {
-        username: "You",
-        avatar: randomAvatar("You"),
-        isYou: true,
-      };
-      setAllUsers(users);
+  // useEffect(() => {
+  //   const simulateGame = () => {
+  //     // Generate dummy users for this round
+  //     const userCount = 30 + Math.floor(Math.random() * 10);
+  //     const users: any[] = [];
+  //     for (let i = 0; i < userCount; i++) {
+  //       const username = randomUsername();
+  //       users.push({
+  //         username,
+  //         avatar: randomAvatar(username),
+  //       });
+  //     }
+  //     // Always include "You"
+  //     users[0] = {
+  //       username: "You",
+  //       avatar: randomAvatar("You"),
+  //       isYou: true,
+  //     };
+  //     setAllUsers(users);
 
-      // Waiting phase
-      setAviatorState((prev) => ({ ...prev, game_anim_status: "WAITING" }));
-      setAllowedBet(false);
-      Game_Global_Vars.allowedBet = false;
-      _setBetPlaceStatus(["none", "none"], 0);
-      setCashingStatus(["none", "none"]);
-      setCashedWin([0, 0]);
-      setBetBoardAllItem([]);
+  //     // Waiting phase
+  //     // setAviatorState((prev) => ({ ...prev, game_anim_status: "WAITING" }));
+  //     // setAllowedBet(false);
+  //     // Game_Global_Vars.allowedBet = false;
+  //     _setBetPlaceStatus(["none", "none"], 0);
+  //     setCashingStatus(["none", "none"]);
+  //     setCashedWin([0, 0]);
+  //     setBetBoardAllItem([]);
 
-      setTimeout(() => {
-        // Betting phase
-        setAllowedBet(true);
-        Game_Global_Vars.allowedBet = true;
-        setAviatorState((prev) => ({ ...prev, game_anim_status: "WAITING" }));
-        setTimeout(async () => {
-          if (Game_Global_Vars.pendingBet[0]) {
-            await doBet(0);
-          }
-          if (Game_Global_Vars.pendingBet[1]) {
-            await doBet(1);
-          }
-          _setPendingBet([false, false], 0);
-          Game_Global_Vars.pendingBet = [false, false];
-        }, 100);
+  //     setTimeout(() => {
+  //       // Betting phase
+  //       // setAllowedBet(true);
+  //       // Game_Global_Vars.allowedBet = true;
+  //       // setAviatorState((prev) => ({ ...prev, game_anim_status: "WAITING" }));
+  //       setTimeout(async () => {
+  //         if (Game_Global_Vars.pendingBet[0]) {
+  //           await doBet(0);
+  //         }
+  //         if (Game_Global_Vars.pendingBet[1]) {
+  //           await doBet(1);
+  //         }
+  //         _setPendingBet([false, false], 0);
+  //         Game_Global_Vars.pendingBet = [false, false];
+  //       }, 100);
 
-        setTimeout(() => {
-          // Flying phase
-          setAllowedBet(false);
-          Game_Global_Vars.allowedBet = false;
-          setAviatorState((prev) => ({
-            ...prev,
-            game_anim_status: "ANIM_STARTED",
-          }));
-          // if (aviatorState.fxChecked) playSound("take");
-          // Simulate payout increase
-          let payout = 1.0;
-          const payoutInterval = setInterval(() => {
-            payout += 0.1;
-            setCurPayout(payout);
-            Game_Global_Vars.curPayout = payout;
-            // Live update dummy bets: randomly cash out some users
-            if (Math.random() < 0.1 && payout > 1.1) {
-              // Pick a random user who hasn't cashed out
-              const notCashed = users.filter((u) => !u.cashedOut && !u.isYou);
-              if (notCashed.length > 0) {
-                const winner =
-                  notCashed[Math.floor(Math.random() * notCashed.length)];
-                winner.cashedOut = true;
-                winner.cashoutX = payout.toFixed(2);
-                winner.win = 100 * parseFloat(winner.cashoutX);
-                setBetBoardAllItem((prev) => [
-                  ...prev,
-                  {
-                    gameCrashId: Date.now() + Math.random(),
-                    username: winner.username,
-                    betAmount: 100,
-                    crashedAt: parseFloat(winner.cashoutX),
-                    cashout: winner.win,
-                    avatar: winner.avatar,
-                    isWinner: true,
-                  },
-                ]);
-              }
-            }
-            // Random crash
-            if (Math.random() < 0.02) {
-              clearInterval(payoutInterval);
-              setTimeout(() => {
-                // Crash phase
-                setCrashHistory((prev) => [`${payout.toFixed(2)}x`, ...prev]);
-                setCrashAnim(true);
-                // if (aviatorState.fxChecked) playCrashSound();
-                // if (aviatorState.fxChecked) playSound("flew");
-                setTimeout(() => setCrashAnim(false), 1000);
+  //       setTimeout(() => {
+  //         // Flying phase
+  //         // setAllowedBet(false);
+  //         // Game_Global_Vars.allowedBet = false;
+  //         // setAviatorState((prev) => ({
+  //         //   ...prev,
+  //         //   game_anim_status: "ANIM_STARTED",
+  //         // }));
+  //         // if (aviatorState.fxChecked) playSound("take");
+  //         // Simulate payout increase
+  //         let payout = 1.0;
+  //         const payoutInterval = setInterval(() => {
+  //           payout += 0.1;
+  //           // setCurPayout(payout);
+  //           // Game_Global_Vars.curPayout = payout;
+  //           // Live update dummy bets: randomly cash out some users
+  //           if (Math.random() < 0.1 && payout > 1.1) {
+  //             // Pick a random user who hasn't cashed out
+  //             const notCashed = users.filter((u) => !u.cashedOut && !u.isYou);
+  //             if (notCashed.length > 0) {
+  //               const winner =
+  //                 notCashed[Math.floor(Math.random() * notCashed.length)];
+  //               winner.cashedOut = true;
+  //               winner.cashoutX = payout.toFixed(2);
+  //               winner.win = 100 * parseFloat(winner.cashoutX);
+  //               setBetBoardAllItem((prev) => [
+  //                 ...prev,
+  //                 {
+  //                   gameCrashId: Date.now() + Math.random(),
+  //                   username: winner.username,
+  //                   betAmount: 100,
+  //                   crashedAt: parseFloat(winner.cashoutX),
+  //                   cashout: winner.win,
+  //                   avatar: winner.avatar,
+  //                   isWinner: true,
+  //                 },
+  //               ]);
+  //             }
+  //           }
+  //           // Random crash
+  //           if (Math.random() < 0.02) {
+  //             clearInterval(payoutInterval);
+  //             setTimeout(() => {
+  //               // Crash phase
+  //               setCrashHistory((prev) => [`${payout.toFixed(2)}x`, ...prev]);
+  //               setCrashAnim(true);
+  //               // if (aviatorState.fxChecked) playCrashSound();
+  //               // if (aviatorState.fxChecked) playSound("flew");
+  //               setTimeout(() => setCrashAnim(false), 1000);
 
-                setAviatorState((prev) => ({
-                  ...prev,
-                  game_anim_status: "ANIM_CRASHED",
-                }));
-                // playSound("flew");
-                // Store previous round
-                setPreviousRounds((prev) => [
-                  {
-                    result: payout.toFixed(2),
-                    bets: betBoardAllItem,
-                  },
-                  ...prev.slice(0, 9),
-                ]);
-                setTimeout(() => {
-                  // Reset for next round
-                  setCurPayout(0);
-                  Game_Global_Vars.curPayout = 0;
-                  _setBetPlaceStatus(["none", "none"], 0);
-                  setCashingStatus(["none", "none"]);
-                  setCashedWin([0, 0]);
-                  simulateGame();
-                }, 3000);
-              }, 100);
-            }
-          }, 100);
-        }, 5000);
-      }, 2000);
-    };
+  //               setAviatorState((prev) => ({
+  //                 ...prev,
+  //                 game_anim_status: "ANIM_CRASHED",
+  //               }));
+  //               // playSound("flew");
+  //               // Store previous round
+  //               setPreviousRounds((prev) => [
+  //                 {
+  //                   result: payout.toFixed(2),
+  //                   bets: betBoardAllItem,
+  //                 },
+  //                 ...prev.slice(0, 9),
+  //               ]);
+  //               setTimeout(() => {
+  //                 // Reset for next round
+  //                 setCurPayout(0);
+  //                 Game_Global_Vars.curPayout = 0;
+  //                 _setBetPlaceStatus(["none", "none"], 0);
+  //                 setCashingStatus(["none", "none"]);
+  //                 setCashedWin([0, 0]);
+  //                 simulateGame();
+  //               }, 3000);
+  //             }, 100);
+  //           }
+  //         }, 100);
+  //       }, 5000);
+  //     }, 2000);
+  //   };
 
-    simulateGame();
-  }, []);
+  //   simulateGame();
+  // }, []);
 
   useEffect(() => {
     handleResize();
@@ -680,6 +717,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
       className="flex overflow-hidden"
       style={{ height: "calc(100vh - 50px)" }}
     >
+      {/* <span className="text-sm text-gray-300">{JSON.stringify(gameData)}</span> */}
       {/* Debug UI for development */}
       {/* {process.env.NODE_ENV === "development" && (
         <div
@@ -822,19 +860,13 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
             className="flex flex-col gap-10 absolute top-0 justify-center items-center"
             style={{
               height: pixiDimension.height,
-              display:
-                aviatorState.game_anim_status !== "ANIM_STARTED"
-                  ? "flex"
-                  : "none",
+              display: gameData.status !== GameStages.RUN ? "flex" : "none",
               gap: pixiDimension.height < 200 ? 2 : 40,
             }}
           >
             <div
               style={{
-                display:
-                  aviatorState.game_anim_status === "WAITING"
-                    ? "block"
-                    : "none",
+                display: gameData.status === GameStages.WAIT ? "block" : "none",
                 // width: Math.min(pixiDimension.width, pixiDimension.height) / 4,
               }}
             >
@@ -866,13 +898,11 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
             </div>
             <div className="flex flex-col gap-1 justify-center items-center px-4 py-2 lg:px-8 lg:py-2 rounded-lg">
               <p className="text-white uppercase text-[21px] lg:text-[30px]">
-                {aviatorState.game_anim_status === "ANIM_CRASHED"
-                  ? "Flew away"
-                  : ""}
+                {gameData.status === GameStages.BLAST ? "Flew away" : ""}
               </p>
-              {aviatorState.game_anim_status === "ANIM_CRASHED" && (
+              {gameData.status === GameStages.BLAST && (
                 <p className="text-[#d0011b] font-bold text-[56px] leading-[42px] lg:text-[100px] lg:leading-[100px]">
-                  {curPayout.toFixed(2)}x
+                  {curPayout}x
                 </p>
               )}
             </div>
@@ -1014,9 +1044,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
                           </h4>
                         )}
                         {cashingStatus[i] === "none" && (
-                          <p className="text-xs text-green-400">
-                            {curPayout.toFixed(2)}x
-                          </p>
+                          <p className="text-xs text-green-400">{curPayout}x</p>
                         )}
                       </button>
                     )

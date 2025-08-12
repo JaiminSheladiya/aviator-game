@@ -41,6 +41,11 @@ export type Bet = {
   stake: number;
   cashIn: number;
 };
+// Types for cashout
+export type Cashout = {
+  betId: string | null;
+  cashOutAtMultiplier: number;
+};
 
 export type PlaceBetResponse = {
   status: string;
@@ -58,6 +63,19 @@ export async function placeBet(
 ): Promise<PlaceBetResponse> {
   const response = await axios.post(
     `${API_BASE}/users/casino/placebet`,
+    { marketId, eventId, bets },
+    { headers }
+  );
+  return response.data;
+}
+
+export async function cashout(
+  marketId: string,
+  eventId: string,
+  bets: Cashout[]
+): Promise<PlaceBetResponse> {
+  const response = await axios.post(
+    `${API_BASE}/users/casino/cashOut`,
     { marketId, eventId, bets },
     { headers }
   );

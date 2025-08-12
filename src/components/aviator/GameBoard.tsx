@@ -24,7 +24,7 @@ import AutoBetModal from "../AutoBetModal";
 import BetBoard from "./BetBoard";
 import CustomSnackBar from "../CustomSnackBar";
 import { MoreHorizontal } from "lucide-react";
-import { placeBet, Bet } from "../../api/universeCasino";
+import { placeBet, Bet, Cashout, cashout } from "../../api/universeCasino";
 import { useUserCount } from "../../hooks/useUserCount";
 import {
   GameStages,
@@ -93,6 +93,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   const [curPayout, setCurPayout] = useState(0);
 
   const [pendingBet, setPendingBet] = useState<boolean[]>([false, false]);
+  const [betId, setBetId] = useState<(string | null)[]>([null, null]);
   // const [allowedBet, setAllowedBet] = useState(false);
   const [betAutoState, setBetAutoState] = useState<betAutoStateType[]>([
     "bet",
@@ -132,9 +133,16 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   const [progress, setProgress] = useState(0);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
-
-  const { getMarketData, isConnected, subscribe, marketData, gameData, bets } =
-    useSocket();
+  const {
+    getMarketData,
+    isConnected,
+    subscribe,
+    marketData,
+    gameData,
+    bets,
+    eventId,
+    roundId,
+  } = useSocket();
 
   // console.log("gameData", gameData);
 
@@ -195,6 +203,14 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
     }
   };
 
+  const _setBetId = (val: string | string[], i: number) => {
+    if (typeof val === "string") {
+      setBetId(setStateTemplate(val, i));
+    } else {
+      setBetId(val);
+    }
+  };
+
   const _setEnabledAutoCashOut = (val: boolean, i: number) => {
     setEnabledAutoCashOut(setStateTemplate(val, i));
   };
@@ -232,6 +248,14 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
     }
   };
 
+  const resetBetPlacingStatus = () => {
+    [0, 1].forEach((i) => {
+      _setCashingStatus("none", i);
+      _setBetPlaceStatus("placing", i);
+    });
+    setBetValue([initBet6[0], initBet6[0]]);
+  };
+
   const modifyBetValue = (amount: number, i: number) => {
     _setBetValue((prev) => {
       const new_val = parseInt(prev);
@@ -254,14 +278,19 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
     // Use real API call
     try {
       // Use manual marketId if provided, otherwise use WebSocket marketId, otherwise fallback
-      const usedMarketId = manualMarketId || marketId || "1183125";
-      const eventId = "88.0022";
+      // const usedMarketId = manualMarketId || marketId || "1183125";
+      // const eventId = "88.0022";
       const bets: Bet[] = [{ stake: parseFloat(betValue[i]), cashIn: i + 1 }];
 
-      console.log("Placing bet with:", { usedMarketId, eventId, bets });
-      const response = await placeBet(usedMarketId, eventId, bets);
+      console.log("Placing bet with:", { roundId, eventId, bets });
+      const response = await placeBet(
+        roundId.toString(),
+        eventId.toString(),
+        bets
+      );
+      console.log("response", response);
 
-      if (response.status === "success") {
+      if (response?.meta?.status_code === 200) {
         _setBetPlaceStatus("success", i);
         setAviatorState((prev) => ({
           ...prev,
@@ -269,8 +298,11 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
         }));
         setSnackState({
           open: true,
-          msg: `Bet placed! Bet ID: ${response.betId}`,
+          msg: `Bet placed! Bet ID: ${response.data?.[0]?.betId}`,
         });
+        _setBetId(response.data?.[0]?.betId, i);
+        _setPendingBet(false, i);
+        Game_Global_Vars.pendingBet[i] = false;
       } else {
         _setBetPlaceStatus("none", i);
         const errorMsg =
@@ -327,6 +359,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
 
   useEffect(() => {
     if (gameData.status === GameStages.WAIT && !progressInterval.current) {
+      setCurPayout(1.0);
       const totalDuration = 8000; // 5 seconds
       const startsIn = (gameData.startsIn || 0) * 1000;
       const intervalMs = 20;
@@ -340,6 +373,8 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
         const decrement = 100 / (totalDuration / intervalMs);
         setProgress((prev) => prev - decrement);
       }, intervalMs);
+
+      handlePendingBets();
     }
     if (gameData.status === GameStages.RUN) {
       setProgress(0);
@@ -352,6 +387,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
     }
     if (gameData.status === GameStages.BLAST) {
       Game_Global_Vars.allowedBet = false;
+      resetBetPlacingStatus();
     }
     // return () => {
     //   console.log("return ");
@@ -367,6 +403,15 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
     }
   }, [gameData.multiplier]);
 
+  const handlePendingBets = () => {
+    console.log("pendingBet", pendingBet);
+
+    pendingBet.forEach(async (isPending, i) => {
+      if (isPending) {
+        await doBet(i);
+      }
+    });
+  };
   const handleCashOut = async (i: number, auto?: boolean) => {
     console.log(
       "handleCashOut called for index:",
@@ -374,21 +419,46 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
       "curPayout:",
       curPayout,
       "betValue:",
-      betValue[i]
+      betValue[i],
+      betId
     );
+    const cashOutAt = JSON.parse(JSON.stringify(curPayout));
     if (Game_Global_Vars.cashStarted[i]) return;
     Game_Global_Vars.cashStarted[i] = true;
     _setCashingStatus("caching", i);
 
     // Simulate cashout
-    await doDelay(1000);
+    // await doDelay(1000);
 
-    const winAmount = curPayout * parseFloat(betValue[i]);
+    //   {
+    //     "marketId": "1235593",
+    //     "eventId": "88.0022",
+    //     "bets": [
+    //         {
+    //             "betId": "689798598e7a6603da1902cd",
+    //             "cashOutAtMultiplier": "1.22"
+    //         }
+    //     ]
+    // }
+
+    const bets: Cashout[] = [
+      { betId: betId[i], cashOutAtMultiplier: cashOutAt },
+    ];
+
+    console.log("Placing bet with:", { roundId, eventId, bets });
+    const response = await cashout(
+      roundId.toString(),
+      eventId.toString(),
+      bets
+    );
+    console.log("cashout response", response);
+
+    const winAmount = cashOutAt * parseFloat(betValue[i]);
     console.log(
       "Win amount calculated:",
       winAmount,
-      "curPayout:",
-      curPayout,
+      "cashOutAt:",
+      cashOutAt,
       "betValue:",
       betValue[i]
     );
@@ -406,7 +476,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
       prev.map((bet) => {
         if (bet.gameCrashId === Date.now() - i) {
           // Simple way to identify the bet
-          return { ...bet, cashout: winAmount, crashedAt: curPayout };
+          return { ...bet, cashout: winAmount, crashedAt: cashOutAt };
         }
         return bet;
       })

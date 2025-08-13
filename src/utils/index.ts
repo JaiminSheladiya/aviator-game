@@ -187,9 +187,10 @@ export function interpolate(
 
 export function getHistoryItemColor(_val: string) {
   const val = parseFloat(_val.substring(0, _val.length - 1));
-  if (val < 2) return "#07BDE5";
-  else if (val < 10) return "#913EF8";
-  else return "#C017B4";
+  if (val >= 1 && val < 2) return "#07BDE5"; // Blue for 1-2
+  else if (val >= 2 && val < 10) return "#913EF8"; // Purple for 2-10
+  else if (val >= 10) return "#C017B4"; // Purple for 10+
+  else return "#07BDE5"; // Default blue for values below 1
 }
 export const testMobile = () => {
   if (

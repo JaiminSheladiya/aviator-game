@@ -405,6 +405,25 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
     }
   }, [gameData.multiplier]);
 
+  // Add crash result to history when game crashes
+  useEffect(() => {
+    if (
+      gameData.status === GameStages.BLAST &&
+      gameData.multiplier !== undefined &&
+      gameData.multiplier !== null
+    ) {
+      // Convert string multiplier to number and add to crash history
+      const multiplierStr = String(gameData.multiplier);
+      const multiplier = parseFloat(multiplierStr);
+      if (!isNaN(multiplier)) {
+        setCrashHistory((prev) => [
+          `${multiplier.toFixed(2)}x`,
+          ...prev.slice(0, 49),
+        ]);
+      }
+    }
+  }, [gameData.status, gameData.multiplier]);
+
   const handlePendingBets = () => {
     console.log("pendingBet", pendingBet);
 

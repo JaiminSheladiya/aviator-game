@@ -1,17 +1,5 @@
-import {
-  AnimatedSprite,
-  Container,
-  Graphics,
-  Sprite,
-  Text,
-  useTick,
-} from "@pixi/react";
-import {
-  TextStyle,
-  Texture,
-  Graphics as GraphicsRaw,
-  ColorMatrixFilter,
-} from "pixi.js";
+import { Container, Graphics, Sprite, Text, useTick } from "@pixi/react";
+import { TextStyle, Texture, Graphics as GraphicsRaw } from "pixi.js";
 import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import {
   renderCurve as _renderCurve,
@@ -22,6 +10,7 @@ import {
   _drawOuterBoundery,
   _drawInnerBoundery,
   interpolate,
+  getHistoryItemColor,
 } from "../../utils";
 import { dimensionType, gameAnimStatusType } from "../../@types";
 import type { Container as ContainerType } from "pixi.js";
@@ -70,7 +59,7 @@ const AppStage = ({
     [dimension]
   );
 
-  const gradTexture = useMemo(() => createGradTexture(dimension), [dimension]);
+  const gradTexture = useMemo(() => createGradTexture(dimension), [dimension.width, dimension.height]);
 
   const handleResize = () => {
     const mobileStatus = window.innerWidth < 768;
@@ -157,11 +146,16 @@ const AppStage = ({
     return () => clearInterval(interval);
   }, []);
 
-  const colorMatrix = useMemo(() => {
-    const c = new ColorMatrixFilter();
-    c.hue(hueRotateRef.current * 100, true);
-    return c;
-  }, [hueRotateRef.current]);
+  const gradTint = useMemo(() => {
+    const numeric = (() => {
+      if (typeof payout === "number") return payout;
+      const parsed = parseFloat(String(payout).replace(/x$/i, ""));
+      return Number.isNaN(parsed) ? 1 : parsed;
+    })();
+    const payoutStr = numeric.toFixed(2) + "x";
+    const payoutColor = getHistoryItemColor(payoutStr);
+    return parseInt(payoutColor.replace("#", ""), 16);
+  }, [payout]);
 
   const maskRef = useRef<GraphicsRaw>(null);
   const dotRef = useRef<GraphicsRaw>(null);
@@ -213,10 +207,14 @@ const AppStage = ({
     const totalSlices = 60;
     const radius = Math.max(dimension.width, dimension.height) * 2;
 
+    // Use original grey and black colors for the radial stripes
+    const primaryColorNum = 0x0a0a0a;   // Dark grey
+    const secondaryColorNum = 0x121212;  // Black
+
     for (let i = 0; i < totalSlices; i++) {
       const startAngle = (i / totalSlices) * Math.PI * 2;
       const endAngle = ((i + 1) / totalSlices) * Math.PI * 2;
-      g.beginFill(i % 2 === 0 ? 0x0a0a0a : 0x121212);
+      g.beginFill(i % 2 === 0 ? primaryColorNum : secondaryColorNum);
       g.moveTo(centerX, centerY);
       g.arc(centerX, centerY, radius, startAngle, endAngle);
       g.lineTo(centerX, centerY);
@@ -244,7 +242,9 @@ const AppStage = ({
       </Container>
       {game_anim_status === GameStages.RUN ? (
         <Sprite
-          filters={[colorMatrix]}
+          key={gradTint}
+          tint={gradTint}
+          alpha={0.6}
           texture={gradTexture}
           width={dimension.width}
           height={dimension.height}

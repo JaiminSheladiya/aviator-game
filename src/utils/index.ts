@@ -91,9 +91,10 @@ export const createGradTexture = (dimension: dimensionType) => {
       dimension.height / 2,
       r / 2
     );
-    // radial - gradient(circle, rgba(86, 0, 152, 1) 0 %, rgba(41, 0, 73, 1) 100 %)
-    grd.addColorStop(0, "#E5940744");
-    grd.addColorStop(1, "#00000044");
+    // Neutral radial gradient fading to transparent so tint appears true
+    // Slightly dimmer center so applied tint isn't too bright
+    grd.addColorStop(0, "#FFFFFF66");
+    grd.addColorStop(1, "#FFFFFF00");
 
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, dimension.width / 2, dimension.height);

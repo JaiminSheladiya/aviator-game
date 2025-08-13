@@ -26,10 +26,11 @@ export const curveFunction = (x: number, dimension: dimensionType) => {
 };
 
 export const renderCurve = (g: Graphics, _dimension: dimensionType) => {
-  const dimension = { width: _dimension.width, height: _dimension.height - 40 };
+  // Use full canvas; no bottom margin so the curve starts at the true bottom-left
+  const dimension = { width: _dimension.width, height: _dimension.height };
   const xAxis = Array.from(
-    { length: dimension.width / 10 },
-    (_, index) => index * 10
+    { length: Math.ceil(dimension.width / 2) },
+    (_, index) => index * 2
   );
   console.log("xAxis", xAxis);
   const points = xAxis.map((item) => ({
@@ -42,7 +43,9 @@ export const renderCurve = (g: Graphics, _dimension: dimensionType) => {
   // 🔴 Fill area under curve in red
   g.beginFill(0xff0000, 0.3);
 
-  g.moveTo(points[0].x, points[0].y);
+  // Begin exactly at bottom-left
+  g.moveTo(0, dimension.height);
+  g.lineTo(points[0].x, points[0].y);
   for (let i = 1; i < points.length; i++) {
     g.lineTo(points[i].x, points[i].y);
   }

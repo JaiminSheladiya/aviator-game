@@ -939,9 +939,9 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
 
         <div
           className={`flex justify-center w-full relative`}
-          style={{
-            height: "100%", //pixiDimension.height,
-          }}
+          // style={{
+          //   height: "100%", //pixiDimension.height,
+          // }}
           ref={pixi_ref}
         >
           <div className="absolute bottom-2 right-2 bg-[#2c2d30] p-1 pr-2 rounded-full">

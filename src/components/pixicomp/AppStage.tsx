@@ -59,7 +59,27 @@ const AppStage = ({
     [dimension]
   );
 
-  const gradTexture = useMemo(() => createGradTexture(dimension), [dimension.width, dimension.height]);
+  const gradTexture = useMemo(
+    () => createGradTexture(dimension),
+    [dimension.width, dimension.height]
+  );
+
+  // Plane presentation tweaks per device
+  const planeAnchor = useMemo(() => {
+    return isMobile ? { x: 0.1, y: 0.53 } : { x: 0.07, y: 0.55 };
+  }, [isMobile]);
+  const planeYOffset = useMemo(() => {
+    // Lift the plane a bit more on smaller screens because of larger scale
+    if (isMobile) return 90;
+    if (window.innerWidth < 1024) return 58;
+    return 50;
+  }, [isMobile]);
+
+  const planeXOffset = useMemo(() => {
+    // Push the plane a bit more on smaller screens because of larger scale
+    if (isMobile) return 22;
+    return game_anim_status === GameStages.RUN ? 0 : 10;
+  }, [isMobile, game_anim_status]);
 
   const handleResize = () => {
     const mobileStatus = window.innerWidth < 768;
@@ -71,7 +91,7 @@ const AppStage = ({
     } else if (window.innerWidth < 1024) {
       setPlaneScale(0.4); // Medium scale for tablet
     } else {
-      setPlaneScale(0.4); // Original scale for desktop
+      setPlaneScale(0.3); // Original scale for desktop
     }
 
     setPulseBase(interpolate(window.innerWidth, 400, 1920, 0.6, 0.8));
@@ -123,17 +143,13 @@ const AppStage = ({
       game_anim_status === GameStages.BLAST ? crashOffset.current * 3 : 0; // Increased from 1.5 to 3
 
     posPlaneRef.current = {
-      x:
-        (pulseBase + pulseGraphRef.current) * planeXRef.current +
-        crashX +
-        interpolate(dimension.width, 400, 1920, 10, 5),
+      x: (pulseBase + pulseGraphRef.current) * planeXRef.current + crashX,
       y:
         dimension.height -
-        interpolate(dimension.width, 400, 1920, 15, 60) -
         (1 - pulseGraphRef.current) *
           curveFunction(planeXRef.current, {
-            width: dimension.width - 40,
-            height: dimension.height - 40,
+            width: dimension.width,
+            height: dimension.height,
           }) -
         crashY,
     };
@@ -164,8 +180,8 @@ const AppStage = ({
   const curveMask = useCallback(
     (g: GraphicsRaw) =>
       _drawMask(g, {
-        width: dimension.width - 40,
-        height: dimension.height - 40,
+        width: dimension.width,
+        height: dimension.height,
       }),
     [dimension]
   );
@@ -203,13 +219,13 @@ const AppStage = ({
   const drawRadialSlices = (g: GraphicsRaw) => {
     g.clear();
     const centerX = 0;
-    const centerY = 0; // Note: it's 0 because the container is already placed at bottom-left
+    const centerY = 0; // container is placed at bottom-left
     const totalSlices = 60;
     const radius = Math.max(dimension.width, dimension.height) * 2;
 
     // Use original grey and black colors for the radial stripes
-    const primaryColorNum = 0x0a0a0a;   // Dark grey
-    const secondaryColorNum = 0x121212;  // Black
+    const primaryColorNum = 0x0a0a0a; // Dark grey
+    const secondaryColorNum = 0x121212; // Black
 
     for (let i = 0; i < totalSlices; i++) {
       const startAngle = (i / totalSlices) * Math.PI * 2;
@@ -264,8 +280,8 @@ const AppStage = ({
       <Graphics
         ref={gameBoardMask}
         draw={dotLeftBottom}
-        x={40}
-        scale={{ x: dimension.width - 40, y: dimension.height - 40 }}
+        x={0}
+        scale={{ x: dimension.width, y: dimension.height }}
       />
       <Container
         mask={gameBoardMask.current}
@@ -286,7 +302,7 @@ const AppStage = ({
           scale={{
             x:
               ((pulseBase + pulseGraphRef.current) * planeXRef.current) /
-              (dimension.width - 40),
+              dimension.width,
             y: 1,
           }}
           name="mask"
@@ -298,9 +314,12 @@ const AppStage = ({
         <Sprite
           texture={planeFrames[currentFrame]}
           pivot={{ x: 0.08, y: 0.54 }}
-          anchor={{ x: 0.07, y: 0.55 }}
+          anchor={planeAnchor}
           scale={planeScale}
-          position={{ x: posPlaneRef.current.x, y: posPlaneRef.current.y - 50 }}
+          position={{
+            x: posPlaneRef.current.x + planeXOffset,
+            y: posPlaneRef.current.y - planeYOffset,
+          }}
         />
         <Text
           visible={game_anim_status === GameStages.RUN}

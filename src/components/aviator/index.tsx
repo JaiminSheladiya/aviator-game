@@ -5,11 +5,19 @@ import AccessDenied from "../AccessDenied";
 import { Assets } from "pixi.js";
 import { urls } from "../../utils/urls";
 import Splash from "../pixicomp/Splash";
-import { Game_Global_Vars, initBet6, loadSound, playSound } from "../../utils";
+import {
+  Game_Global_Vars,
+  initBet6,
+  loadSound,
+  playSound,
+  processCashoutSuccessData,
+  isCashoutSuccessResponse,
+} from "../../utils";
 import TopLogoBar from "../TopLogoBar";
 import RuleModal from "../RuleDialog";
 import SettingModal from "../SettingModal";
 import HistoryModal from "../HistoryModal";
+import CashoutSuccessModal from "../modals/CashoutSuccessModal";
 import axios from "axios";
 import { getUserBalance } from "../../api/universeCasino";
 import { GameStages, useSocket } from "../../providers/SocketProvider";
@@ -39,6 +47,8 @@ const Aviator = () => {
   const [messageHistory, setMessageHistory] = useState<any[]>([]);
   const [settingModalOpen, setSettingModalOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [cashoutSuccessModalOpen, setCashoutSuccessModalOpen] = useState(false);
+  const [cashoutSuccessData, setCashoutSuccessData] = useState<any>(null);
 
   React.useEffect(() => {
     Game_Global_Vars.betValue = [bet6[0], bet6[0]];
@@ -178,6 +188,51 @@ const Aviator = () => {
     }
   };
 
+  // Handle cashout success
+  const handleCashoutSuccess = (cashoutData: any) => {
+    const processedData = processCashoutSuccessData(cashoutData);
+    if (processedData) {
+      setCashoutSuccessData(processedData);
+      setCashoutSuccessModalOpen(true);
+    }
+  };
+
+  // Handle API response for cashout success
+  const handleAPIResponse = (response: any) => {
+    if (isCashoutSuccessResponse(response)) {
+      handleCashoutSuccess(response);
+    }
+  };
+
+  // To use this popup, call handleAPIResponse when you receive your API response:
+  // handleAPIResponse(yourAPIResponseData);
+  //
+  // Example with your exact data format:
+  // const apiResponse = {
+  //   "data": [{
+  //     "betId": "689cf2ec4b63cb03c6a33a5f",
+  //     "userName": "t*********2",
+  //     "stake": 100,
+  //     "marketId": "1248123",
+  //     "nation": "CASHOUT",
+  //     "cashout": 127,
+  //     "createdAt": "2025-08-13T20:17:48.422Z",
+  //     "cashOutAtMultiplier": "1.27"
+  //   }],
+  //   "meta": {
+  //     "message": "Casino Bet Cashout Successful.",
+  //     "status_code": 200,
+  //     "status": true
+  //   }
+  // };
+  // handleAPIResponse(apiResponse);
+
+  // Close cashout success modal
+  const closeCashoutSuccessModal = () => {
+    setCashoutSuccessModalOpen(false);
+    setCashoutSuccessData(null);
+  };
+
   return (
     <>
       <TopLogoBar
@@ -186,6 +241,7 @@ const Aviator = () => {
         setHistoryModalOpen={setHistoryModalOpen}
         setRuleModalOpen={setRuleModalOpen}
       />
+
       {/* Debug UI for development */}
       {/* {process.env.NODE_ENV === "development" && (
         <div
@@ -221,7 +277,11 @@ const Aviator = () => {
       )} */}
       {aviatorState.auth ? (
         openGame && loaded ? (
-          <GameBoard bet6={bet6} marketId={marketId} />
+          <GameBoard
+            bet6={bet6}
+            marketId={marketId}
+            onCashoutSuccess={handleCashoutSuccess}
+          />
         ) : (
           <Splash loaded={loaded} setOpenGame={setOpenGame} />
         )
@@ -238,6 +298,11 @@ const Aviator = () => {
         loaded={loaded}
         open={historyModalOpen}
         setOpen={setHistoryModalOpen}
+      />
+      <CashoutSuccessModal
+        isOpen={cashoutSuccessModalOpen}
+        onClose={closeCashoutSuccessModal}
+        cashoutData={cashoutSuccessData}
       />
     </>
   );

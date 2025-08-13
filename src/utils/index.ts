@@ -119,7 +119,12 @@ export const _drawBar =
   };
 
 export const playSound = (type: "bg" | "flew" | "win" | "take") => {
-  console.log("playSound: -==>>", `${type}-sound` , type, sound.exists(`${type}-sound`));
+  console.log(
+    "playSound: -==>>",
+    `${type}-sound`,
+    type,
+    sound.exists(`${type}-sound`)
+  );
   if (sound.exists(`${type}-sound`)) {
     sound.play(`${type}-sound`, { loop: type === "bg" });
   }
@@ -235,6 +240,29 @@ export const showToast = (msg: string, type: "error" | "info" = "error") => {
   } else {
     toast.info(msg, params);
   }
+};
+
+// Function to handle cashout success data
+export const processCashoutSuccessData = (data: any) => {
+  if (data && data.data && data.data.length > 0) {
+    const cashoutItem = data.data[0];
+    return {
+      cashOutAtMultiplier: cashoutItem.cashOutAtMultiplier,
+      cashout: cashoutItem.cashout,
+      stake: cashoutItem.stake,
+    };
+  }
+  return null;
+};
+
+// Function to check if API response is a cashout success
+export const isCashoutSuccessResponse = (response: any): boolean => {
+  return (
+    response &&
+    response.meta &&
+    response.meta.status === true &&
+    response.meta.message === "Casino Bet Cashout Successful."
+  );
 };
 export const setStateTemplate = (val: any, i: number) => (prev: any[]) => {
   const new_val = [...prev];

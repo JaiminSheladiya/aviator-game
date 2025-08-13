@@ -73,7 +73,15 @@ const AppStage = ({
   const gradTexture = useMemo(() => createGradTexture(dimension), [dimension]);
   const isMobile = window.innerWidth < 768;
   const handleResize = () => {
-    setPlaneScale(interpolate(window.innerWidth, 400, 1920, 0.4, 0.2));
+    // Increase plane scale for mobile devices
+    if (isMobile) {
+      setPlaneScale(0.6); // Larger scale for mobile
+    } else if (window.innerWidth < 1024) {
+      setPlaneScale(0.4); // Medium scale for tablet
+    } else {
+      setPlaneScale(0.2); // Original scale for desktop
+    }
+
     setPulseBase(interpolate(window.innerWidth, 400, 1920, 0.6, 0.8));
   };
 
@@ -114,13 +122,13 @@ const AppStage = ({
     }
 
     if (game_anim_status === GameStages.BLAST) {
-      crashOffset.current += delta * 4;
+      crashOffset.current += delta * 8; // Increased from 4 to 8 for faster blast
     }
 
     const crashX =
-      game_anim_status === GameStages.BLAST ? crashOffset.current * 4 : 0;
+      game_anim_status === GameStages.BLAST ? crashOffset.current * 8 : 0; // Increased from 4 to 8
     const crashY =
-      game_anim_status === GameStages.BLAST ? crashOffset.current * 1.5 : 0;
+      game_anim_status === GameStages.BLAST ? crashOffset.current * 3 : 0; // Increased from 1.5 to 3
 
     posPlaneRef.current = {
       x:

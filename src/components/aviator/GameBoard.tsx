@@ -58,8 +58,12 @@ const dummyUsers = [
   "/avatars/av-3.png",
 ];
 // Add marketId to props
-type GameBoardProps = { bet6: string[]; marketId?: string | null };
-const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
+type GameBoardProps = {
+  bet6: string[];
+  marketId?: string | null;
+  onCashoutSuccess?: (data: any) => void;
+};
+const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
   const { aviatorState, setAviatorState } = useAviator();
   // const { userCount = 15 } = useUserCount();
   const [autoPlayingIndex, setAutoPlayingIndex] = useState(0);
@@ -69,7 +73,6 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
   });
   const [modalAutoPlayOpen, modalAutoPlaySetOpen] = useState(false);
   const [rotate, setRotate] = useState(0);
-  const [manualMarketId, setManualMarketId] = useState<string>("");
   const { userCount } = useSocket();
   const [trigParachute, setTrigParachute] = useState({ uniqId: 0, isMe: true });
 
@@ -80,7 +83,6 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
     "3.45x",
     "1.12x",
   ]);
-  const [crashAnim, setCrashAnim] = useState<boolean>(false);
   const [crashColor, setCrashColor] = useState<string[]>([]);
   const [pixiDimension, setPixiDimension] = useState<dimensionType>({
     width: 0,
@@ -463,6 +465,25 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
       betValue[i]
     );
 
+    // Show cashout success popup if the response indicates success
+    if (response && response.meta && response.meta.status && onCashoutSuccess) {
+      // Create the data structure expected by the popup
+      const cashoutData = {
+        data: [
+          {
+            betId: betId[i],
+            stake: parseFloat(betValue[i]),
+            cashout: winAmount,
+            cashOutAtMultiplier: cashOutAt.toString(),
+          },
+        ],
+        meta: response.meta,
+      };
+
+      // Trigger the popup
+      onCashoutSuccess(cashoutData);
+    }
+
     setAviatorState((prev) => ({
       ...prev,
       balance: prev.balance + winAmount,
@@ -531,7 +552,6 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
 
     const isMobile = window.innerWidth < 768;
     const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-    console.log("isTablet: ", isTablet);
     const isDesktop = window.innerWidth >= 1024;
 
     const footerHeight = footer_ref.current?.clientHeight || 0;
@@ -543,7 +563,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
 
     // Add buffer for mobile and tablet only
     if (isMobile) {
-      totalReservedHeight += 250; // adjust as needed
+      totalReservedHeight += 235; // adjust as needed
     }
     if (isTablet) {
       totalReservedHeight += 400; // adjust as needed
@@ -905,7 +925,7 @@ const GameBoard = ({ bet6, marketId }: GameBoardProps) => {
           }}
           ref={pixi_ref}
         >
-          <div className="absolute bottom-8 right-2 bg-[#2c2d30] p-1 pr-2 rounded-full">
+          <div className="absolute bottom-2 right-2 bg-[#2c2d30] p-1 pr-2 rounded-full">
             <div className="flex items-center gap-2 text-xs">
               <div className="flex -space-x-2">
                 {dummyUsers.map((u, i) => (

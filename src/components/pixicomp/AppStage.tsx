@@ -44,7 +44,6 @@ const AppStage = ({
   const crashOffset = useRef(0);
   const planeXRef = useRef(0);
   const posPlaneRef = useRef({ x: 0, y: 0 });
-
   const [planeScale, setPlaneScale] = useState(0.2);
   const [pulseBase, setPulseBase] = useState(0.8);
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -301,7 +300,7 @@ const AppStage = ({
           pivot={{ x: 0.08, y: 0.54 }}
           anchor={{ x: 0.07, y: 0.55 }}
           scale={planeScale}
-          position={posPlaneRef.current}
+          position={{ x: posPlaneRef.current.x, y: posPlaneRef.current.y - 50 }}
         />
         <Text
           visible={game_anim_status === GameStages.RUN}

@@ -63,7 +63,7 @@ const TopLogoBar = ({
   return (
     <>
       {
-        <div className="w-full bg-[#1C1C1C]/70 text-white relative">
+        <div className="w-full bg-[#1B1C1D] text-white relative">
           <div
             className="flex justify-between items-center w-full "
             ref={header_ref}
@@ -83,7 +83,7 @@ const TopLogoBar = ({
             />
             <div className="flex " style={{ gap: (w_factor / scale) * 0.3 }}>
               <div
-                className="flex gap-1 sm:gap-2 justify-center font-bold items-center"
+                className="flex gap-1 sm:gap-2 justify-center font-semibold items-center"
                 style={{ fontSize: "14px", color: "#9B9C9E" }}
               >
                 {/* <div className="w-4 h-4 bg-[#E59407] rounded-full flex items-center justify-center">

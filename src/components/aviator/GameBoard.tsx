@@ -23,7 +23,7 @@ import SwitchButton from "../SwitchButton";
 import AutoBetModal from "../AutoBetModal";
 import BetBoard from "./BetBoard";
 import CustomSnackBar from "../CustomSnackBar";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, SquareMinus, CopyPlus } from "lucide-react";
 import { placeBet, Bet, Cashout, cashout } from "../../api/universeCasino";
 import { useUserCount } from "../../hooks/useUserCount";
 import {
@@ -615,6 +615,13 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
     });
   };
 
+  // Add a new function specifically for bet board switching
+  const handleBetBoardSwitch = () => {
+    setBetButtonCount((prev) => (prev === 1 ? 2 : 1));
+    // Remove the setTimeout and handleResize call
+    // The layout will adjust automatically through CSS
+  };
+
   // useEffect(() => {
   //   const simulateGame = () => {
   //     // Generate dummy users for this round
@@ -862,7 +869,7 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
       >
         <BetBoard />
       </div>
-      <div className="flex flex-col justify-between gap-0 w-full bg-[#171717] p-2 text-white overflow-auto pb-0">
+      <div className="flex flex-col justify-between gap-0 w-full bg-[#0e0e0e] p-2 pt-0 text-white overflow-auto pb-0">
         {/* <div className="flex justify-between items-center">
           <div className="score-bomb flex gap-x-2 w-full flex-wrap pr-4 h-[26px] overflow-y-hidden">
             {crashHistory.map((item, i) => (
@@ -880,13 +887,13 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
         </div> */}
         <div className="relative w-full">
           {/* ─── Collapsed Bar ─── */}
-          <div className="flex justify-between items-center bg-[#111] rounded px-2">
+          <div className="flex justify-between items-center rounded px-2 py-1">
             <div className="flex gap-x-2 flex-wrap overflow-hidden pr-4 py-1 max-h-[26px]">
               {crashHistory.slice(0, 50).map((item, i) => (
                 <span
                   key={i}
                   style={{ color: crashColor[i] }}
-                  className={`block px-2 py-[2px] rounded-full bg-gray-900 font-bold text-[11px] 3xl:text-[15px]`}
+                  className={`block px-1 py-[2px] rounded-full font-semibold text-[12px] 3xl:text-[15px]`}
                 >
                   {item}
                 </span>
@@ -896,6 +903,13 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
             {/* ─── Dots Icon ─── */}
             <button
               className="p-1 rounded-full bg-[#2c2d30] hover:bg-[#3a3b3e] transition"
+              style={{
+                width: "25px",
+                height: "16px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
               onClick={() => setShowExpanded(true)}
             >
               <MoreHorizontal className="text-gray-400 w-4 h-4" />
@@ -904,12 +918,24 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
 
           {/* ─── Expanded Popup ─── */}
           {showExpanded && (
-            <div className="absolute z-50 right-0 top-0  w-full w-full bg-[#1e1f21] text-gray-200 rounded-lg shadow-lg p-4">
+            <div className="absolute z-50 right-0 top-0  w-full w-full bg-[#1e1f21] text-gray-200 rounded-lg shadow-lg p-2 pl-3">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-300">Round History</span>
+                <span className=" text-gray-400" style={{ fontSize: "12px" }}>
+                  Round History
+                </span>
                 <button
                   onClick={() => setShowExpanded(false)}
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 font-bold hover:text-white text-sm"
+                  style={{
+                    fontSize: "12px",
+                    borderRadius: "1rem",
+                    width: "25px",
+                    height: "16px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: "#2c2d30",
+                  }}
                 >
                   ✕
                 </button>
@@ -1026,28 +1052,25 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
           ref={footer_ref}
         >
           <div
-            className={`grid grid-cols-1 gap-2 relative ${
+            className={`grid grid-cols-1 gap-1 relative ${
               betButtonCount === 1 ? "" : "lg:grid-cols-2 md:grid-cols-2"
             }`}
           >
             <button
-              onClick={() => {
-                setBetButtonCount((prev) => (prev === 1 ? 2 : 1));
-                setTimeout(handleResize, 500);
-              }}
+              onClick={handleBetBoardSwitch}
               disabled={betPlaceStatus[1] === "success" || pendingBet[1]}
-              className={`absolute right-1 top-1 rounded-full bg-[#171717] w-6 h-6 pb-[2px] flex justify-center items-center text-lg cursor-pointer disabled:opacity-30`}
+              className={`absolute right-1 top-3 rounded-full bg-[#2c2d30] w-6 h-6 flex justify-center items-center cursor-pointer disabled:opacity-30 hover:bg-[#2a2a2a] transition-colors`}
             >
               {betButtonCount === 1 ? (
-                <span>+</span>
+                <CopyPlus className="w-4 h-4 text-green-700" />
               ) : (
-                <span className="text-xs">&#8212;</span>
+                <SquareMinus className="w-4 h-4 text-gray-400" />
               )}
             </button>
             {[0, 1].map((item, i) => (
               <div
                 key={i}
-                className={`flex flex-col justify-start items-center gap-1 lg:gap-4 w-full rounded-lg bg-gradient-to-b from-[#1C1C1C] to-black p-3 ${
+                className={`flex flex-col justify-start items-center gap-1 lg:gap-4 w-full rounded-2xl bg-gradient-to-b from-[#1C1C1C] to-black p-3 pt-2 ${
                   i === 1 && betButtonCount === 1 ? "hidden" : ""
                 }`}
                 style={{ background: "#1b1c1d" }}
@@ -1078,7 +1101,7 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                           betPlaceStatus[i] === "success" || pendingBet[i]
                         }
                         onClick={() => modifyBetValue(-10, i)}
-                        className="flex justify-center items-center w-6 h-6 3xl:w-9 3xl:h-9 text-white font-bold text-base 3xl:text-xl rounded-full bg-[#3e3e3e]"
+                        className="flex justify-center items-center w-6 h-6 3xl:w-9 3xl:h-9 text-gray-400 font-bold text-base 3xl:text-xl rounded-full bg-[#3e3e3e]"
                       >
                         −
                       </button>
@@ -1096,7 +1119,7 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                           betPlaceStatus[i] === "success" || pendingBet[i]
                         }
                         onClick={() => modifyBetValue(10, i)}
-                        className="flex justify-center items-center w-6 h-6 3xl:w-9 3xl:h-9 text-white font-bold text-base 3xl:text-xl rounded-full bg-[#3e3e3e]"
+                        className="flex justify-center items-center w-6 h-6 3xl:w-9 3xl:h-9 text-gray-400 font-bold text-base 3xl:text-xl rounded-full bg-[#3e3e3e]"
                       >
                         +
                       </button>
@@ -1112,7 +1135,7 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                           }
                           key={j}
                           onClick={() => _setBetValue(`${item}`, i)}
-                          className="flex justify-center items-center bg-[#171717] rounded-lg gap-[2px] w-full h-[25px] 3xl:h-9 text-[13px] 3xl:text-[26px]"
+                          className="flex justify-center font-bold items-center bg-[#171717] rounded-lg gap-[2px] w-full h-[25px] 3xl:h-9 text-[13px] 3xl:text-[26px] text-gray-500"
                         >
                           {item}
                         </button>

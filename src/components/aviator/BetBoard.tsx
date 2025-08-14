@@ -254,7 +254,7 @@ const BetBoard = () => {
   // Fill vertical space
   return (
     <div
-      className="flex flex-col w-full h-full lg:max-w-[480px] mx-auto bg-[#1b1c1d] rounded-2xl shadow-lg p-0"
+      className="flex flex-col w-full h-full lg:max-w-[480px] mx-auto bg-[#1b1c1d] rounded-2xl shadow-lg p-0 mt-1"
       style={{ maxHeight: "100vh" }}
     >
       <div className="flex flex-col w-full px-2 pt-2 pb-2">
@@ -282,7 +282,7 @@ const BetBoard = () => {
           />
         </div>
         {tab === "All Bets" && (
-          <div className="bg-[#141516] px-3 py-2 rounded-xl">
+          <div className="bg-[#141516] px-3 py-1 rounded-xl">
             <div className="flex items-center justify-between w-full mb-1">
               <div className="flex -space-x-2">
                 {users.slice(0, 3).map((u, i) => (

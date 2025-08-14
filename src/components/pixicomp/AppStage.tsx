@@ -126,9 +126,9 @@ const AppStage = ({
       pulseGraphRef.current = Math.sin(tickRef.current) * amp;
 
       const rawX = tickRef.current * 300;
-      const smoothedX = smoothen(Math.min(rawX, dimension.width - 40), {
-        width: dimension.width - 40,
-        height: dimension.height - 40,
+      const smoothedX = smoothen(Math.min(rawX, dimension.width), {
+        width: dimension.width,
+        height: dimension.height,
       });
       planeXRef.current = smoothedX;
     }

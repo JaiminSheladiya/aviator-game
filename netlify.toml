@@ -1,0 +1,18 @@
+[build]
+  command = "npm run build"
+  publish = "build"
+
+# Proxy API requests in production (Netlify). Mirrors CRA's setupProxy behavior.
+[[redirects]]
+  from = "/api/*"
+  to = "https://universeexchapi.com/:splat"
+  status = 200
+  force = true
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+

@@ -22,7 +22,7 @@ export const Game_Global_Vars: game_global_vars_type = {
 
 // Define the function for the curve
 export const curveFunction = (x: number, dimension: dimensionType) => {
-  return (0.0007 * Math.pow(x, 1.9) * dimension.height) / 1500;
+  return (0.00072 * Math.pow(x, 1.9) * dimension.height) / 1500;
 };
 
 export const renderCurve = (g: Graphics, _dimension: dimensionType) => {

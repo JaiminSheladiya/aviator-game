@@ -1047,7 +1047,7 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
           />
         </div>
         <div
-          className="flex flex-col w-full"
+          className="flex flex-col w-full lg:mt-0 mt-1"
           // style={{ marginTop: "1.25rem" }}
           ref={footer_ref}
         >
@@ -1192,7 +1192,10 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                   )}
                 </div>
                 {betAutoState[i] === "auto" ? (
-                  <div className="flex justify-between gap-2 items-center min-w-[300px] mt-4 lg:mt-0">
+                  <div
+                    className="flex justify-between gap-2 items-center mt-4 lg:mt-0"
+                    style={{ width: "inherit", maxWidth: "350px" }}
+                  >
                     <button
                       onClick={() => {
                         if (aviatorState.RemainedAutoPlayCount[i] < 1) {
@@ -1207,12 +1210,12 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                       className={`flex w-[72px] lg:w-[96px] h-[24px] 3xl:w-[212px] 3xl:h-[48px] rounded-full ${
                         aviatorState.RemainedAutoPlayCount[i] > 0
                           ? "bg-red-700"
-                          : "bg-gradient-to-b from-[#07BDE5] to-[#07BDE588]"
-                      }   justify-center items-center font-bold border border-[#9FEEFF] text-[10px] lg:text-[12px] uppercase`}
+                          : "bg-[#1d7aca]"
+                      }   justify-center items-center font-semibold border border-[#9FEEFF] text-[10px] lg:text-[12px]`}
                     >
                       {aviatorState.RemainedAutoPlayCount[i] > 0
                         ? `Stop (${aviatorState.RemainedAutoPlayCount[i]})`
-                        : "AutoPlay"}
+                        : "Auto Play"}
                     </button>
                     <div className="flex gap-1 items-center">
                       <span className="text-[#939393] min-w-[20px] text-[12px] lg:text-sm text-center">
@@ -1228,7 +1231,9 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                           Game_Global_Vars.enabledAutoCashOut[i] = checked;
                         }}
                       />
-                      <div className="flex gap-1 px-3 py-[2px] rounded-full bg-[#1F1F1F]">
+                      <div
+                        className="flex gap-1 px-3 py-[2px] rounded-full bg-[#141516] text-[12px]"
+                      >
                         <input
                           disabled={!enabledAutoCashOut}
                           readOnly={

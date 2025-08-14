@@ -26,21 +26,23 @@ const PIXIComponent = ({
     );
   }, [pixiDimension, aviatorState.dimension]);
   return (
-    <Stage
-      width={pixiDimension.width}
-      height={pixiDimension.height}
-      options={{ antialias: true }}
-    >
-      <Container scale={scale}>
-        <AppStage
-          payout={curPayout}
-          game_anim_status={gameData.status || GameStages.WAIT}
-          dimension={aviatorState.dimension}
-          pixiDimension={pixiDimension}
-          // trigParachute={trigParachute}
-        />
-      </Container>
-    </Stage>
+    <div className="rounded-b-[1rem] overflow-hidden">
+      <Stage
+        width={pixiDimension.width}
+        height={pixiDimension.height}
+        options={{ antialias: true }}
+      >
+        <Container scale={scale}>
+          <AppStage
+            payout={curPayout}
+            game_anim_status={gameData.status || GameStages.WAIT}
+            dimension={aviatorState.dimension}
+            pixiDimension={pixiDimension}
+            // trigParachute={trigParachute}
+          />
+        </Container>
+      </Stage>
+    </div>
   );
 };
 export default PIXIComponent;

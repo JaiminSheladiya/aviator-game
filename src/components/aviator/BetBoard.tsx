@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getHistoryItemColor } from "../../utils";
 import { useSocket } from "../../providers/SocketProvider";
+import { MessageCircle, ShieldCheck } from "lucide-react";
 
 const GREEN_WIN_BG = "#23391a";
 const GREEN_PROGRESS = "#427f00";
-const PURPLE_X = "#a259f7";
+const PURPLE_X = "rgb(192, 23, 180)";
 const BLUE_X = "#07BDE5";
 const AVATAR_SIZE = 24;
 const PLACEHOLDER_AVATAR =
@@ -98,7 +99,7 @@ const Tab = ({
     className={`px-6 rounded-${
       rounded ? "full" : "md"
     } focus:outline-none m-1 w-[100%] transition-all ${
-      active ? "bg-[#2c2d30] text-gray-400" : "text-gray-400"
+      active ? "bg-[#2c2d30] text-[#ebebeb]" : "text-gray-400"
     }`}
     style={
       rounded
@@ -131,7 +132,7 @@ const BetBoardItem = ({
   return (
     <div
       className={`flex items-center py-1 mb-[2px] rounded-[32px] ${
-        isWinner ? "" : isYou ? "bg-[#232a3a]" : "bg-[#141516]"
+        isWinner ? "" : isYou ? "bg-[#232a3a]" : "bg-[#101112]"
       }`}
       style={{
         background: isWinner ? GREEN_WIN_BG : undefined,
@@ -299,7 +300,7 @@ const BetBoard = () => {
                 ))}
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-[16px] text-white leading-none">
+                <span className="text-[16px] text-[#ebebeb] leading-none">
                   {actualTotalWin.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -308,7 +309,7 @@ const BetBoard = () => {
               </div>
             </div>
             <div className="flex items-center gap-1 justify-between mb-1">
-              <div className="text-[12px] text-white">
+              <div className="text-[12px] text-[#ebebeb]">
                 {actualWinnerCount}/{totalBets}{" "}
                 <span className="text-[#7b7b7b]"> Bets</span>
               </div>
@@ -406,7 +407,9 @@ const BetBoard = () => {
       </div>
       <>
         {tab === "All Bets" && (
-          <div className="flex px-4 py-1 text-gray-400 text-[10px] mb-1">
+          <div
+            className="flex px-4 py-1 text-gray-400 text-[10px]  "
+          >
             <span className="w-20">Player</span>
             <span className="w-24 text-right">Bet USD</span>
             <span className="w-20 text-center">X</span>
@@ -434,67 +437,70 @@ const BetBoard = () => {
         {tab === "Top" && (
           <>
             {top.map((item, i) => (
-              <div
-                key={i}
-                className="flex items-center bg-[#232325] rounded-xl px-3 py-2 mb-2"
-              >
-                <img
-                  src={item.avatar}
-                  alt="avatar"
-                  width={32}
-                  height={32}
-                  className="rounded-full mr-2 border border-[#18191b]"
-                  onError={(e) => (e.currentTarget.src = PLACEHOLDER_AVATAR)}
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-white text-[12px]">
-                      {item.username}
-                    </span>
-                    <span className="text-xs text-gray-400">{item.date}</span>
+              <div className="bg-[#101112] rounded-xl px-2 py-2 " style={{marginBottom : "0.2rem"}}>
+                <div key={i} className="flex items-start ">
+                  <img
+                    src={item.avatar}
+                    alt="avatar"
+                    width={32}
+                    height={32}
+                    className="rounded-full mr-3 border border-[#18191b]"
+                    onError={(e) => (e.currentTarget.src = PLACEHOLDER_AVATAR)}
+                  />
+                  <div className="flex-1">
+                    <div className="flex flex-col">
+                      <span className="font-normal text-[#ebebeb] text-[12px]">
+                        {item.username}
+                      </span>
+                      <span className="text-xs text-gray-400">{item.date}</span>
+                    </div>
                   </div>
-                  <div className="flex gap-4 mt-1">
-                    <div className="text-xs text-gray-400">
-                      Bet USD
-                      <br />
-                      <span className="text-white text-[12px]">{item.bet}</span>
+
+                  <div className="flex items-center gap-2 ml-2">
+                    <div className="w-8 h-8 bg-[#2c2d30] rounded-full flex items-center justify-center">
+                      <MessageCircle className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-xs text-gray-400">
-                      Win USD
-                      <br />
-                      <span className="text-white text-[12px]">
-                        {item.win.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      Result
-                      <br />
-                      <span
-                        className="font-bold text-[12px]"
-                        style={{ color: PURPLE_X }}
-                      >
-                        {item.result}x
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      Round max.
-                      <br />
-                      <span
-                        className="font-bold text-[12px]"
-                        style={{ color: PURPLE_X }}
-                      >
-                        {item.roundMax}x
-                      </span>
+                    <div className="w-8 h-8 bg-[#2c2d30] rounded-full flex items-center justify-center">
+                      <ShieldCheck className="w-4 h-4 text-gray-400" />
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-2 ml-2">
-                  <span className="text-[13px] text-gray-400">{item.x}x</span>
-                  <span className="text-[13px] text-gray-400">💬</span>
-                  <span className="text-[13px] text-gray-400">✔️</span>
+
+                <div
+                  className="grid grid-cols-2 gap-4 mt-1 w-full"
+                  style={{ rowGap: "0.25rem" }}
+                >
+                  <div className="flex justify-between items-center text-xs text-gray-400">
+                    <span>Bet USD</span>
+                    <span className="text-[#ebebeb] text-[12px]">{item.bet}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-gray-400">
+                    <span>Result</span>
+                    <span
+                      className="font-semibold text-[12px]"
+                      style={{ color: PURPLE_X }}
+                    >
+                      {item.result}x
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-gray-400">
+                    <span>Win USD</span>
+                    <span className="text-[#ebebeb] text-[12px]">
+                      {item.win.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-gray-400">
+                    <span>Round max.</span>
+                    <span
+                      className="font-bold text-[12px]"
+                      style={{ color: PURPLE_X }}
+                    >
+                      {item.roundMax}x
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -505,7 +511,7 @@ const BetBoard = () => {
       <div className="flex items-center justify-between px-4 py-2 text-xs text-gray-400 border-t border-[#232325]">
         <span>Provably Fair Game</span>
         <span>
-          Powered by <span className="font-bold text-white">*</span>
+          Powered by <span className="font-bold text-[#ebebeb]">*</span>
         </span>
       </div>
     </div>

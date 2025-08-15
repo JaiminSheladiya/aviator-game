@@ -23,8 +23,8 @@ const ChangeAvatarModal: React.FC<ChangeAvatarModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex justify-center items-start pt-10 overflow-y-auto">
-      <div className="bg-[#1b1c1d] text-white w-[95%] max-w-[600px] rounded-lg shadow-lg max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start sm:p-[1.75rem] p-[.5rem]">
+      <div className="bg-[#1b1c1d] text-white w-full max-w-[500px] rounded-xl shadow-lg max-h-full flex flex-col">
         {/* Header */}
         <div className="bg-[#2c2d30] px-5 py-4 flex justify-between items-center border-b border-[#414345]">
           <h2 className="text-white text-sm font-semibold">CHANGE AVATAR</h2>
@@ -34,27 +34,20 @@ const ChangeAvatarModal: React.FC<ChangeAvatarModalProps> = ({
         </div>
 
         {/* Avatar Grid */}
-        <div className="p-4 grid grid-cols-5 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-8 gap-4 overflow-y-auto">
+        <div className="p-4 flex flex-wrap justify-center gap-2 overflow-y-auto">
           {avatarImages.map((avatar) => (
-            <div
+            <img
               key={avatar.id}
-              className={`w-14 h-14 rounded-full p-0.5 border-2 cursor-pointer transition-all
-            ${
-              selectedId === avatar.id
-                ? "border-green-400"
-                : "border-transparent hover:border-gray-400"
-            }`}
+              src={avatar.src}
+              alt={`Avatar ${avatar.id}`}
+              className={`w-[56px] h-[56px] border-4 object-cover rounded-full ${
+                selectedId === avatar.id ? "border-[#428a12]" : "border-[#333]"
+              }`}
               onClick={() => {
                 onSelect(avatar.id);
                 onClose();
               }}
-            >
-              <img
-                src={avatar.src}
-                alt={`Avatar ${avatar.id}`}
-                className="w-full h-full object-cover rounded-full"
-              />
-            </div>
+            />
           ))}
         </div>
 

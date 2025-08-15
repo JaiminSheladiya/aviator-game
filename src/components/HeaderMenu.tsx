@@ -187,15 +187,13 @@ const DropdownComponent: React.FC<{
 
                 <button
                   onClick={item.onToggle}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${
-                    item.isEnabled ? "bg-gray-400" : "bg-gray-700"
-                  }`}
+                  className={`w-[36px] h-[24px] p-[4px] rounded-full transition-colors relative bg-[#141516]`}
                 >
                   <div
-                    className={`absolute w-5 h-5 rounded-full transition-transform top-0.5 ${
+                    className={`w-[16px] h-[16px] rounded-full transition-transform ${
                       item.isEnabled
-                        ? "translate-x-6 bg-gray-200"
-                        : "translate-x-0.5 bg-gray-600"
+                        ? "translate-x-[0.75rem] bg-[#a3a3a3]"
+                        : "bg-[#2c2d30]"
                     }`}
                   />
                 </button>
@@ -229,7 +227,10 @@ const DropdownComponent: React.FC<{
           </div>
 
           {/* Home section with different background */}
-          <div className="bg-gray-750 rounded-b-lg" onClick={()=>window.location.href = '/'}>
+          <div
+            className="bg-gray-750 rounded-b-lg"
+            onClick={() => (window.location.href = "/")}
+          >
             <div className="flex items-center justify-center px-4 py-3 cursor-pointer bg-[#2c2d30] rounded-b-lg transition-colors">
               <Home size={16} className="text-gray-400 mr-2" />
               <span

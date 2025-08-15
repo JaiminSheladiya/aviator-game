@@ -893,7 +893,7 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                 <span
                   key={i}
                   style={{ color: crashColor[i] }}
-                  className={`block px-1 py-[2px] rounded-full font-semibold text-[12px] 3xl:text-[15px]`}
+                  className={`block px-1 py-[2px] rounded-full text-[12px] 3xl:text-[15px]`}
                 >
                   {item}
                 </span>
@@ -918,7 +918,10 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
 
           {/* ─── Expanded Popup ─── */}
           {showExpanded && (
-            <div className="absolute z-50 right-0 top-0  w-full w-full bg-[#1e1f21] text-gray-200 rounded-lg shadow-lg p-2 pl-3">
+            <div
+              className="absolute z-50 right-0 top-1 w-full w-full bg-[#1e1f21] text-gray-200 rounded-lg shadow-lg px-2 py-1 pl-3"
+              style={{ width: "calc(100% + 8px)", left: "-4px" }}
+            >
               <div className="flex justify-between items-center mb-2">
                 <span className=" text-gray-400" style={{ fontSize: "12px" }}>
                   Round History
@@ -940,12 +943,12 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                   ✕
                 </button>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-[4px] text-[12px]">
                 {crashHistory.map((item, i) => (
                   <span
                     key={i}
                     style={{ color: crashColor[i] }}
-                    className="text-[13px]"
+                    className="px-[2px] py-[4px]"
                   >
                     {item}
                   </span>
@@ -1056,21 +1059,10 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
               betButtonCount === 1 ? "" : "lg:grid-cols-2 md:grid-cols-2"
             }`}
           >
-            <button
-              onClick={handleBetBoardSwitch}
-              disabled={betPlaceStatus[1] === "success" || pendingBet[1]}
-              className={`absolute right-1 top-3 rounded-full bg-[#2c2d30] w-6 h-6 flex justify-center items-center cursor-pointer disabled:opacity-30 hover:bg-[#2a2a2a] transition-colors`}
-            >
-              {betButtonCount === 1 ? (
-                <CopyPlus className="w-4 h-4 text-green-700" />
-              ) : (
-                <SquareMinus className="w-4 h-4 text-gray-400" />
-              )}
-            </button>
             {[0, 1].map((item, i) => (
               <div
                 key={i}
-                className={`flex flex-col justify-start items-center gap-1 lg:gap-4 w-full rounded-2xl bg-gradient-to-b from-[#1C1C1C] to-black p-3 pt-2 ${
+                className={`relative flex flex-col justify-start items-center gap-1 lg:gap-4 w-full rounded-2xl bg-gradient-to-b from-[#1C1C1C] to-black p-3 pt-2 ${
                   i === 1 && betButtonCount === 1 ? "hidden" : ""
                 }`}
                 style={{ background: "#1b1c1d" }}
@@ -1087,6 +1079,19 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                       }),
                   }}
                 />
+                {(betButtonCount === 1 && item === 0) || item === 1 ? (
+                  <button
+                    onClick={handleBetBoardSwitch}
+                    disabled={betPlaceStatus[1] === "success" || pendingBet[1]}
+                    className={`absolute right-1 top-1 rounded-full bg-[#2c2d30] w-[32px] h-[32px] flex justify-center items-center cursor-pointer disabled:opacity-30 hover:bg-[#2a2a2a] transition-colors border-4 border-[#141516]`}
+                  >
+                    {betButtonCount === 1 ? (
+                      <CopyPlus className="w-4 h-4 text-green-700" />
+                    ) : (
+                      <SquareMinus className="w-4 h-4 text-gray-400" />
+                    )}
+                  </button>
+                ) : null}
                 <div className="w-full lg:w-auto flex gap-2">
                   <div className="flex flex-col w-[42%] lg:w-[165px] 3xl:w-[260px] h-full">
                     <div
@@ -1231,9 +1236,7 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                           Game_Global_Vars.enabledAutoCashOut[i] = checked;
                         }}
                       />
-                      <div
-                        className="flex gap-1 px-3 py-[2px] rounded-full bg-[#141516] text-[12px]"
-                      >
+                      <div className="flex gap-1 px-3 py-[2px] rounded-full bg-[#141516] text-[12px]">
                         <input
                           disabled={!enabledAutoCashOut}
                           readOnly={

@@ -26,7 +26,10 @@ const PIXIComponent = ({
     );
   }, [pixiDimension, aviatorState.dimension]);
   return (
-    <div className="rounded-b-[1rem] overflow-hidden">
+    <div className="overflow-hidden" style={{
+      borderBottomLeftRadius: "20px",
+      borderBottomRightRadius: "20px",
+    }}>
       <Stage
         width={pixiDimension.width}
         height={pixiDimension.height}

@@ -183,7 +183,7 @@ const MyBetHistoryModal = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start pt-8">
       <div className="bg-[#1b1c1d] w-full max-w-[500px] rounded-xl text-white shadow-xl relative overflow-hidden">
         {/* Header */}
-        <div className="flex justify-between items-center px-6 py-4 border-b border-[#2c2d30]">
+        <div className="flex justify-between items-center px-4 py-2 bg-[#242424] border-b border-[#2c2d30]">
           <span className="text-base font-semibold">MY BET HISTORY</span>
           <button
             onClick={onClose}
@@ -194,9 +194,9 @@ const MyBetHistoryModal = ({
         </div>
 
         {/* Table Header */}
-        <div className="px-6 py-2 text-sm text-gray-400 font-medium flex justify-between border-b border-[#2c2d30]">
+        <div className="px-6 py-2 text-[11px] text-[#7b7b7b] font-medium flex justify-between border-b border-[#2c2d30]">
           <div className="w-[30%]">Date</div>
-          <div className="w-[30%] text-center">Bet USD X</div>
+          <div className="w-[30%] text-left">Bet USD X</div>
           <div className="w-[30%] text-right">Cash out USD</div>
         </div>
 
@@ -205,22 +205,20 @@ const MyBetHistoryModal = ({
           {dummyBets.slice(0, visibleCount).map((bet, index) => (
             <div
               key={index}
-              className={`px-6 py-2 flex justify-between items-center text-sm ${
-                bet.won ? "bg-green-800 bg-opacity-70" : "bg-[#1b1c1d]"
+              className={`mx-2 py-1 px-1 flex justify-between items-center text-sm ${
+                bet.won ? "bg-green-800 bg-opacity-70" : "bg-[#101112]"
               } ${index !== visibleCount - 1 ? "border-b" : ""}`}
-              style={{ borderColor: "#2c2d30" }}
+              style={{ borderColor: "#2c2d30", borderRadius: "8px" }}
             >
-              <div className="w-[30%] text-gray-300 leading-tight">
+              <div className="w-[30%] leading-tight text-white text-[11px]">
                 <div>{bet.time}</div>
-                <div className="text-xs text-gray-500">{bet.date}</div>
+                <div>{bet.date}</div>
               </div>
 
-              <div className="w-[30%] text-center font-medium">
-                <div className={`${bet.won ? "text-white" : "text-gray-300"}`}>
-                  {bet.amount.toFixed(2)}
-                </div>
+              <div className="w-[30%] text-center font-small flex items-center justify-center">
+                <div className="text-[#bbbfc5]">{bet.amount.toFixed(2)}</div>
                 <div
-                  className={`text-xs font-semibold inline-block mt-1 px-2 py-0.5 rounded-full ${
+                  className={`text-xs font-semibold px-2 py-0.5 ml-2 rounded-full w- ${
                     bet.multiplier.includes("x")
                       ? bet.multiplier === "1.06x"
                         ? "text-blue-400 bg-black bg-opacity-30"
@@ -232,14 +230,19 @@ const MyBetHistoryModal = ({
                 </div>
               </div>
 
-              <div className="w-[30%] text-right text-white text-sm">
+              <div className="w-[30%] text-right text-white text-[12px]">
                 {bet.cashout ? (
-                  <span className="font-semibold">
+                  <span className="font-small">
                     {bet.cashout.toFixed(2)}
                   </span>
                 ) : (
                   <div className="text-green-400 flex justify-end items-center gap-1">
-                    ✅
+                    <img
+                      src="/icon-provabyfair.svg"
+                      alt="checkmark"
+                      className="w-4 h-4"
+                    />
+                    <img src="/share.svg" alt="checkmark" className="w-4 h-4" />
                   </div>
                 )}
               </div>
@@ -247,7 +250,7 @@ const MyBetHistoryModal = ({
           ))}
 
           {/* Load More Button */}
-          {visibleCount < dummyBets.length && (
+          {visibleCount < dummyBets.length ? (
             <div className="px-6 py-4 border-t border-[#2c2d30] bg-[#1b1c1d]">
               <button
                 className="w-full bg-[#2c2d30] text-gray-400 text-sm py-2 rounded-full hover:bg-[#3a3b3c] transition"
@@ -256,6 +259,8 @@ const MyBetHistoryModal = ({
                 Load more
               </button>
             </div>
+          ) : (
+            <div className="py-2 border-t border-[#2c2d30] bg-[#1b1c1d]"></div>
           )}
         </div>
       </div>

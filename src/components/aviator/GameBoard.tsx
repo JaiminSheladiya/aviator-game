@@ -1043,8 +1043,8 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                 </div>
               </div>
               <div className="flex flex-col gap-1 justify-center items-center px-4 py-2 lg:px-8 lg:py-2 rounded-lg">
-                <p className="text-white uppercase text-[21px] lg:text-[30px]">
-                  {gameData.status === GameStages.BLAST ? "Flew away" : ""}
+                <p className="text-white uppercase text-[20px] lg:text-[30px]">
+                  {gameData.status === GameStages.BLAST ? "Flew away!" : ""}
                 </p>
                 {gameData.status === GameStages.BLAST && (
                   <p className="text-[#d0011b] font-bold text-[56px] leading-[42px] lg:text-[100px] lg:leading-[100px]">

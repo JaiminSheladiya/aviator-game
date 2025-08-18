@@ -129,9 +129,9 @@ const DropdownComponent: React.FC<{
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full right-2 mt-2 w-80 bg-[#1b1c1d] border border-gray-700 rounded-lg shadow-2xl z-50">
+        <div className="absolute top-full right-2 mt-0 w-80 bg-[#2c2d30] rounded-lg shadow-2xl z-50">
           {/* User section */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
+          <div className="flex items-center justify-between p-[10px]">
             <div className="flex items-center space-x-3">
               <div className="relative w-10 h-10">
                 <img
@@ -141,7 +141,7 @@ const DropdownComponent: React.FC<{
                 />
               </div>
               <span
-                className="text-white font-medium text-base"
+                className="text-white font-bold text-base"
                 style={{ fontSize: "14px" }}
               >
                 demo_31525
@@ -149,9 +149,9 @@ const DropdownComponent: React.FC<{
             </div>
             <button
               onClick={() => setShowAvatarModal(true)}
-              className="flex items-center border border-[#2c2d30] rounded-full px-2 py-2 text-gray-400 hover:text-gray-300 transition-colors"
+              className="flex items-center border border-[#414148] bg-[#252528] rounded-full px-2 py-2 text-[#83878e] transition-colors"
             >
-              <div className="border border-[#2c2d30] rounded-full p-1">
+              <div className="border border-[#414148] rounded-full p-1">
                 <User size={18} />
               </div>
               <span
@@ -166,11 +166,11 @@ const DropdownComponent: React.FC<{
           </div>
 
           {/* Toggle items */}
-          <div className="border-b border-gray-700">
+          <div>
             {menuItems.map((item, index) => (
               <div
                 key={index}
-                className={`flex items-center justify-between px-4 py-2.5 hover:bg-gray-750 transition-colors cursor-pointer ${
+                className={`flex items-center justify-between px-4 py-2.5 bg-[#1b1c1d] hover:bg-gray-750 transition-colors cursor-pointer ${
                   index !== menuItems.length - 1 ? "border-b" : ""
                 }`}
                 style={{ borderColor: "#2c2d30" }}
@@ -202,7 +202,7 @@ const DropdownComponent: React.FC<{
           </div>
 
           {/* Spacer div */}
-          <div className="h-4 bg-[#2c2d30]"></div>
+          <div className="h-4"></div>
 
           {/* Regular menu items */}
           <div>
@@ -210,7 +210,7 @@ const DropdownComponent: React.FC<{
               <div
                 key={index}
                 onClick={item.onClick}
-                className={`flex items-center px-4 py-2.5 hover:bg-gray-750 transition-colors cursor-pointer ${
+                className={`flex items-center px-4 py-2.5 bg-[#1b1c1d] hover:bg-gray-750 transition-colors cursor-pointer ${
                   index !== regularMenuItems.length - 1 ? "border-b" : ""
                 }`}
                 style={{ borderColor: "#2c2d30" }}

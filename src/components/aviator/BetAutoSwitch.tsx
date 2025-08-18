@@ -42,7 +42,7 @@ const BetAutoSwitch = ({
     setBetAutoState("auto");
   };
   return (
-    <div className="flex gap-1 rounded-full relative bg-[#171717] p-1">
+    <div className="flex gap-1 rounded-full relative bg-[#141516] p-1 w-[200px] h-[32px]">
       <div
         className={`absolute top-1 w-[90px] lg:w-[90px] h-[24px] lg:h-[28px] rounded-full bg-gradient-to-b from-[#2c2d30] to-[#2c2d30] transition-all ease-in-out ${
           betAutoState === "bet"

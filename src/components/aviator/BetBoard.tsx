@@ -99,7 +99,7 @@ const Tab = ({
     className={`px-6 rounded-${
       rounded ? "full" : "md"
     } focus:outline-none m-1 w-[100%] transition-all ${
-      active ? "bg-[#2c2d30] text-[#ebebeb]" : "text-gray-400"
+      active ? "bg-[#2c2d30] text-[#bbbfc5]" : "text-[#7b7b7b]"
     }`}
     style={
       rounded
@@ -300,7 +300,7 @@ const BetBoard = () => {
                 ))}
               </div>
               <div className="flex flex-col items-end">
-                <span className="text-[16px] text-[#ebebeb] leading-none">
+                <span className="text-[16px] text-[#bbbfc5] leading-none">
                   {actualTotalWin.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -309,7 +309,7 @@ const BetBoard = () => {
               </div>
             </div>
             <div className="flex items-center gap-1 justify-between mb-1">
-              <div className="text-[12px] text-[#ebebeb]">
+              <div className="text-[12px] text-[#bbbfc5]">
                 {actualWinnerCount}/{totalBets}{" "}
                 <span className="text-[#7b7b7b]"> Bets</span>
               </div>
@@ -333,7 +333,7 @@ const BetBoard = () => {
         {tab === "Previous" && (
           <>
             <div className="w-full text-center py-2 bg-[#141516] rounded-xl">
-              <div className="text-xs text-gray-400">Round Result</div>
+              <div className="text-xs text-[#7b7b7b]">Round Result</div>
               <span
                 className="text-[28px] font-extrabold"
                 style={{
@@ -343,7 +343,7 @@ const BetBoard = () => {
                 {previous.roundResult.toFixed(2)}x
               </span>
             </div>
-            <div className="flex px-4 py-1 mt-2 text-gray-400 text-[10px] mb-1">
+            <div className="flex px-4 py-1 mt-2 text-[#7b7b7b] text-[10px] mb-1">
               <span className="w-20">Player</span>
               <span className="w-24 text-right">Bet USD</span>
               <span className="w-20 text-center">X</span>
@@ -408,7 +408,7 @@ const BetBoard = () => {
       <>
         {tab === "All Bets" && (
           <div
-            className="flex px-4 py-1 text-gray-400 text-[10px]  "
+            className="flex px-4 py-1 text-[#7b7b7b] text-[10px]  "
           >
             <span className="w-20">Player</span>
             <span className="w-24 text-right">Bet USD</span>
@@ -449,19 +449,19 @@ const BetBoard = () => {
                   />
                   <div className="flex-1">
                     <div className="flex flex-col">
-                      <span className="font-normal text-[#ebebeb] text-[12px]">
+                      <span className="font-normal text-[#bbbfc5] text-[12px]">
                         {item.username}
                       </span>
-                      <span className="text-xs text-gray-400">{item.date}</span>
+                      <span className="text-xs text-[#7b7b7b]">{item.date}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 ml-2">
                     <div className="w-8 h-8 bg-[#2c2d30] rounded-full flex items-center justify-center">
-                      <MessageCircle className="w-4 h-4 text-gray-400" />
+                      <MessageCircle className="w-4 h-4 text-[#7b7b7b]" />
                     </div>
                     <div className="w-8 h-8 bg-[#2c2d30] rounded-full flex items-center justify-center">
-                      <ShieldCheck className="w-4 h-4 text-gray-400" />
+                      <ShieldCheck className="w-4 h-4 text-[#7b7b7b]" />
                     </div>
                   </div>
                 </div>
@@ -470,11 +470,11 @@ const BetBoard = () => {
                   className="grid grid-cols-2 gap-4 mt-1 w-full"
                   style={{ rowGap: "0.25rem" }}
                 >
-                  <div className="flex justify-between items-center text-xs text-gray-400">
+                  <div className="flex justify-between items-center text-xs text-[#7b7b7b]">
                     <span>Bet USD</span>
-                    <span className="text-[#ebebeb] text-[12px]">{item.bet}</span>
+                    <span className="text-[#bbbfc5] text-[12px]">{item.bet}</span>
                   </div>
-                  <div className="flex justify-between items-center text-xs text-gray-400">
+                  <div className="flex justify-between items-center text-xs text-[#7b7b7b]">
                     <span>Result</span>
                     <span
                       className="font-semibold text-[12px]"
@@ -483,16 +483,16 @@ const BetBoard = () => {
                       {item.result}x
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-xs text-gray-400">
+                  <div className="flex justify-between items-center text-xs text-[#7b7b7b]">
                     <span>Win USD</span>
-                    <span className="text-[#ebebeb] text-[12px]">
+                    <span className="text-[#bbbfc5] text-[12px]">
                       {item.win.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-xs text-gray-400">
+                  <div className="flex justify-between items-center text-xs text-[#7b7b7b]">
                     <span>Round max.</span>
                     <span
                       className="font-bold text-[12px]"
@@ -508,10 +508,10 @@ const BetBoard = () => {
         )}
       </div>
       {/* Footer */}
-      <div className="flex items-center justify-between px-4 py-2 text-xs text-gray-400 border-t border-[#232325]">
+      <div className="flex items-center justify-between px-4 py-2 text-xs text-[#7b7b7b] border-t border-[#232325]">
         <span>Provably Fair Game</span>
         <span>
-          Powered by <span className="font-bold text-[#ebebeb]">*</span>
+          Powered by <span className="font-bold text-[#bbbfc5]">*</span>
         </span>
       </div>
     </div>

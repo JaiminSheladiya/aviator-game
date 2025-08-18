@@ -865,11 +865,11 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
       <CustomSnackBar cashes={cashes} setCashes={setCashes} />
       <div
         className="w-[460px] hidden lg:block h-full"
-        style={{ marginTop: "0.2rem" }}
+        style={{ marginTop: "0.2rem", paddingLeft: "2px" }}
       >
         <BetBoard />
       </div>
-      <div className="flex flex-col justify-between gap-0 w-full bg-[#0e0e0e] p-2 pt-0 text-white overflow-auto pb-0">
+      <div className="flex flex-col justify-between gap-1 w-full p-1 pt-0 text-white overflow-auto pb-0">
         {/* <div className="flex justify-between items-center">
           <div className="score-bomb flex gap-x-2 w-full flex-wrap pr-4 h-[26px] overflow-y-hidden">
             {crashHistory.map((item, i) => (
@@ -892,7 +892,7 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
               {crashHistory.slice(0, 50).map((item, i) => (
                 <span
                   key={i}
-                  style={{ color: crashColor[i] }}
+                  style={{ color: crashColor[i], letterSpacing: "-.18px" }}
                   className={`block px-1 py-[2px] rounded-full text-[12px] 3xl:text-[15px]`}
                 >
                   {item}
@@ -957,98 +957,110 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
             </div>
           )}
         </div>
-        <div
-          className="mt-1 text-center text-sm font-bold w-full rounded-t-[20px] border border-[#e59407]"
-          style={{
-            background: "rgba(229, 148, 7, .8)",
-          }}
-        >
-          FUN MODE
-        </div>
-
-        <div
-          className={`flex justify-center w-full relative`}
-          // style={{
-          //   height: "100%", //pixiDimension.height,
-          // }}
-          ref={pixi_ref}
-        >
-          <div className="absolute bottom-2 right-2 bg-[#2c2d30] p-1 pr-2 rounded-full">
-            <div className="flex items-center gap-2 text-xs">
-              <div className="flex -space-x-2">
-                {dummyUsers.map((u, i) => (
-                  <img
-                    key={i}
-                    src={u}
-                    alt="avatar"
-                    width={24}
-                    height={24}
-                    className="rounded-full border border-[#28a90a] bg-[#232325]"
-                    // onError={(e) => (e.currentTarget.src = PLACEHOLDER_AVATAR)}
-                    style={{ zIndex: 10 - i }}
-                  />
-                ))}
-              </div>
-              <div>{userCount}</div>
-            </div>
-          </div>
+        <div className="flex flex-col">
           <div
-            className="flex flex-col gap-10 absolute top-0 justify-center items-center"
+            className="text-center text-sm font-bold w-full rounded-t-[20px] border border-[#e59407]"
             style={{
-              height: pixiDimension.height,
-              display: gameData.status !== GameStages.RUN ? "flex" : "none",
-              gap: pixiDimension.height < 200 ? 2 : 40,
+              background: "rgba(229, 148, 7, .8)",
             }}
           >
+            FUN MODE
+          </div>
+          <div
+            className={`flex justify-center w-full relative`}
+            style={{
+              border: "1px solid #2a2b2e",
+              borderBottomLeftRadius: "20px",
+              borderBottomRightRadius: "20px",
+            }}
+            // style={{
+            //   height: "100%", //pixiDimension.height,
+            // }}
+            ref={pixi_ref}
+          >
+            <div className="absolute bottom-2 right-2 bg-[#2c2d30] p-1 pr-2 rounded-full">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="flex -space-x-2">
+                  {dummyUsers.map((u, i) => (
+                    <img
+                      key={i}
+                      src={u}
+                      alt="avatar"
+                      width={24}
+                      height={24}
+                      className="rounded-full border border-[#28a90a] bg-[#232325]"
+                      // onError={(e) => (e.currentTarget.src = PLACEHOLDER_AVATAR)}
+                      style={{ zIndex: 10 - i }}
+                    />
+                  ))}
+                </div>
+                <div>{userCount}</div>
+              </div>
+            </div>
             <div
+              className="flex flex-col gap-10 absolute top-0 justify-center items-center"
               style={{
-                display: gameData.status === GameStages.WAIT ? "block" : "none",
-                // width: Math.min(pixiDimension.width, pixiDimension.height) / 4,
+                height: pixiDimension.height,
+                display: gameData.status !== GameStages.RUN ? "flex" : "none",
+                gap: pixiDimension.height < 200 ? 2 : 40,
               }}
             >
-              <div className="flex flex-col items-center justify-center w-[300px] rounded-lg">
-                <div className="flex flex-col items-center">
-                  <div className="flex items-center gap-4">
-                    <img src="/vimaan-logo.png" alt="vimaan" className="h-10" />
+              <div
+                style={{
+                  display:
+                    gameData.status === GameStages.WAIT ? "block" : "none",
+                  // width: Math.min(pixiDimension.width, pixiDimension.height) / 4,
+                }}
+              >
+                <div className="flex flex-col items-center justify-center w-[300px] rounded-lg">
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src="/vimaan-logo.png"
+                        alt="vimaan"
+                        className="h-10"
+                      />
 
-                    <div className="w-px h-10 bg-gray-300" />
+                      <div className="w-px h-10 bg-gray-300" />
 
-                    <img
-                      src="/vimaan-plane.png"
-                      alt="vimaan plane"
-                      className="h-10 rotate-[340deg]"
-                    />
-                  </div>
+                      <img
+                        src="/vimaan-plane.png"
+                        alt="vimaan plane"
+                        className="h-10 rotate-[340deg]"
+                      />
+                    </div>
 
-                  {/* Progress Bar */}
-                  <div className="mt-4 h-2 bg-gray-700 rounded w-[250px]">
-                    <div
-                      className={`h-2 bg-red-600 rounded ${
-                        progress > 0 ? "transition-all duration-100" : ""
-                      }`}
-                      style={{ width: `${progress}%` }}
-                    />
+                    {/* Progress Bar */}
+                    <div className="mt-4 h-2 bg-gray-700 rounded w-[250px]">
+                      <div
+                        className={`h-2 bg-red-600 rounded ${
+                          progress > 0 ? "transition-all duration-100" : ""
+                        }`}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-1 justify-center items-center px-4 py-2 lg:px-8 lg:py-2 rounded-lg">
-              <p className="text-white uppercase text-[21px] lg:text-[30px]">
-                {gameData.status === GameStages.BLAST ? "Flew away" : ""}
-              </p>
-              {gameData.status === GameStages.BLAST && (
-                <p className="text-[#d0011b] font-bold text-[56px] leading-[42px] lg:text-[100px] lg:leading-[100px]">
-                  {curPayout}x
+              <div className="flex flex-col gap-1 justify-center items-center px-4 py-2 lg:px-8 lg:py-2 rounded-lg">
+                <p className="text-white uppercase text-[21px] lg:text-[30px]">
+                  {gameData.status === GameStages.BLAST ? "Flew away" : ""}
                 </p>
-              )}
+                {gameData.status === GameStages.BLAST && (
+                  <p className="text-[#d0011b] font-bold text-[56px] leading-[42px] lg:text-[100px] lg:leading-[100px]">
+                    {curPayout}x
+                  </p>
+                )}
+              </div>
             </div>
+            <PIXIComponent
+              pixiDimension={pixiDimension}
+              curPayout={curPayout}
+              trigParachute={trigParachute}
+            />
           </div>
-          <PIXIComponent
-            pixiDimension={pixiDimension}
-            curPayout={curPayout}
-            trigParachute={trigParachute}
-          />
         </div>
+
         <div
           className="flex flex-col w-full lg:mt-0 mt-1"
           // style={{ marginTop: "1.25rem" }}
@@ -1117,7 +1129,12 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
                         onChange={(e) => handleBetValueChange(e, i)}
                         value={betValue[i]}
                         type="string"
-                        className="w-[30px] lg:w-[70px] 3xl:w-[150px] bg-[#171717] text-center text-[13px] 3xl:text-[26px]"
+                        className="w-[30px] lg:w-[70px] 3xl:w-[150px] bg-transparent text-center text-[13px] 3xl:text-[26px]"
+                        style={{
+                          fontWeight: "600",
+                          color: "#ccc",
+                          fontSize: "1rem",
+                        }}
                       />
                       <button
                         disabled={

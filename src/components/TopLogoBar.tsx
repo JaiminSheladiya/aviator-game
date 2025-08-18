@@ -67,7 +67,7 @@ const TopLogoBar = ({
           <div
             className="flex justify-between items-center w-full "
             ref={header_ref}
-            style={{ padding: (w_factor / scale) * 0.2 }}
+            style={{ padding: "4px" }}
           >
             {/* <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-[#E59407] rounded-lg flex items-center justify-center text-white font-bold text-sm">
@@ -83,13 +83,23 @@ const TopLogoBar = ({
             />
             <div className="flex " style={{ gap: (w_factor / scale) * 0.3 }}>
               <div
-                className="flex gap-1 sm:gap-2 justify-center font-semibold items-center"
-                style={{ fontSize: "14px", color: "#9B9C9E" }}
+                className="flex justify-center font-semibold items-center"
+                style={{
+                  fontSize: "14px",
+                  color: "#9b9c9e",
+                  fontWeight: "500",
+                }}
               >
                 {/* <div className="w-4 h-4 bg-[#E59407] rounded-full flex items-center justify-center">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
                 </div> */}
-                <span style={{ color: "#28A909" }}>
+                <span
+                  style={{
+                    color: "#28A909",
+                    fontWeight: "600",
+                    marginRight: "0.4rem",
+                  }}
+                >
                   {aviatorState.balance
                     .toLocaleString("en-US", {
                       style: "currency",
@@ -99,52 +109,23 @@ const TopLogoBar = ({
                 </span>{" "}
                 USD
               </div>
-              <div
+              {/* <div
                 className=" rounded-full bg-[#3E3E43]"
                 style={{ width: 3 }}
-              />
-              <div
+              /> */}
+              <img
+                style={{
+                  cursor: "pointer",
+                  width: "24px",
+                  height: "24px",
+                  marginRight: "0.4rem",
+                }}
                 onClick={() => {
                   setShowMenu((prev) => !prev);
                 }}
-                className="flex flex-col justify-between items-center self-center cursor-pointer rounded-sm hover:bg-[#2e2e2e] transition-all ease-in-out scale-[0.8] sm:scale-100"
-                style={{
-                  width: (w_factor / scale) * 1.0,
-                  height: (w_factor / scale) * 0.8,
-                  paddingLeft: (w_factor / scale) * 0.1,
-                  paddingRight: (w_factor / scale) * 0.1,
-                  paddingTop: (w_factor / scale) * 0.14,
-                  paddingBottom: (w_factor / scale) * 0.14,
-                }}
-              >
-                <div
-                  className="w-full rounded-full"
-                  style={{
-                    height: (w_factor / scale) * 0.1,
-                    background: "rgb(155, 156, 158)",
-                  }}
-                />
-                <div
-                  className="w-full rounded-full"
-                  style={{
-                    height: (w_factor / scale) * 0.1,
-                    background: "rgb(155, 156, 158)",
-                  }}
-                />
-                <div
-                  className="w-full rounded-full"
-                  style={{
-                    height: (w_factor / scale) * 0.1,
-                    background: "rgb(155, 156, 158)",
-                  }}
-                />
-              </div>
-              <div
-                className=" rounded-full bg-[#3E3E43]"
-                style={{
-                  width: 3,
-                  display: testMobile().iPhone ? "none" : "block",
-                }}
+                src="/burger.svg"
+                alt="Hamburger"
+                className="w-full h-full object-contain"
               />
             </div>
           </div>

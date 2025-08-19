@@ -592,7 +592,7 @@ const GameBoard = ({ bet6, marketId, onCashoutSuccess }: GameBoardProps) => {
 
     // 📏 Limit canvas height for large screens (desktop)
     if (isDesktop) {
-      const maxCanvasHeight = 650; // tweak for your layout
+      const maxCanvasHeight =  window.innerHeight < 900 ? 530 : 650;
       height = Math.min(height, maxCanvasHeight);
     }
 
